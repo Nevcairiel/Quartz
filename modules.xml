@@ -1,0 +1,19 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\FrameXML\UI.xsd">
+
+<Script file="Player\Player.lua"/>
+<Script file="Target\Target.lua"/>
+<Script file="Focus\Focus.lua"/>
+<Script file="Pet\Pet.lua"/>
+<Script file="Latency\Latency.lua"/>
+<Script file="Tradeskill\Tradeskill.lua"/>
+<Script file="GCD\GCD.lua"/>
+<Script file="Buff\Buff.lua"/>
+<Script file="Mirror\Mirror.lua"/>
+<Script file="Timer\Timer.lua"/>
+<Script file="Swing\Swing.lua"/>
+<Script file="Interrupt\Interrupt.lua"/>
+<Script file="Range\Range.lua"/>
+<Script file="Flight\Flight.lua"/>
+
+</Ui>

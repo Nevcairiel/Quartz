@@ -1,0 +1,14 @@
+## Interface: 20400
+## LoadOnDemand: 1
+## Title: Quartz |cff7777ffMirror|r
+## Notes: Quartz module to display timers for important stuff.
+## Title-ruRU: Кварц |cff7777ffЗеркало|r
+## Notes-ruRU: Модуль Кварца отображающий таймеры значительных событий.
+## Author: Nymbia
+## Version: 1.0
+## Dependencies: Quartz
+## X-License: GPL v2
+## X-Quartz-Module: Mirror
+## X-Quartz-RequiredModules: Player
+
+Mirror.lua

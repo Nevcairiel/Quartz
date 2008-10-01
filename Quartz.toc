@@ -1,0 +1,47 @@
+
+## Title: Quartz  |cff7fff7f-Ace2-|r
+## Notes: Modular casting bar.
+## Title-ruRU: Кварц  |cff7fff7f-Ace2-|r
+## Notes-ruRU: Модульная полоса применений.
+## Author: Nymbia
+## X-eMail: nymbia@gmail.com
+
+## Interface: 20400
+## Version: 1.0
+
+## OptionalDeps: Ace2, LibSharedMedia-3.0, SharedMedia, Waterfall-1.0, PitBull, FlightMap, InFlight, FuBar_ToFu
+## X-Embeds: Ace2, LibSharedMedia-3.0, Waterfall-1.0
+
+## X-Website: http://www.wowace.com/wiki/Quartz
+## X-Category: Combat
+## X-License: GPL v2
+## X-AceForum: 6006
+## X-RelSite-WoWI: 7158
+
+## SavedVariables: QuartzDB
+
+## X-Credits: Ammo (some code based on PitBull_CastBar), kergoth (Tradeskill Merge module idea), Roartindon (Lag Embed mode for Latency module)
+## Notes-frFR: Barres d'incantation modulaires.
+## Notes-zhTW: 模組化施法條。
+## Notes-zhCN: 模块化施法条
+## LoadManagers: SupplyAndDemand, AddonLoader, ForkliftGnome
+## X-S&D-Always: true
+## X-LoadOn-Events: UNIT_SPELLCAST_SENT, UNIT_SPELLCAST_START
+## X-LoadOn-UNIT_SPELLCAST_SENT: LoadAddOn('Quartz')
+## X-LoadOn-UNIT_SPELLCAST_START: LoadAddOn('Quartz')
+## X-LoadOn-NotResting: true
+## X-LoadOn-Slash: /quartz
+
+embeds.xml
+
+locale\Quartz-enUS.lua
+locale\Quartz-ruRU.lua
+locale\Quartz-deDE.lua
+locale\Quartz-frFR.lua
+locale\Quartz-koKR.lua
+locale\Quartz-zhTW.lua
+locale\Quartz-zhCN.lua
+
+Quartz.lua
+
+modules.xml

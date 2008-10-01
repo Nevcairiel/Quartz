@@ -1,0 +1,14 @@
+## Interface: 20400
+## LoadOnDemand: 1
+## Title: Quartz |cff7777ffSwing|r
+## Notes: Quartz module to display a swing timer.
+## Title-ruRU: Кварц |cff7777ffВзмах|r
+## Notes-ruRU: Модуль Кварца отображающий таймеры Взмаха (взмах оружием, натягивание тетивы, перезарядка оружия).
+## Author: Nymbia
+## Version: 1.0
+## Dependencies: Quartz
+## X-License: GPL v2
+## X-Quartz-Module: Swing
+## X-Quartz-RequiredModules: Player
+
+Swing.lua

@@ -1,0 +1,14 @@
+## Interface: 20400
+## LoadOnDemand: 1
+## Title: Quartz |cff7777ffFlight|r
+## Notes: Quartz module to display the progress of flight paths.
+## Title-ruRU: Кварц |cff7777ffПолеты|r
+## Notes-ruRU: Модуль Кварца отображающий длительность полета.
+## Author: Nymbia
+## Version: 1.0
+## Dependencies: Quartz
+## X-License: GPL v2
+## X-Quartz-Module: Flight
+## X-Quartz-RequiredModules: Player
+
+Flight.lua

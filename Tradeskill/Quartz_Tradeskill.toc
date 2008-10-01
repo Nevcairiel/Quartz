@@ -1,0 +1,14 @@
+## Interface: 20400
+## LoadOnDemand: 1
+## Title: Quartz |cff7777ffTradeskill|r
+## Notes: Quartz module to condense multiple-cast tradeskills into one casting bar.
+## Title-ruRU: Кварц |cff7777ffУмения|r
+## Notes-ruRU: Модуль Кварца сжимает многократное-применение умений в одну полосу применений (т.е. если делать 20 бинтов, то они будут отображаться все в одной полосе с общим временем завершения, а не каждый бинт сного в новой полосе).
+## Author: Nymbia
+## Version: 1.0
+## Dependencies: Quartz
+## X-License: GPL v2
+## X-Quartz-Module: Tradeskill
+## X-Quartz-RequiredModules: Player
+
+Tradeskill.lua

@@ -1,0 +1,14 @@
+## Interface: 20400
+## LoadOnDemand: 1
+## Title: Quartz |cff7777ffInterrupt|r
+## Notes: Quartz module to show who interrupted your spells.
+## Title-ruRU: Кварц |cff7777ffПрерывания|r
+## Notes-ruRU: Модуль Кварца отображающий прерывания ваших заклинаний.
+## Author: Nymbia
+## Version: 1.0
+## Dependencies: Quartz
+## X-License: GPL v2
+## X-Quartz-Module: Interrupt
+## X-Quartz-RequiredModules: Player
+
+Interrupt.lua

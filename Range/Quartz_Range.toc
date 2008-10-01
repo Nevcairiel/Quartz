@@ -1,0 +1,14 @@
+## Interface: 20400
+## LoadOnDemand: 1
+## Title: Quartz |cff7777ffRange|r
+## Notes: Quartz module to re-color your casting bar when the current target goes out of range.
+## Title-ruRU: Кварц |cff7777ffДистанция|r
+## Notes-ruRU: Модуль Кварца перекрашивает вашу полосу применения если текущая цель выходит за радиус действия.
+## Author: Nymbia
+## Version: 1.0
+## Dependencies: Quartz
+## X-License: GPL v2
+## X-Quartz-Module: Range
+## X-Quartz-RequiredModules: Player
+
+Range.lua

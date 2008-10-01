@@ -1,0 +1,12 @@
+ -- Adding New Textures --
+ 
+ Custom textures may be easily added for Quartz to use.  Simply toss the texture file in this folder (make sure it's .tga or .blp), then open Quartz.lua, and find a line that looks like this: 
+ 
+ sm:Register("statusbar", "LiteStep", "Interface\\AddOns\\Quartz\\textures\\LiteStep")
+ 
+ Make another copy of that line, with the name and path changed to match those of your texture.  Restart WoW, and you should be good to go!
+ 
+ -- More Textures!  I Demand More Textures! --
+ 
+ There's a big ole' library of textures available at http://files.wowace.com/SharedMedia/SharedMedia.zip.  Just stick SharedMedia in your addons, and Quartz will automatically recognize them.
+ 

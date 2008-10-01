@@ -1,0 +1,13 @@
+## Interface: 20400
+## LoadOnDemand: 1
+## Title: Quartz |cff7777ffPlayer|r
+## Notes: Quartz module to display the player's casting bar.
+## Title-ruRU: Кварц |cff7777ffИгрок|r
+## Notes-ruRU: Модуль Кварца отображающий полосу применения игроков.
+## Author: Nymbia
+## Version: 1.0
+## Dependencies: Quartz
+## X-License: GPL v2
+## X-Quartz-Module: Player
+
+Player.lua

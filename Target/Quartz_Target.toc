@@ -1,0 +1,14 @@
+## Interface: 20400
+## LoadOnDemand: 1
+## Title: Quartz |cff7777ffTarget|r
+## Notes: Quartz module to display casting bar for your target.
+## Title-ruRU: Кварц |cff7777ffЦель|r
+## Notes-ruRU: Модуль Кварца отображающий полосу применения вашей цели.
+## Author: Nymbia
+## Version: 1.0
+## Dependencies: Quartz
+## X-License: GPL v2
+## X-Quartz-Module: Target
+## X-Quartz-RequiredModules: Player
+
+Target.lua
