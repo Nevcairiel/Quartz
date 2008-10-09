@@ -1,4 +1,3 @@
-
 ## Title: Quartz  |cff7fff7f-Ace2-|r
 ## Notes: Modular casting bar.
 ## Title-ruRU: Кварц  |cff7fff7f-Ace2-|r
@@ -10,7 +9,6 @@
 ## Version: 1.0
 
 ## OptionalDeps: Ace2, LibSharedMedia-3.0, SharedMedia, Waterfall-1.0, PitBull, FlightMap, InFlight, FuBar_ToFu
-## X-Embeds: Ace2, LibSharedMedia-3.0, Waterfall-1.0
 
 ## X-Website: http://www.wowace.com/wiki/Quartz
 ## X-Category: Combat
@@ -32,7 +30,9 @@
 ## X-LoadOn-NotResting: true
 ## X-LoadOn-Slash: /quartz
 
+#@no-lib-strip@
 embeds.xml
+#@end-no-lib-strip@
 
 locale\Quartz-enUS.lua
 locale\Quartz-ruRU.lua
