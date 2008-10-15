@@ -1,4 +1,4 @@
-## Interface: 20400
+## Interface: 30000
 ## LoadOnDemand: 1
 ## Title: Quartz |cff7777ffMirror|r
 ## Notes: Quartz module to display timers for important stuff.

@@ -405,10 +405,9 @@ function QuartzPlayer:UNIT_SPELLCAST_CHANNEL_STOP(unit)
 end
 
 function QuartzPlayer:UNIT_SPELLCAST_FAILED(unit)
-	if unit ~= 'player' or self.channeling then
+	if unit ~= 'player' or self.channeling or self.casting then 
 		return
 	end
-	if UnitCastingInfo(unit) or UnitChannelInfo(unit) then return end
 	self.targetName = nil
 	self.casting = nil
 	self.channeling = nil

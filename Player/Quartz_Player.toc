@@ -1,4 +1,4 @@
-## Interface: 20400
+## Interface: 30000
 ## LoadOnDemand: 1
 ## Title: Quartz |cff7777ffPlayer|r
 ## Notes: Quartz module to display the player's casting bar.

@@ -5,16 +5,13 @@
 ## Author: Nymbia
 ## X-eMail: nymbia@gmail.com
 
-## Interface: 20400
+## Interface: 30000
 ## Version: 1.0
 
 ## OptionalDeps: Ace2, LibSharedMedia-3.0, SharedMedia, Waterfall-1.0, PitBull, FlightMap, InFlight, FuBar_ToFu
 
-## X-Website: http://www.wowace.com/wiki/Quartz
 ## X-Category: Combat
 ## X-License: GPL v2
-## X-AceForum: 6006
-## X-RelSite-WoWI: 7158
 
 ## SavedVariables: QuartzDB
 
