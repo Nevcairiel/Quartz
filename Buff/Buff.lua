@@ -242,22 +242,12 @@ do
 			end
 			if db.targetbuffs then
 				for i = 1, 32 do
-					local name, texture, applications, duration, remaining, _
-					if WotLK then
-						-- name, rank, icon, count, debuffType, duration, expirationTime, isMine, isStealable = UnitAura
-						local expirationTime, isMine
-						name, _, texture, applications, _, duration, expirationTime, isMine = UnitBuff('target', i)
-						if not isMine then
-							duration = nil
-						end
-						remaining = expirationTime and (expirationTime - GetTime()) or nil
-					else
-						name, _, texture, applications, duration, remaining = UnitBuff('target', i)
-					end
+					local name, rank, texture, applications, _, duration, expirationTime, isMine = UnitBuff('target', i)
+					local remaining = expirationTime and (expirationTime - GetTime()) or nil
 					if not name then
 						break
 					end
-					if duration and duration > 0 then
+					if isMine and duration > 0 then
 						local t = new()
 						tmp[#tmp+1] = t
 						t.name = name
@@ -271,21 +261,12 @@ do
 			end
 			if db.targetdebuffs then
 				for i = 1, 40 do
-					local name, _, texture, applications, dispeltype, duration, remaining
-					if WotLK then
-						local expirationTime, isMine
-						name, _, texture, applications, dispeltype, duration, expirationTime, isMine = UnitDebuff('target', i)
-						if not isMine then
-							duration = nil
-						end
-						remaining =  expirationTime and (expirationTime - GetTime()) or nil
-					else
-						name, _, texture, applications, dispeltype, duration, remaining = UnitDebuff('target', i)
-					end
+					local name, rank, texture, applications, dispeltype, duration, expirationTime, isMine = UnitDebuff('target', i)
+					local remaining =  expirationTime and (expirationTime - GetTime()) or nil
 					if not name then
 						break
 					end
-					if duration and duration > 0 then
+					if isMine and duration > 0 then
 						local t = new()
 						tmp[#tmp+1] = t
 						t.name = name
@@ -365,11 +346,12 @@ do
 			end
 			if db.focusbuffs then
 				for i = 1, 32 do
-					local name, _, texture, applications, duration, remaining = UnitBuff('focus', i)
+					local name, rank, texture, applications, dispeltype, duration, expirationTime, isMine = UnitBuff('focus', i)
+					local remaining =  expirationTime and (expirationTime - GetTime()) or nil
 					if not name then
 						break
 					end
-					if duration and duration > 0 then
+					if isMine and duration > 0 then
 						local t = new()
 						tmp[#tmp+1] = t
 						t.name = name
@@ -383,11 +365,12 @@ do
 			end
 			if db.focusdebuffs then
 				for i = 1, 40 do
-					local name, _, texture, applications, dispeltype, duration, remaining = UnitDebuff('focus', i)
+					local name, rank, texture, applications, dispeltype, duration, expirationTime, isMine = UnitDebuff('focus', i)
+					local remaining =  expirationTime and (expirationTime - GetTime()) or nil
 					if not name then
 						break
 					end
-					if duration and duration > 0 then
+					if isMine and duration > 0 then
 						local t = new()
 						tmp[#tmp+1] = t
 						t.name = name
