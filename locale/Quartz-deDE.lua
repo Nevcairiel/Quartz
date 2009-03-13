@@ -189,7 +189,7 @@ L:RegisterTranslations("deDE", function()
 		["Disable the text that displays the spell name/rank"] = "Deaktiviert den Text welcher den Zaubernamen/Rang anzeigt.",
 		["Display the rank of spellcasts alongside their name"] = "Zeige den Rang der Zauber neben den Zaubernamen an.",
 		["Set the display style of the spell rank"] = "Justiere die Art wie der Zauberrang angezeigt werden soll.",
-		["Set the size of the time text"] = "Justiere die Größe des Zeit Textes.",
+		["Set the size of the time text"] = "Justiere die GrÃ¶ÃŸe des Zeit Textes.",
 		["Set the alignment of the time text"] = "Justiere die Grundposition des Zeit Textes.",
 		["Set the border style"] = "Justiere die Rahmenart.",
 		["Set the color of the %s"] = "Justiere die Farbe vom %s",
@@ -272,7 +272,7 @@ L:RegisterTranslations("deDE", function()
 			["Set the side of the mirror bar that the icon appears on"] = "Justiere die Seite der Spiegel Leiste auf der das Symbol erscheinen wird.",
 			["Set the mirror bar Texture"] = "Justiere die Textur der Spiegel Leiste.",
 			["Set the width of the mirror bars"] = "Justiere die Breite der Spiegel Leisten.",
-			["Set the height of the mirror bars"] = "Justiere die Höhe der Spiegel Leisten.",
+			["Set the height of the mirror bars"] = "Justiere die HÃ¶he der Spiegel Leisten.",
 			["Display the names of Mirror Bar Types on their bars"] = "Zeige die Namen der Spiegel Leisten Typen auf ihren Leisten an.",
 			["Display the time remaining on mirror bars"] = "Zeige die verbleibende Dauer der Spiegel Leisten an.",
 			["Set the font used in the mirror bars"] = "Justiere die schriftart die in den Spiegel Leisten benutzt wird.",
@@ -288,7 +288,7 @@ L:RegisterTranslations("deDE", function()
 			["Toggle mirror bar lock"] = "Schaltet die Spiegel Leisten Sperre an/aus.",
 			["Set the grow direction of the mirror bars"] = "Justiere die Ausdehnungs Richtung der Spiegel Leisten.",
 			--Timer
-			["Make a new timer using the above settings.  NOTE: it may be easier for you to simply use the command line to make timers, /qt"] = "Erstelle einen neuen Timer unter zuhilfename der Einstellungen oben. HINWEIS: Es könnte leichter für dich sein einfach die Chatkommandos zu benutzen um neue Timer zu erstellen, /qt.",
+			["Make a new timer using the above settings.  NOTE: it may be easier for you to simply use the command line to make timers, /qt"] = "Erstelle einen neuen Timer unter zuhilfename der Einstellungen oben. HINWEIS: Es kÃ¶nnte leichter fÃ¼r dich sein einfach die Chatkommandos zu benutzen um neue Timer zu erstellen, /qt.",
 			["Select a timer to stop"] = "W\195\164hle einen Timer aus um ihn zu stoppen.",
 			["Set a name for the new timer"] = "Erstelle einen Namen f\195\188r den neuen Timer.",
 			["Length of the new timer, in seconds"] = "L\195\164nge des Timers, in Sekunden.",
@@ -315,7 +315,7 @@ L:RegisterTranslations("deDE", function()
 			--GCD
 			["<Spell Name>"] = "<Zaubername>",
 			["Invalid Spell"] = "Ung\195\188ltiger Zauber",
---			["Spell_Warning"] = "|cffff3333Warnung: Du hast noch keinen Zauber für das Quartz Glaobal Cooldown Modul ausgew\195\164hlt.  Bitte gibt einen Zaubernamen in das Men\195\188 ein (/quartz, dann klick auf Globaler Cooldown). Hinweis, es ist empfehlenswert einen Zauber zu benutzen der keinen anderen Colldown hat als den Globalen Cooldown und der nicht unterbrochen werden kann, so wie Suche Kräuter/Erze.",
+--			["Spell_Warning"] = "|cffff3333Warnung: Du hast noch keinen Zauber fÃ¼r das Quartz Glaobal Cooldown Modul ausgew\195\164hlt.  Bitte gibt einen Zaubernamen in das Men\195\188 ein (/quartz, dann klick auf Globaler Cooldown). Hinweis, es ist empfehlenswert einen Zauber zu benutzen der keinen anderen Colldown hat als den Globalen Cooldown und der nicht unterbrochen werden kann, so wie Suche KrÃ¤uter/Erze.",
 			--Buffs
 			["%dm"] = "%dm",
 			--Mirror

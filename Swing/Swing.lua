@@ -24,6 +24,7 @@ local resetspells = {
 	[GetSpellInfo(6807)] = true, -- Maul
 	[GetSpellInfo(2973)] = true, -- Raptor Strike
 	[GetSpellInfo(1464)] = true, -- Slam
+	[GetSpellInfo(56815)] = true, -- Rune Strike
 }
 local resetautoshotspells = {
 	[GetSpellInfo(19434)] = true, -- Aimed Shot
