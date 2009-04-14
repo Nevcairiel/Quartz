@@ -247,7 +247,7 @@ do
 					if not name then
 						break
 					end
-					if isMine and duration > 0 then
+					if (isMine=="player" or isMine=="pet") and duration > 0 then
 						local t = new()
 						tmp[#tmp+1] = t
 						t.name = name
@@ -266,7 +266,7 @@ do
 					if not name then
 						break
 					end
-					if isMine and duration > 0 then
+					if (isMine=="player" or isMine=="pet") and duration > 0 then
 						local t = new()
 						tmp[#tmp+1] = t
 						t.name = name
@@ -351,7 +351,7 @@ do
 					if not name then
 						break
 					end
-					if isMine and duration > 0 then
+					if (isMine=="player" or isMine=="pet") and duration > 0 then
 						local t = new()
 						tmp[#tmp+1] = t
 						t.name = name
@@ -370,7 +370,7 @@ do
 					if not name then
 						break
 					end
-					if isMine and duration > 0 then
+					if (isMine=="player" or isMine=="pet") and duration > 0 then
 						local t = new()
 						tmp[#tmp+1] = t
 						t.name = name
