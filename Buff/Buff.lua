@@ -16,8 +16,6 @@
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
 
-local WotLK = select(4, GetBuildInfo()) >= 30000
-
 local media = LibStub("LibSharedMedia-3.0")
 local L = AceLibrary("AceLocale-2.2"):new("Quartz")
 
@@ -242,12 +240,12 @@ do
 			end
 			if db.targetbuffs then
 				for i = 1, 32 do
-					local name, rank, texture, applications, _, duration, expirationTime, isMine = UnitBuff('target', i)
+					local name, rank, texture, applications, _, duration, expirationTime, caster = UnitBuff('target', i)
 					local remaining = expirationTime and (expirationTime - GetTime()) or nil
 					if not name then
 						break
 					end
-					if (isMine=="player" or isMine=="pet") and duration > 0 then
+					if (caster=="player" or caster=="pet" or caster=="vehicle") and duration > 0 then
 						local t = new()
 						tmp[#tmp+1] = t
 						t.name = name
@@ -261,12 +259,12 @@ do
 			end
 			if db.targetdebuffs then
 				for i = 1, 40 do
-					local name, rank, texture, applications, dispeltype, duration, expirationTime, isMine = UnitDebuff('target', i)
+					local name, rank, texture, applications, dispeltype, duration, expirationTime, caster = UnitDebuff('target', i)
 					local remaining =  expirationTime and (expirationTime - GetTime()) or nil
 					if not name then
 						break
 					end
-					if (isMine=="player" or isMine=="pet") and duration > 0 then
+					if (caster=="player" or caster=="pet" or caster=="vehicle") and duration > 0 then
 						local t = new()
 						tmp[#tmp+1] = t
 						t.name = name
@@ -346,12 +344,12 @@ do
 			end
 			if db.focusbuffs then
 				for i = 1, 32 do
-					local name, rank, texture, applications, dispeltype, duration, expirationTime, isMine = UnitBuff('focus', i)
+					local name, rank, texture, applications, dispeltype, duration, expirationTime, caster = UnitBuff('focus', i)
 					local remaining =  expirationTime and (expirationTime - GetTime()) or nil
 					if not name then
 						break
 					end
-					if (isMine=="player" or isMine=="pet") and duration > 0 then
+					if (caster=="player" or caster=="pet" or caster=="vehicle") and duration > 0 then
 						local t = new()
 						tmp[#tmp+1] = t
 						t.name = name
@@ -365,12 +363,12 @@ do
 			end
 			if db.focusdebuffs then
 				for i = 1, 40 do
-					local name, rank, texture, applications, dispeltype, duration, expirationTime, isMine = UnitDebuff('focus', i)
+					local name, rank, texture, applications, dispeltype, duration, expirationTime, caster = UnitDebuff('focus', i)
 					local remaining =  expirationTime and (expirationTime - GetTime()) or nil
 					if not name then
 						break
 					end
-					if (isMine=="player" or isMine=="pet") and duration > 0 then
+					if (caster=="player" or caster=="pet" or caster=="vehicle") and duration > 0 then
 						local t = new()
 						tmp[#tmp+1] = t
 						t.name = name

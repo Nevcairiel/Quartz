@@ -1,4 +1,4 @@
-## Interface: 30000
+## Interface: 30100
 ## LoadOnDemand: 1
 ## Title: Quartz |cff7777ffGCD|r
 ## Notes: Quartz module to display the global cooldown in a helpful way.

@@ -1,4 +1,4 @@
-## Interface: 30000
+## Interface: 30100
 ## LoadOnDemand: 1
 ## Title: Quartz |cff7777ffInterrupt|r
 ## Notes: Quartz module to show who interrupted your spells.

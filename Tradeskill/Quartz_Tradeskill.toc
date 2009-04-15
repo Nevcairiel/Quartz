@@ -1,4 +1,4 @@
-## Interface: 30000
+## Interface: 30100
 ## LoadOnDemand: 1
 ## Title: Quartz |cff7777ffTradeskill|r
 ## Notes: Quartz module to condense multiple-cast tradeskills into one casting bar.
