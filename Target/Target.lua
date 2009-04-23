@@ -236,7 +236,7 @@ end
 function QuartzTarget:OnDisable()
 	castBarParent:Hide()
 end
-function QuartzTarget:UNIT_SPELLCAST_START(unit)
+function QuartzTarget:UNIT_SPELLCAST_START(event, unit)
 	if unit ~= 'target' then
 		return
 	end
@@ -286,7 +286,7 @@ function QuartzTarget:UNIT_SPELLCAST_START(unit)
 	end
 end
 
-function QuartzTarget:UNIT_SPELLCAST_CHANNEL_START(unit)
+function QuartzTarget:UNIT_SPELLCAST_CHANNEL_START(event, unit)
 	if unit ~= 'target' then
 		return
 	end
@@ -336,7 +336,7 @@ function QuartzTarget:UNIT_SPELLCAST_CHANNEL_START(unit)
 	end
 end
 
-function QuartzTarget:UNIT_SPELLCAST_STOP(unit)
+function QuartzTarget:UNIT_SPELLCAST_STOP(event, unit)
 	if unit ~= 'target' then
 		return
 	end
@@ -352,7 +352,7 @@ function QuartzTarget:UNIT_SPELLCAST_STOP(unit)
 	end
 end
 
-function QuartzTarget:UNIT_SPELLCAST_CHANNEL_STOP(unit)
+function QuartzTarget:UNIT_SPELLCAST_CHANNEL_STOP(event, unit)
 	if unit ~= 'target' then
 		return
 	end
@@ -368,7 +368,7 @@ function QuartzTarget:UNIT_SPELLCAST_CHANNEL_STOP(unit)
 	end
 end
 
-function QuartzTarget:UNIT_SPELLCAST_FAILED(unit)
+function QuartzTarget:UNIT_SPELLCAST_FAILED(event, unit)
 	if unit ~= 'target' or channeling then
 		return
 	end
@@ -384,7 +384,7 @@ function QuartzTarget:UNIT_SPELLCAST_FAILED(unit)
 	castBarTimeText:SetText("")
 end
 
-function QuartzTarget:UNIT_SPELLCAST_INTERRUPTED(unit)
+function QuartzTarget:UNIT_SPELLCAST_INTERRUPTED(event, unit)
 	if unit ~= 'target' then
 		return
 	end
@@ -400,7 +400,7 @@ function QuartzTarget:UNIT_SPELLCAST_INTERRUPTED(unit)
 	castBarTimeText:SetText("")
 end
 
-function QuartzTarget:UNIT_SPELLCAST_DELAYED(unit)
+function QuartzTarget:UNIT_SPELLCAST_DELAYED(event, unit)
 	if unit ~= 'target' then
 		return
 	end
@@ -426,7 +426,7 @@ function QuartzTarget:UNIT_SPELLCAST_DELAYED(unit)
 	delay = (delay or 0) + (startTime - (oldStart or startTime))
 end
 
-function QuartzTarget:UNIT_SPELLCAST_CHANNEL_UPDATE(unit)
+function QuartzTarget:UNIT_SPELLCAST_CHANNEL_UPDATE(event, unit)
 	if unit ~= 'target' then
 		return
 	end

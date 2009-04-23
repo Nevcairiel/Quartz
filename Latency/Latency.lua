@@ -57,7 +57,7 @@ function QuartzLatency:OnEnable()
 	
 	self:RegisterEvent("UNIT_SPELLCAST_SENT")
 	
-	self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED", "hideIfPlayer")
+	self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
 	media.RegisterCallback(self, "LibSharedMedia_SetGlobal", function(mtype, override)
 		if mtype == "statusbar" then
 			lagbox:SetTexture(media:Fetch("statusbar", override))
@@ -76,7 +76,7 @@ function QuartzLatency:OnDisable()
 	lagbox:Hide()
 	lagtext:Hide()
 end
-function QuartzLatency:UNIT_SPELLCAST_SENT(unit)
+function QuartzLatency:UNIT_SPELLCAST_SENT(event, unit)
 	if unit ~= 'player' then
 		return
 	end
@@ -238,7 +238,7 @@ function QuartzLatency:UNIT_SPELLCAST_CHANNEL_UPDATE(object, unit)
 		QuartzPlayer.endTime = endTime
 	end
 end
-function QuartzLatency:hideIfPlayer(unit)
+function QuartzLatency:UNIT_SPELLCAST_INTERRUPTED(event, unit)
 	if unit == 'player' then
 		lagbox:Hide()
 		lagtext:Hide()

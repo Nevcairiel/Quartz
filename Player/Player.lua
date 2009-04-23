@@ -282,7 +282,7 @@ function QuartzPlayer:OnEnable()
 	Quartz.ApplySettings()
 end
 
-function QuartzPlayer:UNIT_SPELLCAST_SENT(unit, spell, rank, target)
+function QuartzPlayer:UNIT_SPELLCAST_SENT(event, unit, spell, rank, target)
 	if unit ~= 'player' then
 		return
 	end
@@ -293,7 +293,7 @@ function QuartzPlayer:UNIT_SPELLCAST_SENT(unit, spell, rank, target)
 	end
 end
 
-function QuartzPlayer:UNIT_SPELLCAST_START(unit)
+function QuartzPlayer:UNIT_SPELLCAST_START(event, unit)
 	if unit ~= 'player' then
 		return
 	end
@@ -333,7 +333,7 @@ function QuartzPlayer:UNIT_SPELLCAST_START(unit)
 	end
 end
 
-function QuartzPlayer:UNIT_SPELLCAST_CHANNEL_START(unit)
+function QuartzPlayer:UNIT_SPELLCAST_CHANNEL_START(event, unit)
 	if unit ~= 'player' then
 		return
 	end
@@ -372,7 +372,7 @@ function QuartzPlayer:UNIT_SPELLCAST_CHANNEL_START(unit)
 	end
 end
 
-function QuartzPlayer:UNIT_SPELLCAST_STOP(unit)
+function QuartzPlayer:UNIT_SPELLCAST_STOP(event, unit)
 	if unit ~= 'player' then
 		return
 	end
@@ -389,7 +389,7 @@ function QuartzPlayer:UNIT_SPELLCAST_STOP(unit)
 	end
 end
 
-function QuartzPlayer:UNIT_SPELLCAST_CHANNEL_STOP(unit)
+function QuartzPlayer:UNIT_SPELLCAST_CHANNEL_STOP(event, unit)
 	if unit ~= 'player' then
 		return
 	end
@@ -405,7 +405,7 @@ function QuartzPlayer:UNIT_SPELLCAST_CHANNEL_STOP(unit)
 	end
 end
 
-function QuartzPlayer:UNIT_SPELLCAST_FAILED(unit)
+function QuartzPlayer:UNIT_SPELLCAST_FAILED(event, unit)
 	if unit ~= 'player' or self.channeling or self.casting then 
 		return
 	end
@@ -422,7 +422,7 @@ function QuartzPlayer:UNIT_SPELLCAST_FAILED(unit)
 	castBarTimeText:SetText("")
 end
 
-function QuartzPlayer:UNIT_SPELLCAST_INTERRUPTED(unit)
+function QuartzPlayer:UNIT_SPELLCAST_INTERRUPTED(event, unit)
 	if unit ~= 'player' then
 		return
 	end
@@ -439,7 +439,7 @@ function QuartzPlayer:UNIT_SPELLCAST_INTERRUPTED(unit)
 	castBarTimeText:SetText("")
 end
 
-function QuartzPlayer:UNIT_SPELLCAST_DELAYED(unit)
+function QuartzPlayer:UNIT_SPELLCAST_DELAYED(event, unit)
 	if unit ~= 'player' then
 		return
 	end
@@ -456,7 +456,7 @@ function QuartzPlayer:UNIT_SPELLCAST_DELAYED(unit)
 	self.delay = (self.delay or 0) + (startTime - (oldStart or startTime))
 end
 
-function QuartzPlayer:UNIT_SPELLCAST_CHANNEL_UPDATE(unit)
+function QuartzPlayer:UNIT_SPELLCAST_CHANNEL_UPDATE(event, unit)
 	if unit ~= 'player' then
 		return
 	end

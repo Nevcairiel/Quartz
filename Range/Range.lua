@@ -61,7 +61,7 @@ function QuartzRange:OnEnable()
 	self:RegisterEvent("UNIT_SPELLCAST_START")
 	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
 end
-function QuartzRange:UNIT_SPELLCAST_START(unit)
+function QuartzRange:UNIT_SPELLCAST_START(event, unit)
 	if unit ~= 'player' then
 		return
 	end
@@ -74,7 +74,7 @@ function QuartzRange:UNIT_SPELLCAST_START(unit)
 		f:SetScript('OnUpdate', OnUpdate)
 	end
 end
-function QuartzRange:UNIT_SPELLCAST_CHANNEL_START(unit)
+function QuartzRange:UNIT_SPELLCAST_CHANNEL_START(event, unit)
 	if unit ~= 'player' then
 		return
 	end
@@ -87,7 +87,7 @@ function QuartzRange:UNIT_SPELLCAST_CHANNEL_START(unit)
 		f:SetScript('OnUpdate', OnUpdate)
 	end
 end
-function QuartzRange:UNIT_SPELLCAST_SENT(unit, _, _, name)
+function QuartzRange:UNIT_SPELLCAST_SENT(event, unit, _, _, name)
 	if unit ~= 'player' then
 		return
 	end

@@ -121,13 +121,13 @@ function QuartzTradeskill:UNIT_SPELLCAST_START(object, unit)
 		return self.hooks[object].UNIT_SPELLCAST_START(object, unit)
 	end
 end
-function QuartzTradeskill:UNIT_SPELLCAST_STOP(unit)
+function QuartzTradeskill:UNIT_SPELLCAST_STOP(event, unit)
 	if unit ~= 'player' then
 		return
 	end
 	casting = false
 end
-function QuartzTradeskill:UNIT_SPELLCAST_SUCCEEDED(unit, spell)
+function QuartzTradeskill:UNIT_SPELLCAST_SUCCEEDED(event, unit, spell)
 	if unit ~= 'player' then
 		return
 	end
@@ -135,7 +135,7 @@ function QuartzTradeskill:UNIT_SPELLCAST_SUCCEEDED(unit, spell)
 		completedcasts = completedcasts + 1
 	end
 end
-function QuartzTradeskill:UNIT_SPELLCAST_INTERRUPTED(unit)
+function QuartzTradeskill:UNIT_SPELLCAST_INTERRUPTED(event, unit)
 	if unit ~= 'player' then
 		return
 	end

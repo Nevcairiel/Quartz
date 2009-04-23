@@ -413,7 +413,7 @@ do
 		end
 	end
 end
-function QuartzMirror:CHAT_MSG_BG_SYSTEM_NEUTRAL(msg)
+function QuartzMirror:CHAT_MSG_BG_SYSTEM_NEUTRAL(event, msg)
 	if msg:match(L["1 minute"]) or msg:match(L["One minute until"]) then
 		gametimebase = GetTime()
 		gametimetostart = 60

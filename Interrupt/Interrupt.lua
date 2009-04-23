@@ -33,7 +33,7 @@ end
 function QuartzInterrupt:OnEnable()
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 end
-function QuartzInterrupt:COMBAT_LOG_EVENT_UNFILTERED(_, combatEvent, _, sourceName, _, _, _, destFlags)
+function QuartzInterrupt:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, combatEvent, _, sourceName, _, _, _, destFlags)
 	if combatEvent == 'SPELL_INTERRUPT' and destFlags == 0x511 then
 		QuartzPlayer.castBarText:SetText(L["INTERRUPTED (%s)"]:format((sourceName or UNKNOWN):upper()))
 		QuartzPlayer.castBar:SetStatusBarColor(unpack(db.profile.interruptcolor))

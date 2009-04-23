@@ -159,7 +159,7 @@ do
 	end
 end
 
-function QuartzSwing:UNIT_SPELLCAST_SUCCEEDED(unit, spell)
+function QuartzSwing:UNIT_SPELLCAST_SUCCEEDED(event, unit, spell)
 	if swingmode == 0 then
 		if resetspells[spell] then
 			self:MeleeSwing()
@@ -174,7 +174,7 @@ function QuartzSwing:UNIT_SPELLCAST_SUCCEEDED(unit, spell)
 		self:Shoot()
 	end
 end
-function QuartzSwing:UNIT_ATTACK(unit)
+function QuartzSwing:UNIT_ATTACK(event, unit)
 	if unit == 'player' then
 		if not swingmode then
 			return
