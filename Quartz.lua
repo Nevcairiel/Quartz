@@ -77,38 +77,8 @@ end
 Quartz.OnProfileEnable = applySettings
 Quartz.ApplySettings = applySettings
 
-
-function Quartz:OnInitialize()
-	if AceLibrary:HasInstance("Waterfall-1.0") then
-		AceLibrary("Waterfall-1.0"):Register('Quartz',
-			'aceOptions', options,
-			'title', L["Quartz"],
-			'treeLevels', 3,
-			'colorR', 0.8, 'colorG', 0.8, 'colorB', 0.8
-		)
-		self:RegisterChatCommand({"/quartz"}, function()
-			AceLibrary("Waterfall-1.0"):Open('Quartz')
-		end)
-		if AceLibrary:HasInstance("Dewdrop-2.0") then
-			self:RegisterChatCommand({"/quartzdd"}, function()
-				AceLibrary("Dewdrop-2.0"):Open('Quartz', 'children', function()
-					AceLibrary("Dewdrop-2.0"):FeedAceOptionsTable(options)
-				end)
-			end)
-		end
-		self:RegisterChatCommand({"/quartzcl"}, options)
-	elseif AceLibrary:HasInstance("Dewdrop-2.0") then
-		self:RegisterChatCommand({"/quartz"}, function()
-			AceLibrary("Dewdrop-2.0"):Open('Quartz', 'children', function()
-				AceLibrary("Dewdrop-2.0"):FeedAceOptionsTable(options)
-			end)
-		end)
-		self:RegisterChatCommand({"/quartzcl"}, options)
-	else
-		self:RegisterChatCommand({"/quartz"}, options)
-	end
-
-	self:RegisterDefaults("profile", {
+local defaults = {
+	profile = {
 		hidesamwise = true,
 		
 		sparkcolor = {1,1,1,0.5},
@@ -123,21 +93,26 @@ function Quartz:OnInitialize()
 		
 		backgroundalpha = 1,
 		borderalpha = 1,
-	})
-	if ( EarthFeature_AddButton ) then
-		EarthFeature_AddButton(
-			{
-				id= "Quartz";
-				name= L["Modular casting bar"];
-				subtext= "Quartz";
-				tooltip = L["Modular casting bar"];
-				icon= "Interface\\Icons\\Spell_Nature_ElementalAbsorption";
-				callback= function()
-					AceLibrary("Waterfall-1.0"):Open('Quartz')
-					end;
-			}
-		);
-	end
+		},
+	}
+
+function Quartz:OnInitialize()
+	AceConfig:RegisterOptionsTable("Quartz", options)
+
+	self.db = LibStub("AceDB-3.0"):New("QuartzDB", defaults, "Default")
+	db = self.db.profile
+
+	self:RegisterChatCommand("quartz", function() LibStub("AceConfigDialog-3.0"):Open("Quartz") end )
+	local optFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Quartz", "Quartz")
+	options.args.profile = LibStub("AceDBOptions-3.0"):GetOptionsTable(addon.db)
+        self:SetSinkStorage(db.sinkOptions)
+
+	self.db.RegisterCallback(self, "OnProfileChanged", "applySettings")
+	self.db.RegisterCallback(self, "OnProfileCopied", "applySettings")
+	self.db.RegisterCallback(self, "OnProfileReset", "applySettings")	
+
+        media.RegisterCallback(self, "LibSharedMedia_Registered", "applySettings")
+        media.RegisterCallback(self, "LibSharedMedia_SetGlobal", "applySettings")
 end
 
 function Quartz:OnEnable(first)
@@ -193,7 +168,6 @@ function Quartz:OnEnable(first)
 		end
 		lodmodules = nil
 	end
-	self:RegisterEvent('PLAYER_LOGIN')
 	applySettings()
 end
 function Quartz:OnDisable()
@@ -208,9 +182,7 @@ function Quartz:OnDisable()
 	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
 	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
 end
-function Quartz:PLAYER_LOGIN()
-	applySettings()
-end
+
 do
 	local exclude = {
 		x = true,
@@ -371,7 +343,6 @@ do
 			}
 		},
 	}
-	Quartz.options = options
 end
 
 
