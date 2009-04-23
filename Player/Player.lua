@@ -15,14 +15,11 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
-local L = AceLibrary("AceLocale-2.2"):new("Quartz")
-
-local Quartz = Quartz
-if Quartz:HasModule('Player') then
-	return
-end
-local QuartzPlayer = Quartz:NewModule('Player')
+local QuartzPlayer = Quartz:NewModule("Player", "AceHook-3.0")
 local self = QuartzPlayer
+local Quartz = Quartz
+
+local L = LibStub("AceLocale-3.0"):GetLocale("Quartz")
 
 local media = LibStub("LibSharedMedia-3.0")
 
@@ -127,10 +124,12 @@ local function OnUpdate()
 		castBarParent:Hide()
 	end
 end
+
 QuartzPlayer.OnUpdate = OnUpdate
+
 local function OnHide()
-	if Quartz:HasModule('Latency') and Quartz:IsModuleActive('Latency') then
-		local ql = Quartz:GetModule('Latency')
+	local ql = Quartz:GetModule('Latency', true)
+	if ql:IsEnabled() then
 		if ql.lagbox then
 			ql.lagbox:Hide()
 			ql.lagtext:Hide()
@@ -138,9 +137,11 @@ local function OnHide()
 	end
 	castBarParent:SetScript('OnUpdate', nil)
 end
+
 local function OnShow()
 	castBarParent:SetScript('OnUpdate', OnUpdate)
 end
+
 local setnametext
 do
 	local numerals = { -- 25's enough for now, I think?
@@ -676,7 +677,7 @@ do
 				name = L["Enable"],
 				desc = L["Enable"],
 				get = function()
-					return Quartz:IsModuleActive('Player')
+					return Quartz:GetModule('Player', true):IsEnabled()
 				end,
 				set = function(v)
 					Quartz:ToggleModuleActive('Player', v)

@@ -118,11 +118,11 @@ end
 function Quartz:OnEnable(first)
 	if first then
 		for k, v in pairs(lodmodules) do
-			if self:IsModuleActive(k, true) then
+			if self:GetModule(k, true):IsEnabled() then
 				local depends = GetAddOnMetadata('Quartz_'..k, "X-Quartz-RequiredModules")
 				if depends then
 					for module in depends:gmatch('([^, ]+)') do
-						if not self:HasModule(module) then
+						if not self:GetModule(module, true) then
 							local success, reason = LoadAddOn('Quartz_'..module)
 							if not success then
 								error(k..' requires '..module..' module, which could not load: '..reason)
@@ -131,7 +131,7 @@ function Quartz:OnEnable(first)
 					end
 				end
 				LoadAddOn('Quartz_'..k)
-			elseif not self:HasModule(k) then
+			elseif not self:GetModule(k, true) then
 				options.args[k] = {
 					type = 'group',
 					name = L[k],
@@ -143,13 +143,13 @@ function Quartz:OnEnable(first)
 							name = L["Enable"],
 							desc = L["Enable"],
 							get = function()
-								return Quartz:IsModuleActive(k, true)
+								return Quartz:GetModule(k, true):IsEnabled()
 							end,
 							set = function(v)
 								local depends = GetAddOnMetadata('Quartz_'..k, "X-Quartz-RequiredModules")
 								if depends then
 									for module in depends:gmatch('([^, ]+)') do
-										if not self:HasModule(module) then
+										if not self:GetModule(module, true) then
 											local success, reason = LoadAddOn('Quartz_'..module)
 											if not success then
 												error(k..' requires '..module..' module, which could not load: '..reason)
