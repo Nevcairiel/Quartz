@@ -15,14 +15,16 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
-local L = AceLibrary("AceLocale-2.2"):new("Quartz")
 
-Quartz = AceLibrary("AceAddon-2.0"):new("AceConsole-2.0", "AceDB-2.0", "AceEvent-2.0", "AceModuleCore-2.0")
-Quartz:SetModuleMixins("AceEvent-2.0")
-Quartz:RegisterDB("QuartzDB")
+Quartz = LibStub("AceAddon-3.0"):NewAddon("Quartz", "AceEvent-3.0", "AceConsole-3.0")
+local addon = Quartz
 local self = Quartz
-Quartz.revision = tonumber(("$Rev: 70806 $"):match("%d+"))
-Quartz.version = "0.1." .. (revision or 0)
+local db
+
+local L = LibStub:GetLibrary("AceLocale-3.0"):GetLocale("Quartz")
+
+local AceConfig = LibStub("AceConfig-3.0")
+local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 
 local media = LibStub("LibSharedMedia-3.0")
 media:Register("statusbar", "Frost", "Interface\\AddOns\\Quartz\\textures\\Frost")
@@ -53,11 +55,13 @@ do
 		return nil
 	end
 end
+
 Quartz.new = new
 Quartz.del = del
 
 local function nothing()
 end
+
 local options
 local function applySettings()
 	if not IsLoggedIn() then
@@ -69,6 +73,7 @@ local function applySettings()
 		end
 	end
 end
+
 Quartz.OnProfileEnable = applySettings
 Quartz.ApplySettings = applySettings
 
