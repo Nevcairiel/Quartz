@@ -16,7 +16,8 @@
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
 
-local Quartz = LibStub("AceAddon-3.0"):NewAddon("Quartz", "AceEvent-3.0", "AceConsole-3.0", "AceHook-3.0", "AceTimer-3.0")
+Quartz = LibStub("AceAddon-3.0"):NewAddon("Quartz", "AceEvent-3.0", "AceConsole-3.0", "AceHook-3.0", "AceTimer-3.0")
+
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz")
 
 local media = LibStub("LibSharedMedia-3.0")
