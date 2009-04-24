@@ -16,11 +16,11 @@
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
 
-local Quartz = Quartz
-local QuartzPet = Quartz:NewModule("Pet")
-local self = QuartzPet
-
+local Quartz = LibStub("AceAddon-3.0"):GetAddon("Quartz")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz")
+
+local QuartzPlayer = Quartz:NewModule("Player", "AceEvent-3.0")
+local self = QuartzPlayer
 
 local media = LibStub("LibSharedMedia-3.0")
 
@@ -30,18 +30,33 @@ local tonumber = tonumber
 local UnitCastingInfo = UnitCastingInfo
 local UnitChannelInfo = UnitChannelInfo
 local GetTime = GetTime
+local castTimeFormatString
 
-local castBar, castBarText, castBarTimeText, castBarIcon, castBarSpark, castBarParent
-local startTime, endTime, delay, fadeOut, stopTime, casting, channeling, db
+local castBar, castBarText, castBarTimeText, castBarIcon, castBarSpark, castBarParent, db
 
+local function timenum(num, isCastTime)
+	if num <= 60 then
+		if isCastTime then
+			return (castTimeFormatString):format(num)
+		else
+			return ('%.1f'):format(num)
+		end
+	else
+		return ('%d:%02d'):format(num / 60, num % 60)
+	end
+end
 local function OnUpdate()
 	local currentTime = GetTime()
-	if casting then
+	local startTime = self.startTime
+	local endTime = self.endTime
+	local delay = self.delay
+	if self.casting then
 		if currentTime > endTime then
-			casting = nil
-			fadeOut = true
-			stopTime = currentTime
+			self.casting = nil
+			self.fadeOut = true
+			self.stopTime = currentTime
 		end
+		
 		local showTime = math_min(currentTime, endTime)
 		
 		local perc = (showTime-startTime) / (endTime - startTime)
@@ -51,22 +66,22 @@ local function OnUpdate()
 		
 		if delay and delay ~= 0 then
 			if db.profile.hidecasttime then
-				castBarTimeText:SetText(("|cffff0000+%.1f|cffffffff %.1f"):format(delay, endTime - showTime))
+				castBarTimeText:SetText(("|cffff0000+%.1f|cffffffff %s"):format(delay, timenum(endTime - showTime)))
 			else
-				castBarTimeText:SetText(("|cffff0000+%.1f|cffffffff %.1f / %.1f"):format(delay, endTime - showTime, endTime - startTime))
+				castBarTimeText:SetText(("|cffff0000+%.1f|cffffffff %s / %s"):format(delay, timenum(endTime - showTime), timenum(endTime - startTime, true)))
 			end
 		else
 			if db.profile.hidecasttime then
-				castBarTimeText:SetText(("%.1f"):format(endTime - showTime))
+				castBarTimeText:SetText(timenum(endTime - showTime))
 			else
-				castBarTimeText:SetText(("%.1f / %.1f"):format(endTime - showTime, endTime - startTime))
+				castBarTimeText:SetText(("%s / %s"):format(timenum(endTime - showTime), timenum(endTime - startTime, true)))
 			end
 		end
-	elseif channeling then
+	elseif self.channeling then
 		if currentTime > endTime then
-			channeling = nil
-			fadeOut = true
-			stopTime = currentTime
+			self.channeling = nil
+			self.fadeOut = true
+			self.stopTime = currentTime
 		end
 		local remainingTime = endTime - currentTime
 		local perc = remainingTime / (endTime - startTime)
@@ -74,22 +89,24 @@ local function OnUpdate()
 		castBarTimeText:SetText(("%.1f"):format(remainingTime))
 		castBarSpark:ClearAllPoints()
 		castBarSpark:SetPoint('CENTER', castBar, 'LEFT', perc * db.profile.w, 0)
+		
 		if delay and delay ~= 0 then
 			if db.profile.hidecasttime then
-				castBarTimeText:SetText(("|cffFF0000-%.1f|cffffffff %.1f"):format(delay, remainingTime))
+				castBarTimeText:SetText(("|cffFF0000-%.1f|cffffffff %s"):format(delay, timenum(remainingTime)))
 			else
-				castBarTimeText:SetText(("|cffFF0000-%.1f|cffffffff %.1f / %.1f"):format(delay, remainingTime, endTime - startTime))
+				castBarTimeText:SetText(("|cffFF0000-%.1f|cffffffff %s / %s"):format(delay, timenum(remainingTime), timenum(endTime - startTime, true)))
 			end
 		else
 			if db.profile.hidecasttime then
-				castBarTimeText:SetText(("%.1f"):format(remainingTime))
+				castBarTimeText:SetText(timenum(remainingTime))
 			else
-				castBarTimeText:SetText(("%.1f / %.1f"):format(remainingTime, endTime - startTime))
-			end				
+				castBarTimeText:SetText(("%s / %s"):format(timenum(remainingTime), timenum(endTime - startTime, true)))
+			end
 		end
-	elseif fadeOut then
+	elseif self.fadeOut then
 		castBarSpark:Hide()
 		local alpha
+		local stopTime = self.stopTime
 		if stopTime then
 			alpha = stopTime - currentTime + 1
 		else
@@ -99,7 +116,7 @@ local function OnUpdate()
 			alpha = 1
 		end
 		if alpha <= 0 then
-			stopTime = nil
+			self.stopTime = nil
 			castBarParent:Hide()
 		else
 			castBarParent:SetAlpha(alpha*db.profile.alpha)
@@ -109,9 +126,19 @@ local function OnUpdate()
 	end
 end
 
+QuartzPlayer.OnUpdate = OnUpdate
+
 local function OnHide()
+	local ql = Quartz:GetModule('Latency', true)
+	if ql:IsEnabled() then
+		if ql.lagbox then
+			ql.lagbox:Hide()
+			ql.lagtext:Hide()
+		end
+	end
 	castBarParent:SetScript('OnUpdate', nil)
 end
+
 local function OnShow()
 	castBarParent:SetScript('OnUpdate', OnUpdate)
 end
@@ -136,7 +163,12 @@ do
 					castBarText:SetText(name)
 				end
 			elseif rankstyle == L["Full Text"] then
-				castBarText:SetText(("%s (%s)"):format(name, rank))
+				local num = tonumber(rank:match(L["Rank (%d+)"]))
+				if num and num > 0 then
+					castBarText:SetText(("%s (%s)"):format(name, rank))
+				else
+					castBarText:SetText(name)
+				end
 			elseif rankstyle == L["Roman"] then
 				local num = tonumber(rank:match(L["Rank (%d+)"]))
 				if num and num > 0 then
@@ -155,21 +187,29 @@ do
 		else
 			castBarText:SetText(name)
 		end
+		
+		if db.profile.targetname and self.targetName and (self.targetName ~= '') then
+			local castText = castBarText:GetText() or nil
+			if castText then castBarText:SetText(castText .. " -> " .. self.targetName) end
+		end
 	end
 end
 
-function QuartzPet:OnInitialize()
-	db = Quartz:AcquireDBNamespace("Pet")
-	Quartz:RegisterDefaults("Pet", "profile", {
+
+function QuartzPlayer:OnInitialize()
+	db = Quartz:AcquireDBNamespace("Player")
+	self.db = db
+	Quartz:RegisterDefaults("Player", "profile", {
 		hideblizz = true,
 		
-		--x =  -- applied automatically in :ApplySettings()
-		y = 300,
-		h = 18,
-		w = 200,
+		--x =  -- applied automatically in applySettings()
+		y = 180,
+		h = 25,
+		w = 250,
 		scale = 1,
 		
 		texture = 'LiteStep',
+		
 		hideicon = false,
 		
 		alpha = 1,
@@ -184,18 +224,48 @@ function QuartzPet:OnInitialize()
 		fontsize = 14,
 		hidetimetext = false,
 		hidecasttime = false,
+		casttimeprecision = 1,
 		timefontsize = 12,
+		targetname = false,
 		spellrank = false,
 		spellrankstyle = L["Roman"], --L["Full Text"], L["Number"], L["Roman Full Text"]
+		
+		border = 'Blizzard Tooltip', -- L["None"]
 		
 		nametextx = 3,
 		nametexty = 0,
 		timetextx = 3,
 		timetexty = 0,
 	})
+	castBarParent = CreateFrame('Frame', 'QuartzCastBar', UIParent)
+	castBarParent:SetFrameStrata('MEDIUM')
+	castBarParent:SetScript('OnShow', OnShow)
+	castBarParent:SetScript('OnHide', OnHide)
+	castBarParent:SetMovable(true)
+	castBarParent:RegisterForDrag('LeftButton')
+	castBarParent:SetClampedToScreen(true)
+	
+	castBar = CreateFrame("StatusBar", nil, castBarParent)
+	castBarText = castBar:CreateFontString(nil, 'OVERLAY')
+	castBarTimeText = castBar:CreateFontString(nil, 'OVERLAY')
+	castBarIcon = castBar:CreateTexture(nil, 'DIALOG')
+	castBarSpark = castBar:CreateTexture(nil, 'OVERLAY')
+	
+	castBarParent:Hide()
+	
+	self.castBarParent = castBarParent
+	self.castBar = castBar
+	self.castBarText = castBarText
+	self.castBarTimeText = castBarTimeText
+	self.castBarIcon = castBarIcon
+	self.castBarSpark = castBarSpark
+	
+	self.playerName = UnitName("player");
 end
 
-function QuartzPet:OnEnable()
+
+function QuartzPlayer:OnEnable()
+	self:RegisterEvent("UNIT_SPELLCAST_SENT")
 	self:RegisterEvent("UNIT_SPELLCAST_START")
 	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
 	self:RegisterEvent("UNIT_SPELLCAST_STOP")
@@ -210,44 +280,34 @@ function QuartzPet:OnEnable()
 			castBar:SetStatusBarTexture(media:Fetch("statusbar", override))
 		end
 	end)
-	if not castBarParent then
-		castBarParent = CreateFrame('Frame', 'QuartzPetBar', UIParent)
-		castBarParent:SetFrameStrata('MEDIUM')
-		castBarParent:SetScript('OnShow', OnShow)
-		castBarParent:SetScript('OnHide', OnHide)
-		castBarParent:SetMovable(true)
-		castBarParent:RegisterForDrag('LeftButton')
-		castBarParent:SetClampedToScreen(true)
-		
-		castBar = CreateFrame("StatusBar", nil, castBarParent)
-		castBarText = castBar:CreateFontString(nil, 'OVERLAY')
-		castBarTimeText = castBar:CreateFontString(nil, 'OVERLAY')
-		castBarIcon = castBar:CreateTexture(nil, 'DIALOG')
-		castBarSpark = castBar:CreateTexture(nil, 'OVERLAY')
-		
-		castBarParent:Hide()
-	end
 	Quartz.ApplySettings()
 end
 
-function QuartzPet:OnDisable()
-	castBarParent:Hide()
-end
-function QuartzPet:UNIT_SPELLCAST_START(event, unit)
-	if unit ~= 'pet' then
+function QuartzPlayer:UNIT_SPELLCAST_SENT(event, unit, spell, rank, target)
+	if unit ~= 'player' then
 		return
 	end
-	local spell, rank, displayName, icon
-	spell, rank, displayName, icon, startTime, endTime = UnitCastingInfo(unit)
-	if not startTime then
-		return castBarParent:Hide()
+	if target then
+		self.targetName = target;
+	else
+		self.targetName = self.playerName;
 	end
+end
+
+function QuartzPlayer:UNIT_SPELLCAST_START(event, unit)
+	if unit ~= 'player' then
+		return
+	end
+	local spell, rank, displayName, icon, startTime, endTime = UnitCastingInfo(unit)
+
 	startTime = startTime / 1000
 	endTime = endTime / 1000
-	delay = 0
-	casting = true
-	channeling = nil
-	fadeOut = nil
+	self.startTime = startTime
+	self.endTime = endTime
+	self.delay = 0
+	self.casting = true
+	self.channeling = nil
+	self.fadeOut = nil
 
 	castBar:SetStatusBarColor(unpack(Quartz.db.profile.castingcolor))
 	
@@ -258,6 +318,7 @@ function QuartzPet:UNIT_SPELLCAST_START(event, unit)
 	setnametext(displayName, rank)
 	
 	castBarSpark:Show()
+	
 	if icon == "Interface\\Icons\\Temp" and Quartz.db.profile.hidesamwise then
 		icon = nil
 	end
@@ -273,21 +334,20 @@ function QuartzPet:UNIT_SPELLCAST_START(event, unit)
 	end
 end
 
-function QuartzPet:UNIT_SPELLCAST_CHANNEL_START(event, unit)
-	if unit ~= 'pet' then
+function QuartzPlayer:UNIT_SPELLCAST_CHANNEL_START(event, unit)
+	if unit ~= 'player' then
 		return
 	end
-	local spell, rank, displayName, icon
-	spell, rank, displayName, icon, startTime, endTime = UnitChannelInfo(unit)
-	if not startTime then
-		return castBarParent:Hide()
-	end
+	local spell, rank, displayName, icon, startTime, endTime = UnitChannelInfo(unit)
+	
 	startTime = startTime / 1000
 	endTime = endTime / 1000
-	delay = 0
-	casting = nil
-	channeling = true
-	fadeOut = nil
+	self.startTime = startTime
+	self.endTime = endTime
+	self.delay = 0
+	self.casting = nil
+	self.channeling = true
+	self.fadeOut = nil
 
 	castBar:SetStatusBarColor(unpack(Quartz.db.profile.channelingcolor))
 	
@@ -313,14 +373,15 @@ function QuartzPet:UNIT_SPELLCAST_CHANNEL_START(event, unit)
 	end
 end
 
-function QuartzPet:UNIT_SPELLCAST_STOP(event, unit)
-	if unit ~= 'pet' then
+function QuartzPlayer:UNIT_SPELLCAST_STOP(event, unit)
+	if unit ~= 'player' then
 		return
 	end
-	if casting then
-		casting = nil
-		fadeOut = true
-		stopTime = GetTime()
+	if self.casting then
+		self.targetName = nil
+		self.casting = nil
+		self.fadeOut = true
+		self.stopTime = GetTime()
 		
 		castBar:SetValue(1.0)
 		castBar:SetStatusBarColor(unpack(Quartz.db.profile.completecolor))
@@ -329,14 +390,14 @@ function QuartzPet:UNIT_SPELLCAST_STOP(event, unit)
 	end
 end
 
-function QuartzPet:UNIT_SPELLCAST_CHANNEL_STOP(event, unit)
-	if unit ~= 'pet' then
+function QuartzPlayer:UNIT_SPELLCAST_CHANNEL_STOP(event, unit)
+	if unit ~= 'player' then
 		return
 	end
-	if channeling then
-		channeling = nil
-		fadeOut = true
-		stopTime = GetTime()
+	if self.channeling then
+		self.channeling = nil
+		self.fadeOut = true
+		self.stopTime = GetTime()
 		
 		castBar:SetValue(0)
 		castBar:SetStatusBarColor(unpack(Quartz.db.profile.completecolor))
@@ -345,15 +406,16 @@ function QuartzPet:UNIT_SPELLCAST_CHANNEL_STOP(event, unit)
 	end
 end
 
-function QuartzPet:UNIT_SPELLCAST_FAILED(event, unit)
-	if unit ~= 'pet' or channeling then
+function QuartzPlayer:UNIT_SPELLCAST_FAILED(event, unit)
+	if unit ~= 'player' or self.channeling or self.casting then 
 		return
 	end
-	casting = nil
-	channeling = nil
-	fadeOut = true
-	if not stopTime then
-		stopTime = GetTime()
+	self.targetName = nil
+	self.casting = nil
+	self.channeling = nil
+	self.fadeOut = true
+	if not self.stopTime then
+		self.stopTime = GetTime()
 	end
 	castBar:SetValue(1.0)
 	castBar:SetStatusBarColor(unpack(Quartz.db.profile.failcolor))
@@ -361,15 +423,16 @@ function QuartzPet:UNIT_SPELLCAST_FAILED(event, unit)
 	castBarTimeText:SetText("")
 end
 
-function QuartzPet:UNIT_SPELLCAST_INTERRUPTED(event, unit)
-	if unit ~= 'pet' then
+function QuartzPlayer:UNIT_SPELLCAST_INTERRUPTED(event, unit)
+	if unit ~= 'player' then
 		return
 	end
-	casting = nil
-	channeling = nil
-	fadeOut = true
-	if not stopTime then
-		stopTime = GetTime()
+	self.targetName = nil
+	self.casting = nil
+	self.channeling = nil
+	self.fadeOut = true
+	if not self.stopTime then
+		self.stopTime = GetTime()
 	end
 	castBar:SetValue(1.0)
 	castBar:SetStatusBarColor(unpack(Quartz.db.profile.failcolor))
@@ -377,190 +440,201 @@ function QuartzPet:UNIT_SPELLCAST_INTERRUPTED(event, unit)
 	castBarTimeText:SetText("")
 end
 
-function QuartzPet:UNIT_SPELLCAST_DELAYED(event, unit)
-	if unit ~= 'pet' then
+function QuartzPlayer:UNIT_SPELLCAST_DELAYED(event, unit)
+	if unit ~= 'player' then
 		return
 	end
-	local oldStart = startTime
-	local spell, rank, displayName, icon
-	spell, rank, displayName, icon, startTime, endTime = UnitCastingInfo(unit)
+	local oldStart = self.startTime
+	local spell, rank, displayName, icon, startTime, endTime = UnitCastingInfo(unit)
 	if not startTime then
 		return castBarParent:Hide()
 	end
 	startTime = startTime / 1000
 	endTime = endTime / 1000
+	self.startTime = startTime
+	self.endTime = endTime
 
-	delay = (delay or 0) + (startTime - (oldStart or startTime))
+	self.delay = (self.delay or 0) + (startTime - (oldStart or startTime))
 end
 
-function QuartzPet:UNIT_SPELLCAST_CHANNEL_UPDATE(event, unit)
-	if unit ~= 'pet' then
+function QuartzPlayer:UNIT_SPELLCAST_CHANNEL_UPDATE(event, unit)
+	if unit ~= 'player' then
 		return
 	end
-	local oldStart = startTime
-	local spell, rank, displayName, icon
-	spell, rank, displayName, icon, startTime, endTime = UnitChannelInfo(unit)
+	local oldStart = self.startTime
+	local spell, rank, displayName, icon, startTime, endTime = UnitChannelInfo(unit)
 	if not startTime then
 		return castBarParent:Hide()
 	end
 	startTime = startTime / 1000
 	endTime = endTime / 1000
+	self.startTime = startTime
+	self.endTime = endTime
 	
-	delay = (delay or 0) + ((oldStart or startTime) - startTime)
+	self.delay = (self.delay or 0) + ((oldStart or startTime) - startTime)
 end
 do
 	local backdrop = { insets = {} }
 	local backdrop_insets = backdrop.insets
 	
-	function QuartzPet:ApplySettings()
-		if not castBarParent then
-			return
-		end
-		local db = db.profile
-		local qdb = Quartz.db.profile
-		local qpdb = Quartz:AcquireDBNamespace("Player").profile
-		castBarParent:ClearAllPoints()
-		if not db.x then
-			db.x = (UIParent:GetWidth() / 2 - (db.w * db.scale)) / db.scale - 5
-		end
-		castBarParent:SetPoint('BOTTOMLEFT', UIParent, 'BOTTOMLEFT', db.x, db.y)
-		castBarParent:SetWidth(db.w+9)
-		castBarParent:SetHeight(db.h+10)
-		castBarParent:SetAlpha(db.alpha)
-		castBarParent:SetScale(db.scale)
-		
-		backdrop.bgFile = "Interface\\Tooltips\\UI-Tooltip-Background"
-		backdrop.tile = true
-		backdrop.tileSize = 16
-		backdrop.edgeFile = media:Fetch('border', qpdb.border)
-		backdrop.edgeSize = 16
-		backdrop_insets.left = 4
-		backdrop_insets.right = 4
-		backdrop_insets.top = 4
-		backdrop_insets.bottom = 4
-		
-		castBarParent:SetBackdrop(backdrop)
-		local r,g,b = unpack(qdb.bordercolor)
-		castBarParent:SetBackdropBorderColor(r,g,b, qdb.borderalpha)
-		r,g,b = unpack(qdb.backgroundcolor)
-		castBarParent:SetBackdropColor(r,g,b, qdb.backgroundalpha)
-		
-		castBar:ClearAllPoints()
-		castBar:SetPoint('CENTER',castBarParent,'CENTER')
-		castBar:SetWidth(db.w)
-		castBar:SetHeight(db.h)
-		castBar:SetStatusBarTexture(media:Fetch('statusbar', db.texture))
-		castBar:SetMinMaxValues(0,1)
-		
-		if db.hidetimetext then
-			castBarTimeText:Hide()
-		else
-			castBarTimeText:Show()
-			castBarTimeText:ClearAllPoints()
-			castBarTimeText:SetWidth(db.w)
-			local position = db.timetextposition
-			if position == L["Left"] then
-				castBarTimeText:SetPoint('LEFT', castBar, 'LEFT', db.timetextx, db.timetexty)
-				castBarTimeText:SetJustifyH("LEFT")
-			elseif position == L["Center"] then
-				castBarTimeText:SetPoint('CENTER', castBar, 'CENTER', db.timetextx, db.timetexty)
-				castBarTimeText:SetJustifyH("CENTER")
-			elseif position == L["Right"] then
-				castBarTimeText:SetPoint('RIGHT', castBar, 'RIGHT', -1 * db.timetextx, db.timetexty)
-				castBarTimeText:SetJustifyH("RIGHT")
-			end -- L["Cast Start Side"], L["Cast End Side"] --handled at runtime
-		end
-		castBarTimeText:SetFont(media:Fetch('font', db.font), db.timefontsize)
-		castBarTimeText:SetShadowColor( 0, 0, 0, 1)
-		castBarTimeText:SetShadowOffset( 0.8, -0.8 )
-		castBarTimeText:SetTextColor(unpack(qdb.timetextcolor))
-		castBarTimeText:SetNonSpaceWrap(false)
-		castBarTimeText:SetHeight(db.h)
-		
-		local temptext = castBarTimeText:GetText()
-		if db.hidecasttime then
-			castBarTimeText:SetText('10.0')
-		else
-			castBarTimeText:SetText('10.0 / 10.0')
-		end
-		local normaltimewidth = castBarTimeText:GetStringWidth()
-		castBarTimeText:SetText(temptext)
-		
-		if db.hidenametext then
-			castBarText:Hide()
-		else
-			castBarText:Show()
-			castBarText:ClearAllPoints()
-			local position = db.nametextposition
-			if position == L["Left"] then
-				castBarText:SetPoint('LEFT', castBar, 'LEFT', db.nametextx, db.nametexty)
-				castBarText:SetJustifyH("LEFT")
-				if db.hidetimetext or db.timetextposition ~= L["Right"] then
-					castBarText:SetWidth(db.w)
-				else
-					castBarText:SetWidth(db.w - normaltimewidth - 5)
-				end
-			elseif position == L["Center"] then
-				castBarText:SetPoint('CENTER', castBar, 'CENTER', db.nametextx, db.nametexty)
-				castBarText:SetJustifyH("CENTER")
-			else -- L["Right"]
-				castBarText:SetPoint('RIGHT', castBar, 'RIGHT', -1 * db.nametextx, db.nametexty)
-				castBarText:SetJustifyH("RIGHT")
-				if db.hidetimetext or db.timetextposition ~= L["Left"] then
-					castBarText:SetWidth(db.w)
-				else
-					castBarText:SetWidth(db.w - normaltimewidth - 5)
+	function QuartzPlayer:ApplySettings()
+		if castBarParent then
+			local db = db.profile
+			
+			castBarParent = self.castBarParent
+			castBar = self.castBar
+			castBarText = self.castBarText
+			castBarTimeText = self.castBarTimeText
+			castBarIcon = self.castBarIcon
+			castBarSpark = self.castBarSpark
+			
+			castBarParent:ClearAllPoints()
+			if not db.x then
+				db.x = (UIParent:GetWidth() / 2 - (db.w * db.scale) / 2) / db.scale
+			end
+			castBarParent:SetPoint('BOTTOMLEFT', UIParent, 'BOTTOMLEFT', db.x, db.y)
+			castBarParent:SetWidth(db.w+9)
+			castBarParent:SetHeight(db.h+10)
+			castBarParent:SetAlpha(db.alpha)
+			castBarParent:SetScale(db.scale)
+			
+			
+
+			backdrop.bgFile = "Interface\\Tooltips\\UI-Tooltip-Background"
+			backdrop.tile = true
+			backdrop.tileSize = 16
+			backdrop.edgeFile = media:Fetch('border', db.border)
+			backdrop.edgeSize = 16
+			backdrop_insets.left = 4
+			backdrop_insets.right = 4
+			backdrop_insets.top = 4
+			backdrop_insets.bottom = 4
+			
+			castBarParent:SetBackdrop(backdrop)
+			local r,g,b = unpack(Quartz.db.profile.bordercolor)
+			castBarParent:SetBackdropBorderColor(r,g,b, Quartz.db.profile.borderalpha)
+			r,g,b = unpack(Quartz.db.profile.backgroundcolor)
+			castBarParent:SetBackdropColor(r,g,b, Quartz.db.profile.backgroundalpha)
+			
+			castBar:ClearAllPoints()
+			castBar:SetPoint('CENTER',castBarParent,'CENTER')
+			castBar:SetWidth(db.w)
+			castBar:SetHeight(db.h)
+			castBar:SetStatusBarTexture(media:Fetch('statusbar', db.texture))
+			castBar:SetMinMaxValues(0, 1)
+			
+			if db.hidetimetext then
+				castBarTimeText:Hide()
+			else
+				castBarTimeText:Show()
+				castBarTimeText:ClearAllPoints()
+				castBarTimeText:SetWidth(db.w)
+				local position = db.timetextposition
+				if position == L["Left"] then
+					castBarTimeText:SetPoint('LEFT', castBar, 'LEFT', db.timetextx, db.timetexty)
+					castBarTimeText:SetJustifyH("LEFT")
+				elseif position == L["Center"] then
+					castBarTimeText:SetPoint('CENTER', castBar, 'CENTER', db.timetextx, db.timetexty)
+					castBarTimeText:SetJustifyH("CENTER")
+				elseif position == L["Right"] then
+					castBarTimeText:SetPoint('RIGHT', castBar, 'RIGHT', -1 * db.timetextx, db.timetexty)
+					castBarTimeText:SetJustifyH("RIGHT")
+				end -- L["Cast Start Side"], L["Cast End Side"] --handled at runtime
+			end
+			castBarTimeText:SetFont(media:Fetch('font', db.font), db.timefontsize)
+			castBarTimeText:SetShadowColor( 0, 0, 0, 1)
+			castBarTimeText:SetShadowOffset( 0.8, -0.8 )
+			castBarTimeText:SetTextColor(unpack(Quartz.db.profile.timetextcolor))
+			castBarTimeText:SetNonSpaceWrap(false)
+			castBarTimeText:SetHeight(db.h)
+			
+			castTimeFormatString = '%.'..db.casttimeprecision..'f'
+			
+			local temptext = castBarTimeText:GetText()
+			if db.hidecasttime then
+				castBarTimeText:SetText(("%s"):format(timenum(10)))
+			else
+				castBarTimeText:SetText(("%s / %s"):format(timenum(10), timenum(10, true)))
+			end
+			local normaltimewidth = castBarTimeText:GetStringWidth()
+			castBarTimeText:SetText(temptext)
+			
+			if db.hidenametext then
+				castBarText:Hide()
+			else
+				castBarText:Show()
+				castBarText:ClearAllPoints()
+				local position = db.nametextposition
+				if position == L["Left"] then
+					castBarText:SetPoint('LEFT', castBar, 'LEFT', db.nametextx, db.nametexty)
+					castBarText:SetJustifyH("LEFT")
+					if db.hidetimetext or db.timetextposition ~= L["Right"] then
+						castBarText:SetWidth(db.w)
+					else
+						castBarText:SetWidth(db.w - normaltimewidth - 5)
+					end
+				elseif position == L["Center"] then
+					castBarText:SetPoint('CENTER', castBar, 'CENTER', db.nametextx, db.nametexty)
+					castBarText:SetJustifyH("CENTER")
+				else -- L["Right"]
+					castBarText:SetPoint('RIGHT', castBar, 'RIGHT', -1 * db.nametextx, db.nametexty)
+					castBarText:SetJustifyH("RIGHT")
+					if db.hidetimetext or db.timetextposition ~= L["Left"] then
+						castBarText:SetWidth(db.w)
+					else
+						castBarText:SetWidth(db.w - normaltimewidth - 5)
+					end
 				end
 			end
-		end
-		castBarText:SetFont(media:Fetch('font', db.font), db.fontsize)
-		castBarText:SetShadowColor( 0, 0, 0, 1)
-		castBarText:SetShadowOffset( 0.8, -0.8 )
-		castBarText:SetTextColor(unpack(qdb.spelltextcolor))
-		castBarText:SetNonSpaceWrap(false)
-		castBarText:SetHeight(db.h)
-		
-		if db.hideicon then
-			castBarIcon:Hide()
-		else
-			castBarIcon:Show()
-			castBarIcon:ClearAllPoints()
-			if db.iconposition == L["Left"] then
-				castBarIcon:SetPoint("RIGHT", castBar, "LEFT", -1 * db.icongap, 0)
-			else --L["Right"]
-				castBarIcon:SetPoint("LEFT", castBar, "RIGHT", db.icongap, 0)
+			castBarText:SetFont(media:Fetch('font', db.font), db.fontsize)
+			castBarText:SetShadowColor( 0, 0, 0, 1)
+			castBarText:SetShadowOffset( 0.8, -0.8 )
+			castBarText:SetTextColor(unpack(Quartz.db.profile.spelltextcolor))
+			castBarText:SetNonSpaceWrap(false)
+			castBarText:SetHeight(db.h)
+			
+			if db.hideicon then
+				castBarIcon:Hide()
+			else
+				castBarIcon:Show()
+				castBarIcon:ClearAllPoints()
+				if db.iconposition == L["Left"] then
+					castBarIcon:SetPoint("RIGHT", castBar, "LEFT", -1 * db.icongap, 0)
+				else --L["Right"]
+					castBarIcon:SetPoint("LEFT", castBar, "RIGHT", db.icongap, 0)
+				end
+				castBarIcon:SetWidth(db.h)
+				castBarIcon:SetHeight(db.h)
+				castBarIcon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+				castBarIcon:SetAlpha(db.iconalpha)
 			end
-			castBarIcon:SetWidth(db.h)
-			castBarIcon:SetHeight(db.h)
-			castBarIcon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
-			castBarIcon:SetAlpha(db.iconalpha)
-		end
-		
-		castBarSpark:SetTexture("Interface\\CastingBar\\UI-CastingBar-Spark")
-		castBarSpark:SetVertexColor(unpack(qdb.sparkcolor))
-		castBarSpark:SetBlendMode('ADD')
-		castBarSpark:SetWidth(20)
-		castBarSpark:SetHeight(db.h*2.2)
-		
-		if db.hideblizz then
-			PetCastingBarFrame.RegisterEvent = nothing
-			PetCastingBarFrame:UnregisterAllEvents()
-			PetCastingBarFrame:Hide()
-		else
-			PetCastingBarFrame.RegisterEvent = nil
-			PetCastingBarFrame:UnregisterAllEvents()
-			PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_START")
-			PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_STOP")
-			PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_FAILED")
-			PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
-			PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_DELAYED")
-			PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
-			PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
-			PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
-			PetCastingBarFrame:RegisterEvent("UNIT_PET")
+			
+			castBarSpark:SetTexture("Interface\\CastingBar\\UI-CastingBar-Spark")
+			castBarSpark:SetVertexColor(unpack(Quartz.db.profile.sparkcolor))
+			castBarSpark:SetBlendMode('ADD')
+			castBarSpark:SetWidth(20)
+			castBarSpark:SetHeight(db.h*2.2)
+			
+			if db.hideblizz then
+				CastingBarFrame.RegisterEvent = nothing
+				CastingBarFrame:UnregisterAllEvents()
+				CastingBarFrame:Hide()
+			else
+				CastingBarFrame.RegisterEvent = nil
+				CastingBarFrame:UnregisterAllEvents()
+				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_START")
+				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_STOP")
+				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_FAILED")
+				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
+				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_DELAYED")
+				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
+				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
+				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
+			end
 		end
 	end
 end
+
 do
 	local function set(field, value)
 		db.profile[field] = value
@@ -587,13 +661,16 @@ do
 	local function hidetimetextoptions()
 		return db.profile.hidetimetext
 	end
+	local function hidecasttimeprecision()
+		return db.profile.hidetimetext or db.profile.hidecasttime
+	end
 	local function hidenametextoptions()
 		return db.profile.hidenametext
 	end
-	Quartz.options.args.Pet = {
+	Quartz.options.args.Player = {
 		type = 'group',
-		name = L["Pet"],
-		desc = L["Pet"],
+		name = L["Player"],
+		desc = L["Player"],
 		order = 600,
 		args = {
 			toggle = {
@@ -601,10 +678,10 @@ do
 				name = L["Enable"],
 				desc = L["Enable"],
 				get = function()
-					return Quartz:IsModuleActive('Pet')
+					return Quartz:GetModule('Player', true):IsEnabled()
 				end,
 				set = function(v)
-					Quartz:ToggleModuleActive('Pet', v)
+					Quartz:ToggleModuleActive('Player', v)
 				end,
 				order = 99,
 			},
@@ -621,7 +698,7 @@ do
 						castBarParent:EnableMouse(false)
 						castBarParent:SetScript('OnDragStart', nil)
 						castBarParent:SetScript('OnDragStop', nil)
-						if not (channeling or casting) then
+						if not (self.channeling or self.casting) then
 							castBarParent:Hide()
 						end
 					else
@@ -663,7 +740,7 @@ do
 				name = L["Width"],
 				desc = L["Width"],
 				min = 50,
-				max = 500,
+				max = 1500,
 				step = 5,
 				order = 200,
 				get = get,
@@ -677,7 +754,7 @@ do
 				get = get,
 				set = set,
 				passValue = 'x',
-				order = 201,
+				order = 200,
 				validate = function(v)
 					return tonumber(v) and true
 				end,
@@ -690,7 +767,7 @@ do
 				get = get,
 				set = set,
 				passValue = 'y',
-				order = 201,
+				order = 200,
 				validate = function(v)
 					return tonumber(v) and true
 				end,
@@ -703,7 +780,7 @@ do
 				min = 0.2,
 				max = 1,
 				step = 0.025,
-				order = 202,
+				order = 201,
 				get = get,
 				set = set,
 				passValue = 'scale',
@@ -716,14 +793,14 @@ do
 				min = 0.1,
 				max = 1,
 				step = 0.025,
-				order = 203,
+				order = 202,
 				get = get,
 				set = set,
 				passValue = 'alpha',
 			},
 			header2 = {
 				type = 'header',
-				order = 204,
+				order = 203,
 			},
 			hideicon = {
 				type = 'toggle',
@@ -851,6 +928,15 @@ do
 				disabled = hidenametextoptions,
 				passValue = 'fontsize',
 			},
+			targetname = {
+				type = 'toggle',
+				name = L["Target Name"],
+				desc = L["Display target name of spellcasts after spell name"],
+				get = get,
+				set = set,
+				passValue = 'targetname',
+				order = 404,
+			},			
 			spellrank = {
 				type = 'toggle',
 				name = L["Spell Rank"],
@@ -859,7 +945,7 @@ do
 				set = set,
 				disabled = hidenametextoptions,
 				passValue = 'spellrank',
-				order = 404,
+				order = 405,
 			},
 			spellrankstyle = {
 				type = 'text',
@@ -872,7 +958,7 @@ do
 				end,
 				passValue = 'spellrankstyle',
 				validate = {L["Number"], L["Roman"], L["Full Text"], L["Roman Full Text"]},
-				order = 405,
+				order = 406,
 			},
 			hidetimetext = {
 				type = 'toggle',
@@ -893,6 +979,19 @@ do
 				disabled = hidetimetextoptions,
 				order = 412,
 			},
+			casttimeprecision = {
+				type = 'range',
+				name = L["Cast Time Precision"],
+				desc = L["Set the precision (i.e. number of decimal places) for the cast time text"],
+				min = 1,
+				max = 3,
+				step = 1,
+				order = 413,
+				get = get,
+				set = set,
+				disabled = hidecasttimeprecision,
+				passValue = 'casttimeprecision',
+			},
 			timefontsize = {
 				type = 'range',
 				name = L["Time Font Size"],
@@ -900,7 +999,7 @@ do
 				min = 7,
 				max = 20,
 				step = 1,
-				order = 413,
+				order = 414,
 				get = get,
 				set = set,
 				disabled = hidetimetextoptions,
@@ -915,7 +1014,7 @@ do
 				passValue = 'timetextposition',
 				validate = {L["Left"], L["Right"], L["Center"], L["Cast Start Side"], L["Cast End Side"]},
 				disabled = hidetimetextoptions,
-				order = 414,
+				order = 415,
 			},
 			timetextx = {
 				type = 'range',
@@ -928,7 +1027,7 @@ do
 				max = 35,
 				step = 1,
 				disabled = hidetimetextoptions,
-				order = 415,
+				order = 416,
 			},
 			timetexty = {
 				type = 'range',
@@ -941,7 +1040,21 @@ do
 				max = 35,
 				step = 1,
 				disabled = hidetimetextoptions,
-				order = 416,
+				order = 417,
+			},
+			header4 = {
+				type = 'header',
+				order = 418,
+			},
+			border = {
+				type = 'text',
+				name = L["Border"],
+				desc = L["Set the border style"],
+				get = get,
+				set = set,
+				passValue = 'border',
+				validate = media:List('border'),
+				order = 418,
 			},
 			header6 = {
 				type = 'header',
@@ -974,8 +1087,12 @@ do
 					Quartz:CopySettings(from.profile, db.profile)
 					Quartz.ApplySettings()
 				end,
-				validate = {L["Player"], L["Target"], L["Focus"]},
+				validate = {L["Target"], L["Focus"], L["Pet"]},
 				order = 504
+			},
+			header6 = {
+				type = 'header',
+				order = 505,
 			},
 		},
 	}

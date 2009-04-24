@@ -18,19 +18,3 @@ externals:
   libs/AceGUI-3.0-SharedMediaWidgets: svn://svn.wowace.com/wow/ace-gui-3-0-shared-media-widgets/mainline/trunk/AceGUI-3.0-SharedMediaWidgets
   libs/LibSharedMedia-3.0: svn://svn.wowace.com/wow/libsharedmedia-3-0/mainline/trunk/LibSharedMedia-3.0
 
-move-folders:
-    Quartz/Buff: Quartz_Buff
-    Quartz/Flight: Quartz_Flight
-    Quartz/Focus: Quartz_Focus
-    Quartz/GCD: Quartz_GCD
-    Quartz/Interrupt: Quartz_Interrupt
-    Quartz/Latency: Quartz_Latency
-    Quartz/Mirror: Quartz_Mirror
-    Quartz/Pet: Quartz_Pet
-    Quartz/Player: Quartz_Player
-    Quartz/Range: Quartz_Range
-    Quartz/Swing: Quartz_Swing
-    Quartz/Target: Quartz_Target
-    Quartz/Timer: Quartz_Timer
-    Quartz/Tradeskill: Quartz_Tradeskill
-    

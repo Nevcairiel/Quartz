@@ -16,12 +16,12 @@
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
 
-local Quartz = Quartz
-local QuartzInterrupt = Quartz:NewModule("Interrupt")
-local self = QuartzInterrupt
-local QuartzPlayer = Quartz:GetModule('Player')
-
+local Quartz = LibStub("AceAddon-3.0"):GetAddon("Quartz")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz")
+
+local QuartzPlayer = Quartz:GetModule("Player")
+local QuartzInterrupt = Quartz:NewModule("Interrupt", "AceEvent-3.0")
+local self = QuartzInterrupt
 
 local db
 

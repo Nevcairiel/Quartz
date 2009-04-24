@@ -16,15 +16,14 @@
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
 
-local Quartz = Quartz
-local QuartzTradeskill = Quartz:NewModule("Tradeskill", "AceHook-3.0")
-local self = QuartzTradeskill
-local QuartzPlayer = Quartz:GetModule('Player')
-
+local Quartz = LibStub("AceAddon-3.0"):GetAddon("Quartz")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz")
 
-local castBar, castBarText, castBarTimeText, castBarIcon, castBarSpark, castBarParent
+local QuartzPlayer = Quartz:GetModule('Player')
+local QuartzTradeskill = Quartz:NewModule("Tradeskill", "AceHook-3.0", "AceEvent-3.0")
+local self = QuartzTradeskill
 
+local castBar, castBarText, castBarTimeText, castBarIcon, castBarSpark, castBarParent
 
 local repeattimes, castname, duration, totaltime, starttime, casting, bail
 local completedcasts = 0

@@ -16,12 +16,12 @@
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
 
-local Quartz = Quartz
-local QuartzLatency = Quartz:NewModule("Latency", "AceHook-3.0")
-local self = QuartzLatency
-local QuartzPlayer = Quartz:GetModule('Player')
-
+local Quartz = LibStub("AceAddon-3.0"):GetAddon("Quartz")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz")
+
+local QuartzPlayer = Quartz:GetModule("Player")
+local QuartzLatency = Quartz:NewModule("Latency", "AceHook-3.0", "AceEvent-3.0")
+local self = QuartzLatency
 
 local media = LibStub("LibSharedMedia-3.0")
 

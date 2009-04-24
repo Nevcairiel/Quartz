@@ -18,13 +18,6 @@
 ## Notes-frFR: Barres d'incantation modulaires.
 ## Notes-zhTW: 模組化施法條。
 ## Notes-zhCN: 模块化施法条
-## LoadManagers: SupplyAndDemand, AddonLoader, ForkliftGnome
-## X-S&D-Always: true
-## X-LoadOn-Events: UNIT_SPELLCAST_SENT, UNIT_SPELLCAST_START
-## X-LoadOn-UNIT_SPELLCAST_SENT: LoadAddOn('Quartz')
-## X-LoadOn-UNIT_SPELLCAST_START: LoadAddOn('Quartz')
-## X-LoadOn-NotResting: true
-## X-LoadOn-Slash: /quartz
 
 #@no-lib-strip@
 libs\LibStub\LibStub.lua
@@ -41,8 +34,21 @@ libs\AceGUI-3.0-SharedMediaWidgets\widget.xml
 libs\LibSharedMedia-3.0\lib.xml
 #@end-no-lib-strip@
 
-locales.xml
+locale\locale.xml
 
 Quartz.lua
-
-modules.xml
+Config.lua
+Player.lua
+Target.lua
+Focus.lua
+Pet.lua
+Latency.lua
+Tradeskill.lua
+GCD.lua
+Buff.lua
+Mirror.lua
+Timer.lua
+Swing.lua
+Interrupt.lua
+Range.lua
+Flight.lua

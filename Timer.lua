@@ -16,12 +16,12 @@
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
 
-local Quartz = Quartz
-local QuartzTimer = Quartz:NewModule("Timer")
-local self = QuartzTimer
-local QuartzMirror = Quartz:GetModule('Mirror')
-
+local Quartz = LibStub("AceAddon-3.0"):GetAddon("Quartz")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz")
+
+local QuartzMirror = Quartz:GetModule("Mirror")
+local QuartzTimer = Quartz:NewModule("Timer", "AceEvent-3.0")
+local self = QuartzTimer
 
 local new, del = Quartz.new, Quartz.del
 

@@ -16,11 +16,11 @@
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
 
-local Quartz = Quartz
-local QuartzFocus = Quartz:NewModule("Focus")
-local self = QuartzFocus
-
+local Quartz = LibStub("AceAddon-3.0"):GetAddon("Quartz")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz")
+
+local QuartzFocus = Quartz:NewModule("Focus", "AceEvent-3.0")
+local self = QuartzFocus
 
 local media = LibStub("LibSharedMedia-3.0")
 

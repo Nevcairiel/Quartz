@@ -16,11 +16,11 @@
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
 
-local Quartz = Quartz
-local QuartzTarget = Quartz:NewModule("Target")
-local self = QuartzTarget
-
+local Quartz = LibStub("AceAddon-3.0"):GetAddon("Quartz")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz")
+
+local QuartzPet = Quartz:NewModule("Pet", "AceEvent-3.0")
+local self = QuartzPet
 
 local media = LibStub("LibSharedMedia-3.0")
 
@@ -158,11 +158,13 @@ do
 	end
 end
 
-function QuartzTarget:OnInitialize()
-	db = Quartz:AcquireDBNamespace("Target")
-	Quartz:RegisterDefaults("Target", "profile", {
+function QuartzPet:OnInitialize()
+	db = Quartz:AcquireDBNamespace("Pet")
+	Quartz:RegisterDefaults("Pet", "profile", {
+		hideblizz = true,
+		
 		--x =  -- applied automatically in :ApplySettings()
-		y = 250,
+		y = 300,
 		h = 18,
 		w = 200,
 		scale = 1,
@@ -172,7 +174,7 @@ function QuartzTarget:OnInitialize()
 		
 		alpha = 1,
 		iconalpha = 0.9,
-		iconposition = L["Right"],
+		iconposition = L["Left"],
 		icongap = 4,
 		
 		hidenametext = false,
@@ -190,13 +192,10 @@ function QuartzTarget:OnInitialize()
 		nametexty = 0,
 		timetextx = 3,
 		timetexty = 0,
-		
-		showfriendly = true,
-		showhostile = true,
 	})
 end
 
-function QuartzTarget:OnEnable()
+function QuartzPet:OnEnable()
 	self:RegisterEvent("UNIT_SPELLCAST_START")
 	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
 	self:RegisterEvent("UNIT_SPELLCAST_STOP")
@@ -206,14 +205,13 @@ function QuartzTarget:OnEnable()
 	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
 	self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
 	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_INTERRUPTED", "UNIT_SPELLCAST_INTERRUPTED")
-	self:RegisterEvent("PLAYER_TARGET_CHANGED")
 	media.RegisterCallback(self, "LibSharedMedia_SetGlobal", function(mtype, override)
 		if mtype == "statusbar" then
 			castBar:SetStatusBarTexture(media:Fetch("statusbar", override))
 		end
 	end)
 	if not castBarParent then
-		castBarParent = CreateFrame('Frame', 'QuartzTargetBar', UIParent)
+		castBarParent = CreateFrame('Frame', 'QuartzPetBar', UIParent)
 		castBarParent:SetFrameStrata('MEDIUM')
 		castBarParent:SetScript('OnShow', OnShow)
 		castBarParent:SetScript('OnHide', OnHide)
@@ -232,22 +230,12 @@ function QuartzTarget:OnEnable()
 	Quartz.ApplySettings()
 end
 
-function QuartzTarget:OnDisable()
+function QuartzPet:OnDisable()
 	castBarParent:Hide()
 end
-function QuartzTarget:UNIT_SPELLCAST_START(event, unit)
-	if unit ~= 'target' then
+function QuartzPet:UNIT_SPELLCAST_START(event, unit)
+	if unit ~= 'pet' then
 		return
-	end
-	if not db.profile.showfriendly then
-		if UnitIsFriend('player', 'target') then
-			return
-		end
-	end
-	if not db.profile.showhostile then
-		if UnitIsEnemy('player', 'target') then
-			return
-		end
 	end
 	local spell, rank, displayName, icon
 	spell, rank, displayName, icon, startTime, endTime = UnitCastingInfo(unit)
@@ -285,19 +273,9 @@ function QuartzTarget:UNIT_SPELLCAST_START(event, unit)
 	end
 end
 
-function QuartzTarget:UNIT_SPELLCAST_CHANNEL_START(event, unit)
-	if unit ~= 'target' then
+function QuartzPet:UNIT_SPELLCAST_CHANNEL_START(event, unit)
+	if unit ~= 'pet' then
 		return
-	end
-	if not db.profile.showfriendly then
-		if UnitIsFriend('player', 'target') then
-			return
-		end
-	end
-	if not db.profile.showhostile then
-		if UnitIsEnemy('player', 'target') then
-			return
-		end
 	end
 	local spell, rank, displayName, icon
 	spell, rank, displayName, icon, startTime, endTime = UnitChannelInfo(unit)
@@ -335,8 +313,8 @@ function QuartzTarget:UNIT_SPELLCAST_CHANNEL_START(event, unit)
 	end
 end
 
-function QuartzTarget:UNIT_SPELLCAST_STOP(event, unit)
-	if unit ~= 'target' then
+function QuartzPet:UNIT_SPELLCAST_STOP(event, unit)
+	if unit ~= 'pet' then
 		return
 	end
 	if casting then
@@ -351,8 +329,8 @@ function QuartzTarget:UNIT_SPELLCAST_STOP(event, unit)
 	end
 end
 
-function QuartzTarget:UNIT_SPELLCAST_CHANNEL_STOP(event, unit)
-	if unit ~= 'target' then
+function QuartzPet:UNIT_SPELLCAST_CHANNEL_STOP(event, unit)
+	if unit ~= 'pet' then
 		return
 	end
 	if channeling then
@@ -367,8 +345,8 @@ function QuartzTarget:UNIT_SPELLCAST_CHANNEL_STOP(event, unit)
 	end
 end
 
-function QuartzTarget:UNIT_SPELLCAST_FAILED(event, unit)
-	if unit ~= 'target' or channeling then
+function QuartzPet:UNIT_SPELLCAST_FAILED(event, unit)
+	if unit ~= 'pet' or channeling then
 		return
 	end
 	casting = nil
@@ -383,8 +361,8 @@ function QuartzTarget:UNIT_SPELLCAST_FAILED(event, unit)
 	castBarTimeText:SetText("")
 end
 
-function QuartzTarget:UNIT_SPELLCAST_INTERRUPTED(event, unit)
-	if unit ~= 'target' then
+function QuartzPet:UNIT_SPELLCAST_INTERRUPTED(event, unit)
+	if unit ~= 'pet' then
 		return
 	end
 	casting = nil
@@ -399,19 +377,9 @@ function QuartzTarget:UNIT_SPELLCAST_INTERRUPTED(event, unit)
 	castBarTimeText:SetText("")
 end
 
-function QuartzTarget:UNIT_SPELLCAST_DELAYED(event, unit)
-	if unit ~= 'target' then
+function QuartzPet:UNIT_SPELLCAST_DELAYED(event, unit)
+	if unit ~= 'pet' then
 		return
-	end
-	if not db.profile.showfriendly then
-		if UnitIsFriend('player', 'target') then
-			return
-		end
-	end
-	if not db.profile.showhostile then
-		if UnitIsEnemy('player', 'target') then
-			return
-		end
 	end
 	local oldStart = startTime
 	local spell, rank, displayName, icon
@@ -425,8 +393,8 @@ function QuartzTarget:UNIT_SPELLCAST_DELAYED(event, unit)
 	delay = (delay or 0) + (startTime - (oldStart or startTime))
 end
 
-function QuartzTarget:UNIT_SPELLCAST_CHANNEL_UPDATE(event, unit)
-	if unit ~= 'target' then
+function QuartzPet:UNIT_SPELLCAST_CHANNEL_UPDATE(event, unit)
+	if unit ~= 'pet' then
 		return
 	end
 	local oldStart = startTime
@@ -440,92 +408,11 @@ function QuartzTarget:UNIT_SPELLCAST_CHANNEL_UPDATE(event, unit)
 	
 	delay = (delay or 0) + ((oldStart or startTime) - startTime)
 end
-function QuartzTarget:PLAYER_TARGET_CHANGED()
-	if not UnitExists('target') then
-		return
-	end
-	if not db.profile.showfriendly then
-		if UnitIsFriend('player', 'target') then
-			return
-		end
-	end
-	if not db.profile.showhostile then
-		if UnitIsEnemy('player', 'target') then
-			return
-		end
-	end
-	local spell, rank, displayName, icon
-	spell, rank, displayName, icon, startTime, endTime = UnitCastingInfo('target')
-	if spell then
-		startTime = startTime / 1000
-		endTime = endTime / 1000
-		delay = 0
-		casting = true
-		channeling = nil
-		fadeOut = nil
-		
-		castBar:SetStatusBarColor(unpack(Quartz.db.profile.castingcolor))
-		
-		castBar:SetValue(0)
-		castBarParent:Show()
-		castBarParent:SetAlpha(db.profile.alpha)
-		
-		setnametext(displayName, rank)
-		
-		castBarSpark:Show()
-		if icon == "Interface\\Icons\\Temp" and Quartz.db.profile.hidesamwise then
-			icon = nil
-		end
-		castBarIcon:SetTexture(icon)
-		
-		local position = db.profile.timetextposition
-		if position == L["Cast Start Side"] then
-			castBarTimeText:SetPoint('LEFT', castBar, 'LEFT', db.profile.timetextx, db.profile.timetexty)
-			castBarTimeText:SetJustifyH("LEFT")
-		elseif position == L["Cast End Side"] then
-			castBarTimeText:SetPoint('RIGHT', castBar, 'RIGHT', -1 * db.profile.timetextx, db.profile.timetexty)
-			castBarTimeText:SetJustifyH("RIGHT")
-		end
-	else
-		spell, rank, displayName, icon, startTime, endTime = UnitChannelInfo('target')
-		if spell then
-			startTime = startTime / 1000
-			endTime = endTime / 1000
-			delay = 0
-			casting = nil
-			channeling = true
-			fadeOut = nil
-			
-			castBar:SetStatusBarColor(unpack(Quartz.db.profile.channelingcolor))
-			
-			castBar:SetValue(0)
-			castBarParent:Show()
-			castBarParent:SetAlpha(db.profile.alpha)
-			
-			setnametext(spell, rank)
-			if icon == "Interface\\Icons\\Temp" and Quartz.db.profile.hidesamwise then
-				icon = nil
-			end
-			castBarIcon:SetTexture(icon)
-			
-			local position = db.profile.timetextposition
-			if position == L["Cast Start Side"] then
-				castBarTimeText:SetPoint('RIGHT', castBar, 'RIGHT', -1 * db.profile.timetextx, db.profile.timetexty)
-				castBarTimeText:SetJustifyH("RIGHT")
-			elseif position == L["Cast End Side"] then
-				castBarTimeText:SetPoint('LEFT', castBar, 'LEFT', db.profile.timetextx, db.profile.timetexty)
-				castBarTimeText:SetJustifyH("LEFT")
-			end
-		else
-			castBarParent:Hide()
-		end
-	end
-end
 do
 	local backdrop = { insets = {} }
 	local backdrop_insets = backdrop.insets
 	
-	function QuartzTarget:ApplySettings()
+	function QuartzPet:ApplySettings()
 		if not castBarParent then
 			return
 		end
@@ -534,7 +421,7 @@ do
 		local qpdb = Quartz:AcquireDBNamespace("Player").profile
 		castBarParent:ClearAllPoints()
 		if not db.x then
-			db.x = (UIParent:GetWidth() / 2) / db.scale + 5
+			db.x = (UIParent:GetWidth() / 2 - (db.w * db.scale)) / db.scale - 5
 		end
 		castBarParent:SetPoint('BOTTOMLEFT', UIParent, 'BOTTOMLEFT', db.x, db.y)
 		castBarParent:SetWidth(db.w+9)
@@ -654,6 +541,24 @@ do
 		castBarSpark:SetBlendMode('ADD')
 		castBarSpark:SetWidth(20)
 		castBarSpark:SetHeight(db.h*2.2)
+		
+		if db.hideblizz then
+			PetCastingBarFrame.RegisterEvent = nothing
+			PetCastingBarFrame:UnregisterAllEvents()
+			PetCastingBarFrame:Hide()
+		else
+			PetCastingBarFrame.RegisterEvent = nil
+			PetCastingBarFrame:UnregisterAllEvents()
+			PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_START")
+			PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_STOP")
+			PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_FAILED")
+			PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
+			PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_DELAYED")
+			PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
+			PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
+			PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
+			PetCastingBarFrame:RegisterEvent("UNIT_PET")
+		end
 	end
 end
 do
@@ -685,10 +590,10 @@ do
 	local function hidenametextoptions()
 		return db.profile.hidenametext
 	end
-	Quartz.options.args.Target = {
+	Quartz.options.args.Pet = {
 		type = 'group',
-		name = L["Target"],
-		desc = L["Target"],
+		name = L["Pet"],
+		desc = L["Pet"],
 		order = 600,
 		args = {
 			toggle = {
@@ -696,10 +601,10 @@ do
 				name = L["Enable"],
 				desc = L["Enable"],
 				get = function()
-					return Quartz:IsModuleActive('Target')
+					return Quartz:IsModuleActive('Pet')
 				end,
 				set = function(v)
-					Quartz:ToggleModuleActive('Target', v)
+					Quartz:ToggleModuleActive('Pet', v)
 				end,
 				order = 99,
 			},
@@ -732,22 +637,13 @@ do
 				end,
 				order = 100,
 			},
-			showfriendly = {
+			hideblizz = {
 				type = 'toggle',
-				name = L["Show for Friends"],
-				desc = L["Show this castbar for friendly units"],
+				name = L["Disable Blizzard Cast Bar"],
+				desc = L["Disable and hide the default UI's casting bar"],
 				get = get,
 				set = set,
-				passValue = 'showfriendly',
-				order = 101,
-			},
-			showhostile = {
-				type = 'toggle',
-				name = L["Show for Enemies"],
-				desc = L["Show this castbar for hostile units"],
-				get = get,
-				set = set,
-				passValue = 'showhostile',
+				passValue = 'hideblizz',
 				order = 101,
 			},
 			h = {
@@ -1078,7 +974,7 @@ do
 					Quartz:CopySettings(from.profile, db.profile)
 					Quartz.ApplySettings()
 				end,
-				validate = {L["Player"], L["Focus"], L["Pet"]},
+				validate = {L["Player"], L["Target"], L["Focus"]},
 				order = 504
 			},
 		},

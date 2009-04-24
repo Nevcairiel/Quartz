@@ -16,11 +16,11 @@
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
 
-local Quartz = Quartz
-local QuartzMirror = Quartz:NewModule("Mirror", "AceHook-3.0")
-local self = QuartzMirror
-
+local Quartz = LibStub("AceAddon-3.0"):GetAddon("Quartz")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz")
+
+local QuartzMirror = Quartz:NewModule("Mirror", "AceHook-3.0", "AceEvent-3.0")
+local self = QuartzMirror
 
 local media = LibStub("LibSharedMedia-3.0")
 

@@ -16,12 +16,12 @@
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
 
-local Quartz = Quartz
-local QuartzRange = Quartz:NewModule("Range")
-local self = QuartzRange
-local QuartzPlayer = Quartz:GetModule('Player')
-
+local Quartz = LibStub("AceAddon-3.0"):GetAddon("Quartz")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz")
+
+local QuartzPlayer = Quartz:GetModule("Player")
+local QuartzRange = Quartz:NewModule("Range", "AceEvent-3.0")
+local self = QuartzRange
 
 local GetTime = GetTime
 local IsSpellInRange = IsSpellInRange

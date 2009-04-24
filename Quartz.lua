@@ -16,24 +16,42 @@
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
 
-Quartz = LibStub("AceAddon-3.0"):NewAddon("Quartz", "AceEvent-3.0", "AceConsole-3.0")
-local addon = Quartz
+local Quartz = LibStub("AceAddon-3.0"):NewAddon("Quartz", "AceEvent-3.0", "AceConsole-3.0")
+
 local db
+local defaults = {
+	profile = {
+		hidesamwise = true,
+		
+		sparkcolor = {1,1,1,0.5},
+		spelltextcolor = {1, 1, 1},
+		timetextcolor = {1, 1, 1},
+		castingcolor = {1.0,0.49, 0},
+		channelingcolor = {0.32,0.3, 1},
+		completecolor = {0.12, 0.86, 0.15},
+		failcolor = {1.0, 0.09, 0},
+		backgroundcolor = {0, 0, 0},
+		bordercolor = {0,0,0},
+		
+		backgroundalpha = 1,
+		borderalpha = 1,
+		},
+	}
 
-local L = LibStub:GetLibrary("AceLocale-3.0"):GetLocale("Quartz")
 
-local AceConfig = LibStub("AceConfig-3.0")
-local AceConfigDialog = LibStub("AceConfigDialog-3.0")
+function Quartz:OnInitialize()
+	self.db = LibStub("AceDB-3.0"):New("QuartzDB", defaults, "Default")
+	self.db.RegisterCallback(self, "OnProfileChanged", "ApplySettings")
+	self.db.RegisterCallback(self, "OnProfileCopied", "ApplySettings")
+	self.db.RegisterCallback(self, "OnProfileReset", "ApplySettings")	
+	db = self.db.profile
 
-local media = LibStub("LibSharedMedia-3.0")
-media:Register("statusbar", "Frost", "Interface\\AddOns\\Quartz\\textures\\Frost")
-media:Register("statusbar", "Healbot", "Interface\\AddOns\\Quartz\\textures\\Healbot")
-media:Register("statusbar", "LiteStep", "Interface\\AddOns\\Quartz\\textures\\LiteStep")
-media:Register("statusbar", "Rocks", "Interface\\AddOns\\Quartz\\textures\\Rocks")
-media:Register("statusbar", "Runes", "Interface\\AddOns\\Quartz\\textures\\Runes")
-media:Register("statusbar", "Xeon", "Interface\\AddOns\\Quartz\\textures\\Xeon")
+	self:SetupOptions()
+end
 
-local lodmodules = {}
+function Quartz:OnEnable(first)
+end
+
 local new, del
 do
 	local cache = setmetatable({}, {__mode='k'})
@@ -58,117 +76,6 @@ end
 Quartz.new = new
 Quartz.del = del
 
-local function nothing()
-end
-
-local options
-local function applySettings()
-	if not IsLoggedIn() then
-		return
-	end
-	for name, module in addon:IterateModules() do
-		if module.ApplySettings then
-			module:ApplySettings()
-		end
-	end
-end
-
-Quartz.OnProfileEnable = applySettings
-Quartz.ApplySettings = applySettings
-
-local defaults = {
-	profile = {
-		hidesamwise = true,
-		
-		sparkcolor = {1,1,1,0.5},
-		spelltextcolor = {1, 1, 1},
-		timetextcolor = {1, 1, 1},
-		castingcolor = {1.0,0.49, 0},
-		channelingcolor = {0.32,0.3, 1},
-		completecolor = {0.12, 0.86, 0.15},
-		failcolor = {1.0, 0.09, 0},
-		backgroundcolor = {0, 0, 0},
-		bordercolor = {0,0,0},
-		
-		backgroundalpha = 1,
-		borderalpha = 1,
-		},
-	}
-
-function Quartz:OnInitialize()
-	AceConfig:RegisterOptionsTable("Quartz", options)
-
-	self.db = LibStub("AceDB-3.0"):New("QuartzDB", defaults, "Default")
-	db = self.db.profile
-
-	self:RegisterChatCommand("quartz", function() LibStub("AceConfigDialog-3.0"):Open("Quartz") end )
-	local optFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Quartz", "Quartz")
-	options.args.profile = LibStub("AceDBOptions-3.0"):GetOptionsTable(addon.db)
-
-	self.db.RegisterCallback(self, "OnProfileChanged", "ApplySettings")
-	self.db.RegisterCallback(self, "OnProfileCopied", "ApplySettings")
-	self.db.RegisterCallback(self, "OnProfileReset", "ApplySettings")	
-
-        media.RegisterCallback(self, "LibSharedMedia_Registered", "ApplySettings")
-        media.RegisterCallback(self, "LibSharedMedia_SetGlobal", "ApplySettings")
-end
-
-function Quartz:OnEnable(first)
-	if first then
-		for k, v in pairs(lodmodules) do
-			if addon:GetModule(k, true):IsEnabled() then
-				local depends = GetAddOnMetadata('Quartz_'..k, "X-Quartz-RequiredModules")
-				if depends then
-					for module in depends:gmatch('([^, ]+)') do
-						if not addon:GetModule(module, true) then
-							local success, reason = LoadAddOn('Quartz_'..module)
-							if not success then
-								error(k..' requires '..module..' module, which could not load: '..reason)
-							end
-						end
-					end
-				end
-				LoadAddOn('Quartz_'..k)
-			elseif not addon:GetModule(k, true) then
-				options.args[k] = {
-					type = 'group',
-					name = L[k],
-					desc = L[k],
-					order = 600,
-					args = {
-						toggle = {
-							type = 'toggle',
-							name = L["Enable"],
-							desc = L["Enable"],
-							get = function()
-								return Quartz:GetModule(k, true):IsEnabled()
-							end,
-							set = function(v)
-								local depends = GetAddOnMetadata('Quartz_'..k, "X-Quartz-RequiredModules")
-								if depends then
-									for module in depends:gmatch('([^, ]+)') do
-										if not addon:GetModule(module, true) then
-											local success, reason = LoadAddOn('Quartz_'..module)
-											if not success then
-												error(k..' requires '..module..' module, which could not load: '..reason)
-											end
-										end
-									end
-								end
-								LoadAddOn('Quartz_'..k)
-								addon:ToggleModuleActive(k, true)
-							end,
-							order = 99,
-						},
-					},
-				}
-			end
-		end
-		lodmodules = nil
-	end
-	applySettings()
-end
-
 function Quartz:OnDisable()
 	CastingBarFrame.RegisterEvent = nil
 	CastingBarFrame:UnregisterAllEvents()
@@ -182,175 +89,3 @@ function Quartz:OnDisable()
 	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
 end
 
-do
-	local exclude = {
-		x = true,
-		y = true,
-	}
-	function Quartz:CopySettings(from, to)
-		for k,v in pairs(from) do
-			if to[k] and not exclude[k] and type(v) ~= 'table' then
-				to[k] = v
-			end
-		end
-	end
-end
-do
-	local function set(field, value)
-		addon.db.profile[field] = value
-		applySettings()
-	end
-	local function get(field)
-		return db[field]
-	end
-	
-	local function setcolor(field, ...)
-		db[field] = {...}
-		applySettings()
-	end
-	local function getcolor(field)
-		return unpack(db[field])
-	end
-	options = {
-		type = 'group',
-		name = L["Quartz"],
-		desc = L["Quartz"],
-		args = {
-			hidesamwise = {
-				type = 'toggle',
-				name = L["Hide Samwise Icon"],
-				desc = L["Hide the icon for spells with no icon"],
-				get = get,
-				set = set,
-				passValue = 'hidesamwise',
-				order = 101,
-			},
-			colors = {
-				type = 'group',
-				name = L["Colors"],
-				desc = L["Colors"],
-				order = 450,
-				args = {
-					spelltextcolor = {
-						type = 'color',
-						name = L["Spell Text"],
-						desc = L["Set the color of the %s"]:format(L["Spell Text"]),
-						order = 98,
-						get = getcolor,
-						set = setcolor,
-						passValue = 'spelltextcolor',
-					},
-					timetextcolor = {
-						type = 'color',
-						name = L["Time Text"],
-						desc = L["Set the color of the %s"]:format(L["Time Text"]),
-						order = 98,
-						get = getcolor,
-						set = setcolor,
-						passValue = 'timetextcolor',
-					},
-					header = {
-						type = 'header',
-						order = 99,
-					},
-					castingcolor = {
-						type = 'color',
-						name = L["Casting"],
-						desc = L["Set the color of the cast bar when %s"]:format(L["Casting"]),
-						get = getcolor,
-						set = setcolor,
-						passValue = 'castingcolor',
-					},
-					channelingcolor = {
-						type = 'color',
-						name = L["Channeling"],
-						desc = L["Set the color of the cast bar when %s"]:format(L["Channeling"]),
-						get = getcolor,
-						set = setcolor,
-						passValue = 'channelingcolor',
-					},
-					completecolor = {
-						type = 'color',
-						name = L["Complete"],
-						desc = L["Set the color of the cast bar when %s"]:format(L["Complete"]),
-						get = getcolor,
-						set = setcolor,
-						passValue = 'completecolor',
-					},
-					failcolor = {
-						type = 'color',
-						name = L["Failed"],
-						desc = L["Set the color of the cast bar when %s"]:format(L["Failed"]),
-						get = getcolor,
-						set = setcolor,
-						passValue = 'failcolor',
-					},
-					sparkcolor = {
-						type = 'color',
-						name = L["Spark Color"],
-						desc = L["Set the color of the casting bar spark"],
-						get = getcolor,
-						set = setcolor,
-						hasAlpha = true,
-						passValue = 'sparkcolor',
-					},
-					backgroundcolor = {
-						type = 'color',
-						name = L["Background"],
-						desc = L["Set the color of the casting bar background"],
-						get = getcolor,
-						set = setcolor,
-						passValue = 'backgroundcolor',
-						order = 101,
-					},
-					backgroundalpha = {
-						type = 'range',
-						name = L["Background Alpha"],
-						desc = L["Set the alpha of the casting bar background"],
-						isPercent = true,
-						min = 0,
-						max = 1,
-						step = 0.025,
-						get = get,
-						set = set,
-						passValue = 'backgroundalpha',
-						order = 102,
-					},
-					bordercolor = {
-						type = 'color',
-						name = L["Border"],
-						desc = L["Set the color of the casting bar border"],
-						get = getcolor,
-						set = setcolor,
-						passValue = 'bordercolor',
-						order = 103,
-					},
-					borderalpha = {
-						type = 'range',
-						name = L["Border Alpha"],
-						desc = L["Set the alpha of the casting bar border"],
-						isPercent = true,
-						min = 0,
-						max = 1,
-						step = 0.025,
-						get = get,
-						set = set,
-						passValue = 'borderalpha',
-						order = 104,
-					},
-				},
-			}
-		},
-	}
-end
-
-
-for i = 1, GetNumAddOns() do
-	local metadata = GetAddOnMetadata(i, "X-Quartz-Module")
-	if metadata then
-		local name, _, _, enabled = GetAddOnInfo(i)
-		if enabled then
-			lodmodules[metadata] = true
-		end
-	end
-end
