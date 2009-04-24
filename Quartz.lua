@@ -17,15 +17,11 @@
 ]]
 
 Quartz3 = LibStub("AceAddon-3.0"):NewAddon("Quartz3", "AceEvent-3.0", "AceConsole-3.0", "AceHook-3.0", "AceTimer-3.0")
-
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
-
 local media = LibStub("LibSharedMedia-3.0")
-
+local optFrame
 local options = {
-	type = 'group',
-	name = L["Quartz"],
-	desc = L["Quartz"],
+	type = "group",
 	args = {
 		hidesamwise = {
 			type = 'toggle',
@@ -150,14 +146,22 @@ local options = {
 					order = 104,
 				},
 			},
-		}
-	},
+		},
+		modules = {
+			type = "group",
+			name = L["Modules"],
+			desc = L["Modules"],
+			args = {},
+		},
+	},	
 }
 
 Quartz3.options = options
 
 local defaults = {
 	profile = {
+		modules = {},
+
 		hidesamwise = true,
 		
 		sparkcolor = {1,1,1,0.5},
@@ -183,6 +187,7 @@ function Quartz3:OnInitialize()
 	options.args.profile = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
 
 	LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("Quartz3", options)
+	LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("Quartz3Modules", options.args.modules)
 
 	self:RegisterChatCommand("quartz3", function() ACD3:Open("Quartz3") end)
 

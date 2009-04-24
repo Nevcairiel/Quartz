@@ -33,6 +33,7 @@ local castTimeFormatString
 local castBar, castBarText, castBarTimeText, castBarIcon, castBarSpark, castBarParent, db
 
 local defaults = {
+	profile = {
 	hideblizz = true,
 
 	--x =  -- applied automatically in applySettings()
@@ -70,225 +71,205 @@ local defaults = {
 	timetextx = 3,
 	timetexty = 0,
 	}
+}
 
 local options = {
-	type = 'group',
-	name = L["Player"],
-	desc = L["Player"],
-	order = 600,
-	args = {
-		toggle = {
-			type = 'toggle',
-			name = L["Enable"],
-			desc = L["Enable"],
-			get = function()
-				return Quartz3:GetModule('Player', true):IsEnabled()
-			end,
-			set = function(v)
-				Quartz3:ToggleModuleActive('Player', v)
-			end,
-			order = 99,
-		},
-		lock = {
-			type = 'toggle',
-			name = L["Lock"],
-			desc = L["Toggle Cast Bar lock"],
-			get = function()
-				return locked
-			end,
-			set = function(v)
-				if v then
-					castBarParent.Hide = nil
-					castBarParent:EnableMouse(false)
-					castBarParent:SetScript('OnDragStart', nil)
-					castBarParent:SetScript('OnDragStop', nil)
-					if not (self.channeling or self.casting) then
-						castBarParent:Hide()
-					end
-				else
-					castBarParent:Show()
-					castBarParent:EnableMouse(true)
-					castBarParent:SetScript('OnDragStart', dragstart)
-					castBarParent:SetScript('OnDragStop', dragstop)
-					castBarParent:SetAlpha(1)
-					castBarParent.Hide = nothing
-					castBarIcon:SetTexture("Interface\\Icons\\Temp")
+	lock = {
+		type = 'toggle',
+		name = L["Lock"],
+		desc = L["Toggle Cast Bar lock"],
+		get = function()
+			return locked
+		end,
+		set = function(v)
+			if v then
+				castBarParent.Hide = nil
+				castBarParent:EnableMouse(false)
+				castBarParent:SetScript('OnDragStart', nil)
+				castBarParent:SetScript('OnDragStop', nil)
+				if not (self.channeling or self.casting) then
+					castBarParent:Hide()
 				end
-				locked = v
-			end,
-			order = 100,
-		},
-		hideblizz = {
-			type = 'toggle',
-			name = L["Disable Blizzard Cast Bar"],
-			desc = L["Disable and hide the default UI's casting bar"],
-			get = get,
-			set = set,
-			passValue = 'hideblizz',
-			order = 101,
-		},
-		h = {
-			type = 'range',
-			name = L["Height"],
-			desc = L["Height"],
-			min = 10,
-			max = 50,
-			step = 1,
-			order = 200,
-			get = get,
-			set = set,
-			passValue = 'h',
-		},
-		w = {
-			type = 'range',
-			name = L["Width"],
-			desc = L["Width"],
-			min = 50,
-			max = 1500,
-			step = 5,
-			order = 200,
-			get = get,
-			set = set,
-			passValue = 'w',
-		},
-		x = {
-			type = 'text',
-			name = L["X"],
-			desc = L["Set an exact X value for this bar's position."],
-			get = get,
-			set = set,
-			passValue = 'x',
-			order = 200,
-			validate = function(v)
-				return tonumber(v) and true
-			end,
-			usage = L["Number"],
-		},
-		y = {
-			type = 'text',
-			name = L["Y"],
-			desc = L["Set an exact Y value for this bar's position."],
-			get = get,
-			set = set,
-			passValue = 'y',
-			order = 200,
-			validate = function(v)
-				return tonumber(v) and true
-			end,
-			usage = L["Number"],
-		},
-		scale = {
-			type = 'range',
-			name = L["Scale"],
-			desc = L["Scale"],
-			min = 0.2,
-			max = 1,
-			step = 0.025,
-			order = 201,
-			get = get,
-			set = set,
-			passValue = 'scale',
-		},
-		alpha = {
-			type = 'range',
-			name = L["Alpha"],
-			desc = L["Alpha"],
-			isPercent = true,
-			min = 0.1,
-			max = 1,
-			step = 0.025,
-			order = 202,
-			get = get,
-			set = set,
-			passValue = 'alpha',
-		},
-		header2 = {
-			type = 'header',
-			order = 203,
-		},
-		hideicon = {
-			type = 'toggle',
-			name = L["Hide Icon"],
-			desc = L["Hide Spell Cast Icon"],
-			get = get,
-			set = set,
-			passValue = 'hideicon',
-			order = 301,
-		},
-		iconalpha = {
-			type = 'range',
-			name = L["Icon Alpha"],
-			desc = L["Set the Spell Cast icon alpha"],
-			isPercent = true,
-			min = 0.1,
-			max = 1,
-			step = 0.025,
-			order = 301,
-			get = get,
-			set = set,
-			disabled = hideiconoptions,
-			passValue = 'iconalpha',
-		},
-		iconposition = {
-			type = 'text',
-			name = L["Icon Position"],
-			desc = L["Set where the Spell Cast icon appears"],
-			get = get,
-			set = set,
-			disabled = hideiconoptions,
-			passValue = 'iconposition',
-			validate = {L["Left"], L["Right"]},
-			order = 301,
-		},
-		icongap = {
-			type = 'range',
-			name = L["Icon Gap"],
-			desc = L["Space between the cast bar and the icon."],
-			min = -35,
-			max = 35,
-			step = 1,
-			order = 301,
-			get = get,
-			set = set,
-			disabled = hideiconoptions,
-			passValue = 'icongap',
-		},
-		texture = {
-			type = 'text',
-			name = L["Texture"],
-			desc = L["Set the Cast Bar Texture"],
-			validate = media:List('statusbar'),
-			order = 302,
-			get = get,
-			set = set,
-			passValue = 'texture',
-		},
-		font = {
-			type = 'text',
-			name = L["Font"],
-			desc = L["Set the font used in the Name and Time texts"],
-			validate = media:List('font'),
-			order = 400,
-			get = get,
-			set = set,
-			passValue = 'font',
-		},
-		hidenametext = {
-			type = 'toggle',
-			name = L["Hide Name Text"],
-			desc = L["Disable the text that displays the spell name/rank"],
-			get = get,
-			set = set,
-			passValue = 'hidenametext',
-			order = 401,
-		},
-		nametextposition = {
-			type = 'text',
+			else
+				castBarParent:Show()
+				castBarParent:EnableMouse(true)
+				castBarParent:SetScript('OnDragStart', dragstart)
+				castBarParent:SetScript('OnDragStop', dragstop)
+				castBarParent:SetAlpha(1)
+				castBarParent.Hide = nothing
+				castBarIcon:SetTexture("Interface\\Icons\\Temp")
+			end
+			locked = v
+		end,
+		order = 100,
+	},
+	hideblizz = {
+		type = 'toggle',
+		name = L["Disable Blizzard Cast Bar"],
+		desc = L["Disable and hide the default UI's casting bar"],
+		get = get,
+		set = set,
+		--passValue = 'hideblizz',
+		order = 101,
+	},
+	h = {
+		type = 'range',
+		name = L["Height"],
+		desc = L["Height"],
+		min = 10,
+		max = 50,
+		step = 1,
+		order = 200,
+		get = get,
+		set = set,
+		--passValue = 'h',
+	},
+	w = {
+		type = 'range',
+		name = L["Width"],
+		desc = L["Width"],
+		min = 50,
+		max = 1500,
+		step = 5,
+		order = 200,
+		get = get,
+		set = set,
+		--passValue = 'w',
+	},
+	x = {
+		type = 'text',
+		name = L["X"],
+		desc = L["Set an exact X value for this bar's position."],
+		get = get,
+		set = set,
+		--passValue = 'x',
+		order = 200,
+		validate = function(v)
+			return tonumber(v) and true
+		end,
+		usage = L["Number"],
+	},
+	y = {
+		type = 'text',
+		name = L["Y"],
+		desc = L["Set an exact Y value for this bar's position."],
+		get = get,
+		set = set,
+		--passValue = 'y',
+		order = 200,
+		validate = function(v)
+			return tonumber(v) and true
+		end,
+		usage = L["Number"],
+	},
+	scale = {
+		type = 'range',
+		name = L["Scale"],
+		desc = L["Scale"],
+		min = 0.2,
+		max = 1,
+		step = 0.025,
+		order = 201,
+		get = get,
+		set = set,
+		--passValue = 'scale',
+	},
+	alpha = {
+		type = 'range',
+		name = L["Alpha"],
+		desc = L["Alpha"],
+		isPercent = true,
+		min = 0.1,
+		max = 1,
+		step = 0.025,
+		order = 202,
+		get = get,
+		set = set,
+		--passValue = 'alpha',
+	},
+	hideicon = {
+		type = 'toggle',
+		name = L["Hide Icon"],
+		desc = L["Hide Spell Cast Icon"],
+		get = get,
+		set = set,
+		--passValue = 'hideicon',
+		order = 301,
+	},
+	iconalpha = {
+		type = 'range',
+		name = L["Icon Alpha"],
+		desc = L["Set the Spell Cast icon alpha"],
+		isPercent = true,
+		min = 0.1,
+		max = 1,
+		step = 0.025,
+		order = 301,
+		get = get,
+		set = set,
+		disabled = hideiconoptions,
+		--passValue = 'iconalpha',
+	},
+	iconposition = {
+		type = 'text',
+		name = L["Icon Position"],
+		desc = L["Set where the Spell Cast icon appears"],
+		get = get,
+		set = set,
+		disabled = hideiconoptions,
+		--passValue = 'iconposition',
+		validate = {L["Left"], L["Right"]},
+		order = 301,
+	},
+	icongap = {
+		type = 'range',
+		name = L["Icon Gap"],
+		desc = L["Space between the cast bar and the icon."],
+		min = -35,
+		max = 35,
+		step = 1,
+		order = 301,
+		get = get,
+		set = set,
+		disabled = hideiconoptions,
+		--passValue = 'icongap',
+	},
+	texture = {
+		type = 'text',
+		name = L["Texture"],
+		desc = L["Set the Cast Bar Texture"],
+		validate = media:List('statusbar'),
+		order = 302,
+		get = get,
+		set = set,
+		--passValue = 'texture',
+	},
+	font = {
+		type = 'text',
+		name = L["Font"],
+		desc = L["Set the font used in the Name and Time texts"],
+		validate = media:List('font'),
+		order = 400,
+		get = get,
+		set = set,
+		--passValue = 'font',
+	},
+	hidenametext = {
+		type = 'toggle',
+		name = L["Hide Name Text"],
+		desc = L["Disable the text that displays the spell name/rank"],
+		get = get,
+		set = set,
+		--passValue = 'hidenametext',
+		order = 401,
+	},
+	nametextposition = {
+		type = 'text',
 			name = L["Name Text Position"],
 			desc = L["Set the alignment of the spell name text"],
 			get = get,
 			set = set,
-			passValue = 'nametextposition',
+			--passValue = 'nametextposition',
 			validate = {L["Left"], L["Right"], L["Center"]},
 			disabled = hidenametextoptions,
 			order = 402,
@@ -299,7 +280,7 @@ local options = {
 			desc = L["Adjust the X position of the name text"],
 			get = get,
 			set = set,
-			passValue = 'nametextx',
+			--passValue = 'nametextx',
 			min = -35,
 			max = 35,
 			step = 1,
@@ -312,7 +293,7 @@ local options = {
 			desc = L["Adjust the Y position of the name text"],
 			get = get,
 			set = set,
-			passValue = 'nametexty',
+			--passValue = 'nametexty',
 			min = -35,
 			max = 35,
 			step = 1,
@@ -330,7 +311,7 @@ local options = {
 			get = get,
 			set = set,
 			disabled = hidenametextoptions,
-			passValue = 'fontsize',
+			--passValue = 'fontsize',
 		},
 		targetname = {
 			type = 'toggle',
@@ -338,7 +319,7 @@ local options = {
 			desc = L["Display target name of spellcasts after spell name"],
 			get = get,
 			set = set,
-			passValue = 'targetname',
+			--passValue = 'targetname',
 			order = 404,
 		},			
 		spellrank = {
@@ -348,7 +329,7 @@ local options = {
 			get = get,
 			set = set,
 			disabled = hidenametextoptions,
-			passValue = 'spellrank',
+			--passValue = 'spellrank',
 			order = 405,
 		},
 		spellrankstyle = {
@@ -360,7 +341,7 @@ local options = {
 			disabled = function()
 				return db.profile.hidenametext or not db.profile.spellrank
 			end,
-			passValue = 'spellrankstyle',
+			--passValue = 'spellrankstyle',
 			validate = {L["Number"], L["Roman"], L["Full Text"], L["Roman Full Text"]},
 			order = 406,
 		},
@@ -370,7 +351,7 @@ local options = {
 			desc = L["Disable the text that displays the time remaining on your cast"],
 			get = get,
 			set = set,
-			passValue = 'hidetimetext',
+			--passValue = 'hidetimetext',
 			order = 411,
 		},
 		hidecasttime = {
@@ -379,7 +360,7 @@ local options = {
 			desc = L["Disable the text that displays the total cast time"],
 			get = get,
 			set = set,
-			passValue = 'hidecasttime',
+			--passValue = 'hidecasttime',
 			disabled = hidetimetextoptions,
 			order = 412,
 		},
@@ -394,7 +375,7 @@ local options = {
 			get = get,
 			set = set,
 			disabled = hidecasttimeprecision,
-			passValue = 'casttimeprecision',
+			--passValue = 'casttimeprecision',
 		},
 		timefontsize = {
 			type = 'range',
@@ -407,7 +388,7 @@ local options = {
 			get = get,
 			set = set,
 			disabled = hidetimetextoptions,
-			passValue = 'timefontsize',
+			--passValue = 'timefontsize',
 		},
 		timetextposition = {
 			type = 'text',
@@ -415,7 +396,7 @@ local options = {
 			desc = L["Set the alignment of the time text"],
 			get = get,
 			set = set,
-			passValue = 'timetextposition',
+			--passValue = 'timetextposition',
 			validate = {L["Left"], L["Right"], L["Center"], L["Cast Start Side"], L["Cast End Side"]},
 			disabled = hidetimetextoptions,
 			order = 415,
@@ -426,7 +407,7 @@ local options = {
 			desc = L["Adjust the X position of the time text"],
 			get = get,
 			set = set,
-			passValue = 'timetextx',
+			--passValue = 'timetextx',
 			min = -35,
 			max = 35,
 			step = 1,
@@ -439,16 +420,12 @@ local options = {
 			desc = L["Adjust the Y position of the time text"],
 			get = get,
 			set = set,
-			passValue = 'timetexty',
+			--passValue = 'timetexty',
 			min = -35,
 			max = 35,
 			step = 1,
 			disabled = hidetimetextoptions,
 			order = 417,
-		},
-		header4 = {
-			type = 'header',
-			order = 418,
 		},
 		border = {
 			type = 'text',
@@ -456,13 +433,9 @@ local options = {
 			desc = L["Set the border style"],
 			get = get,
 			set = set,
-			passValue = 'border',
+			--passValue = 'border',
 			validate = media:List('border'),
 			order = 418,
-		},
-		header6 = {
-			type = 'header',
-			order = 501,
 		},
 		snaptocenter = {
 			type = 'text',
@@ -481,23 +454,18 @@ local options = {
 			validate = {L["Horizontal"], L["Vertical"]},
 			order = 503,
 		},
-		copysettings = {
-			type = 'text',
-			name = L["Copy Settings From"],
-			desc = L["Select a bar from which to copy settings"],
-			get = false,
-			set = function(v)
-				local from = Quartz3:AcquireDBNamespace(v)
-				Quartz3:CopySettings(from.profile, db.profile)
-				mod.ApplySettings()
-			end,
-			validate = {L["Target"], L["Focus"], L["Pet"]},
-			order = 504
-		},
-		header6 = {
-			type = 'header',
-			order = 505,
-		},
+	copysettings = {
+		type = 'text',
+		name = L["Copy Settings From"],
+		desc = L["Select a bar from which to copy settings"],
+		get = false,
+		set = function(v)
+			local from = Quartz3:AcquireDBNamespace(v)
+			Quartz3:CopySettings(from.profile, db.profile)
+			mod.ApplySettings()
+		end,
+		validate = {L["Target"], L["Focus"], L["Pet"]},
+		order = 504
 	},
 }
 
@@ -597,12 +565,12 @@ end
 mod.OnUpdate = OnUpdate
 
 local function OnHide()
-	local ql = Quartz3:GetModule('Latency', true)
-	if ql:IsEnabled() then
-	if ql.lagbox then
-		ql.lagbox:Hide()
-		ql.lagtext:Hide()
-	end
+	local ql = Quartz3:GetModule("Latency", true)
+	if ql then
+		if ql:IsEnabled() and ql.lagbox then
+			ql.lagbox:Hide()
+			ql.lagtext:Hide()
+		end
 	end
 	castBarParent:SetScript('OnUpdate', nil)
 end

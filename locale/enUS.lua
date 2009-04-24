@@ -2,6 +2,13 @@ local AceLocale = LibStub:GetLibrary("AceLocale-3.0")
 local L = AceLocale:NewLocale("Quartz3", "enUS", true)
 if not L then return end
 
+L["Modules"] = true
+L["Module"] = true
+L["Settings"] = true
+L["Enable "] = true
+L["Options"] = true
+L["Profiles"] = true
+
 L["Quartz"] = true
 L["Latency"] = true
 L["Tradeskill Merge"] = true
