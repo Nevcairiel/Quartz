@@ -17,14 +17,24 @@
 ]]
 
 local Quartz = LibStub("AceAddon-3.0"):NewAddon("Quartz", "AceEvent-3.0", "AceConsole-3.0")
-local db
-
 local L = LibStub:GetLibrary("AceLocale-3.0"):GetLocale("Quartz")
 
-local AceConfig = LibStub("AceConfig-3.0")
-local AceConfigDialog = LibStub("AceConfigDialog-3.0")
+local getopt, setopt
+do
+        function getopt(info)
+		local key = info[#info]
+		return Quartz.db.profile[key]
+	end
+						        
+	function setopt(info, value)
+		local key = info[#info]
+		Quartz.db.profile[key] = value
+
+	end
+end
 
 local media = LibStub("LibSharedMedia-3.0")
+
 media:Register("statusbar", "Frost", "Interface\\AddOns\\Quartz\\textures\\Frost")
 media:Register("statusbar", "Healbot", "Interface\\AddOns\\Quartz\\textures\\Healbot")
 media:Register("statusbar", "LiteStep", "Interface\\AddOns\\Quartz\\textures\\LiteStep")
@@ -66,18 +76,6 @@ local defaults = {
 	}
 
 function Quartz:OnInitialize()
-	AceConfig:RegisterOptionsTable("Quartz", options)
-
-	self:RegisterChatCommand("quartz", function() LibStub("AceConfigDialog-3.0"):Open("Quartz") end )
-	local optFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Quartz", "Quartz")
-	options.args.profile = LibStub("AceDBOptions-3.0"):GetOptionsTable(addon.db)
-
-	self.db.RegisterCallback(self, "OnProfileChanged", "ApplySettings")
-	self.db.RegisterCallback(self, "OnProfileCopied", "ApplySettings")
-	self.db.RegisterCallback(self, "OnProfileReset", "ApplySettings")	
-
-        media.RegisterCallback(self, "LibSharedMedia_Registered", "ApplySettings")
-        media.RegisterCallback(self, "LibSharedMedia_SetGlobal", "ApplySettings")
 end
 
 function Quartz:OnEnable(first)

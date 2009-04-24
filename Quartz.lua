@@ -49,9 +49,38 @@ function Quartz:OnInitialize()
 	self:SetupOptions()
 end
 
-function Quartz:OnEnable(first)
+function Quartz:OnEnable()
 end
 
+function Quartz:OnDisable()
+	CastingBarFrame.RegisterEvent = nil
+	CastingBarFrame:UnregisterAllEvents()
+	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_START")
+	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_STOP")
+	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_FAILED")
+	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
+	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_DELAYED")
+	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
+	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
+	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
+end
+
+function Mapster:GetModuleEnabled(module)
+        return db.modules[module]
+end
+
+function Mapster:SetModuleEnabled(module, value)
+        local old = db.modules[module]
+	db.modules[module] = value
+	if old ~= value then
+		if value then
+			self:EnableModule(module)
+		else    
+			self:DisableModule(module)
+		end
+	end                                                                                                                                                                                  
+end     
+		
 local new, del
 do
 	local cache = setmetatable({}, {__mode='k'})
@@ -75,17 +104,3 @@ end
 
 Quartz.new = new
 Quartz.del = del
-
-function Quartz:OnDisable()
-	CastingBarFrame.RegisterEvent = nil
-	CastingBarFrame:UnregisterAllEvents()
-	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_START")
-	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_STOP")
-	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_FAILED")
-	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
-	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_DELAYED")
-	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
-	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
-	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
-end
-

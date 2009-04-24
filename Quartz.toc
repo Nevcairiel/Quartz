@@ -6,7 +6,7 @@
 ## X-eMail: nymbia@gmail.com
 
 ## Interface: 30100
-## Version: 1.0
+## Version: 2.0
 
 ## OptionalDeps: Ace3, LibSharedMedia-3.0, FlightMap, InFlight, FuBar_ToFu
 
@@ -34,21 +34,10 @@ libs\AceGUI-3.0-SharedMediaWidgets\widget.xml
 libs\LibSharedMedia-3.0\lib.xml
 #@end-no-lib-strip@
 
-locale\locale.xml
+locale.xml
 
 Quartz.lua
 Config.lua
-Player.lua
-Target.lua
-Focus.lua
-Pet.lua
-Latency.lua
-Tradeskill.lua
-GCD.lua
-Buff.lua
-Mirror.lua
-Timer.lua
-Swing.lua
-Interrupt.lua
-Range.lua
-Flight.lua
+
+modules.xml
+
