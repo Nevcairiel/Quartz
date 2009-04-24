@@ -1,4 +1,4 @@
-package-as: Quartz
+package-as: Quartz3
 
 externals:
   libs/LibStub:

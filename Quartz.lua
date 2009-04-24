@@ -16,9 +16,9 @@
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
 
-Quartz = LibStub("AceAddon-3.0"):NewAddon("Quartz", "AceEvent-3.0", "AceConsole-3.0", "AceHook-3.0", "AceTimer-3.0")
+Quartz3 = LibStub("AceAddon-3.0"):NewAddon("Quartz3", "AceEvent-3.0", "AceConsole-3.0", "AceHook-3.0", "AceTimer-3.0")
 
-local L = LibStub("AceLocale-3.0"):GetLocale("Quartz")
+local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
 local media = LibStub("LibSharedMedia-3.0")
 
@@ -154,7 +154,7 @@ local options = {
 	},
 }
 
-Quartz.options = options
+Quartz3.options = options
 
 local defaults = {
 	profile = {
@@ -178,13 +178,13 @@ local defaults = {
 local optionFrames = {}
 local ACD3 = LibStub("AceConfigDialog-3.0")
 
-function Quartz:OnInitialize()
-	self.db = LibStub("AceDB-3.0"):New("Quartz", defaults)
+function Quartz3:OnInitialize()
+	self.db = LibStub("AceDB-3.0"):New("Quartz3", defaults)
 	options.args.profile = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
 
-	LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("Quartz", options)
+	LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("Quartz3", options)
 
-	self:RegisterChatCommand("quartz", function() ACD3:Open("Quartz") end)
+	self:RegisterChatCommand("quartz3", function() ACD3:Open("Quartz3") end)
 
 	for k, v in self:IterateModules() do
 		options.args.modules.args[k:gsub(" ", "_")] = {
@@ -209,16 +209,16 @@ function Quartz:OnInitialize()
 			desc = v.Info and v:Info() or (L["Enable "] .. (v.modName or k)), 
 			order = 11,
 			get = function()
-				return Quartz.db.profile.modules[k] ~= false or false
+				return Quartz3.db.profile.modules[k] ~= false or false
 			end,
 			set = function(info, v)
-				Quartz.db.profile.modules[k] = v
+				Quartz3.db.profile.modules[k] = v
 				if v then
-					Quartz:EnableModule(k)
-					Quartz:Print(L["Enabled"], k, L["Module"])
+					Quartz3:EnableModule(k)
+					Quartz3:Print(L["Enabled"], k, L["Module"])
 				else
-					Quartz:DisableModule(k)
-					Quartz:Print(L["Disabled"], k, L["Module"])
+					Quartz3:DisableModule(k)
+					Quartz3:Print(L["Disabled"], k, L["Module"])
 				end
 			end
 		}
@@ -245,7 +245,7 @@ function Quartz:OnInitialize()
 	end
 	table.sort(moduleNames)
 	for _, name in ipairs(moduleNames) do
-		ACD3:AddToBlizOptions("QuartzModules", name, "Quartz", moduleList[name])
+		ACD3:AddToBlizOptions("Quartz3Modules", name, "Quartz3", moduleList[name])
 	end
 	
 	self.db.RegisterCallback(self, "OnProfileChanged", "ApplySettings")
@@ -255,15 +255,15 @@ function Quartz:OnInitialize()
         media.RegisterCallback(self, "LibSharedMedia_Registered", "ApplySettings")
         media.RegisterCallback(self, "LibSharedMedia_SetGlobal", "ApplySettings")
 
-	media:Register("statusbar", "Frost", "Interface\\AddOns\\Quartz\\textures\\Frost")
-	media:Register("statusbar", "Healbot", "Interface\\AddOns\\Quartz\\textures\\Healbot")
-	media:Register("statusbar", "LiteStep", "Interface\\AddOns\\Quartz\\textures\\LiteStep")
-	media:Register("statusbar", "Rocks", "Interface\\AddOns\\Quartz\\textures\\Rocks")
-	media:Register("statusbar", "Runes", "Interface\\AddOns\\Quartz\\textures\\Runes")
-	media:Register("statusbar", "Xeon", "Interface\\AddOns\\Quartz\\textures\\Xeon")
+	media:Register("statusbar", "Frost", "Interface\\AddOns\\Quartz3\\textures\\Frost")
+	media:Register("statusbar", "Healbot", "Interface\\AddOns\\Quartz3\\textures\\Healbot")
+	media:Register("statusbar", "LiteStep", "Interface\\AddOns\\Quartz3\\textures\\LiteStep")
+	media:Register("statusbar", "Rocks", "Interface\\AddOns\\Quartz3\\textures\\Rocks")
+	media:Register("statusbar", "Runes", "Interface\\AddOns\\Quartz3\\textures\\Runes")
+	media:Register("statusbar", "Xeon", "Interface\\AddOns\\Quartz3\\textures\\Xeon")
 end
 
-function Quartz:OnEnable()
+function Quartz3:OnEnable()
 	for k, v in self:IterateModules() do
 		if self.db.profile.modules[k] ~= false then
 			v:Enable()
@@ -276,7 +276,7 @@ function Quartz:OnEnable()
 	end
 end
 
-function Quartz:ApplySettings()
+function Quartz3:ApplySettings()
 	for k, v in self:IterateModules() do
 		if v:IsEnabled() then
 			v:Disable()
@@ -285,15 +285,15 @@ function Quartz:ApplySettings()
 	end
 end
 
-function Quartz:OnDisable()
+function Quartz3:OnDisable()
 end
 
-function Quartz:RegisterModuleOptions(name, optionTbl, displayName)
+function Quartz3:RegisterModuleOptions(name, optionTbl, displayName)
 	options.args[name] = (type(optionTbl) == "function") and optionTbl() or optionTbl
 	if not optionFrames.default then
-		optionFrames.default = ACD3:AddToBlizOptions("Quartz", nil, nil, name)
+		optionFrames.default = ACD3:AddToBlizOptions("Quartz3", nil, nil, name)
 	else
-		optionFrames[name] = ACD3:AddToBlizOptions("Quartz", displayName, "Quartz", name)
+		optionFrames[name] = ACD3:AddToBlizOptions("Quartz3", displayName, "Quartz3", name)
 	end
 end
 
