@@ -2,7 +2,7 @@
 -- CWDG site: http://cwowaddon.com
 
 local AceLocale = LibStub:GetLibrary("AceLocale-3.0")
-local L = AceLocale:NewLocale("Quartz", "zhCN", true)
+local L = AceLocale:NewLocale("Quartz3", "zhCN", true)
 if not L then return end
 
 L["Quartz"] = "Quartz"

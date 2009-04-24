@@ -1,5 +1,5 @@
 local AceLocale = LibStub:GetLibrary("AceLocale-3.0")
-local L = AceLocale:NewLocale("Quartz", "deDE", true)
+local L = AceLocale:NewLocale("Quartz3", "deDE", true)
 if not L then return end
 
 L["Quartz"] = "Quartz"
