@@ -283,6 +283,19 @@ function QuartzPlayer:OnEnable()
 	Quartz.ApplySettings()
 end
 
+function QuartzPlayer:OnDisable()
+	CastingBarFrame.RegisterEvent = nil
+	CastingBarFrame:UnregisterAllEvents()
+	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_START")
+	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_STOP")
+	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_FAILED")
+	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
+	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_DELAYED")
+	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
+	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
+	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
+end
+
 function QuartzPlayer:UNIT_SPELLCAST_SENT(event, unit, spell, rank, target)
 	if unit ~= 'player' then
 		return
