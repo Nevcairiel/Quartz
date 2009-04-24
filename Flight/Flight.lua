@@ -15,16 +15,16 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
-if Quartz:HasModule('Flight') then
-	return
-end
-
-local L = AceLibrary("AceLocale-2.2"):new("Quartz")
 
 local Quartz = Quartz
-local QuartzFlight = Quartz:NewModule('Flight', 'AceHook-2.1', 'AceEvent-2.0')
+local QuartzFlight = Quartz:NewModule("Flight", "AceHook-3.0")
+local self = QuartzFlight
 local QuartzPlayer = Quartz:GetModule('Player')
+
+local L = LibStub("AceLocale-3.0"):GetLocale("Quartz")
+
 local db
+
 function QuartzFlight:OnInitialize()
 	db = Quartz:AcquireDBNamespace("Flight")
 	Quartz:RegisterDefaults("Flight", "profile", {

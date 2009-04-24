@@ -16,17 +16,15 @@
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
 
-local L = AceLibrary("AceLocale-2.2"):new("Quartz")
-
-local unpack = unpack
-
 local Quartz = Quartz
-if Quartz:HasModule('GCD') then
-	return
-end
-local QuartzGCD = Quartz:NewModule('GCD')
+local QuartzGCD = Quartz:NewModule("GCD")
+local self = QuartzGCD
 local QuartzPlayer = Quartz:GetModule('Player')
 
+local L = LibStub("AceLocale-3.0"):GetLocale("Quartz")
+
+
+local unpack = unpack
 local GetTime = GetTime
 
 local gcdbar, gcdbar_width, gcdspark, db

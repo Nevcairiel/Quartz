@@ -16,14 +16,12 @@
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
 
-local L = AceLibrary("AceLocale-2.2"):new("Quartz")
-
 local Quartz = Quartz
-if Quartz:HasModule('Range') then
-	return
-end
-local QuartzRange = Quartz:NewModule('Range')
+local QuartzRange = Quartz:NewModule("Range")
+local self = QuartzRange
 local QuartzPlayer = Quartz:GetModule('Player')
+
+local L = LibStub("AceLocale-3.0"):GetLocale("Quartz")
 
 local GetTime = GetTime
 local IsSpellInRange = IsSpellInRange

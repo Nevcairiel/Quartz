@@ -18,7 +18,6 @@
 
 Quartz = LibStub("AceAddon-3.0"):NewAddon("Quartz", "AceEvent-3.0", "AceConsole-3.0")
 local addon = Quartz
-local self = Quartz
 local db
 
 local L = LibStub:GetLibrary("AceLocale-3.0"):GetLocale("Quartz")
@@ -67,7 +66,7 @@ local function applySettings()
 	if not IsLoggedIn() then
 		return
 	end
-	for name, module in self:IterateModules() do
+	for name, module in addon:IterateModules() do
 		if module.ApplySettings then
 			module:ApplySettings()
 		end
@@ -105,24 +104,23 @@ function Quartz:OnInitialize()
 	self:RegisterChatCommand("quartz", function() LibStub("AceConfigDialog-3.0"):Open("Quartz") end )
 	local optFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Quartz", "Quartz")
 	options.args.profile = LibStub("AceDBOptions-3.0"):GetOptionsTable(addon.db)
-        self:SetSinkStorage(db.sinkOptions)
 
-	self.db.RegisterCallback(self, "OnProfileChanged", "applySettings")
-	self.db.RegisterCallback(self, "OnProfileCopied", "applySettings")
-	self.db.RegisterCallback(self, "OnProfileReset", "applySettings")	
+	self.db.RegisterCallback(self, "OnProfileChanged", "ApplySettings")
+	self.db.RegisterCallback(self, "OnProfileCopied", "ApplySettings")
+	self.db.RegisterCallback(self, "OnProfileReset", "ApplySettings")	
 
-        media.RegisterCallback(self, "LibSharedMedia_Registered", "applySettings")
-        media.RegisterCallback(self, "LibSharedMedia_SetGlobal", "applySettings")
+        media.RegisterCallback(self, "LibSharedMedia_Registered", "ApplySettings")
+        media.RegisterCallback(self, "LibSharedMedia_SetGlobal", "ApplySettings")
 end
 
 function Quartz:OnEnable(first)
 	if first then
 		for k, v in pairs(lodmodules) do
-			if self:GetModule(k, true):IsEnabled() then
+			if addon:GetModule(k, true):IsEnabled() then
 				local depends = GetAddOnMetadata('Quartz_'..k, "X-Quartz-RequiredModules")
 				if depends then
 					for module in depends:gmatch('([^, ]+)') do
-						if not self:GetModule(module, true) then
+						if not addon:GetModule(module, true) then
 							local success, reason = LoadAddOn('Quartz_'..module)
 							if not success then
 								error(k..' requires '..module..' module, which could not load: '..reason)
@@ -131,7 +129,7 @@ function Quartz:OnEnable(first)
 					end
 				end
 				LoadAddOn('Quartz_'..k)
-			elseif not self:GetModule(k, true) then
+			elseif not addon:GetModule(k, true) then
 				options.args[k] = {
 					type = 'group',
 					name = L[k],
@@ -149,7 +147,7 @@ function Quartz:OnEnable(first)
 								local depends = GetAddOnMetadata('Quartz_'..k, "X-Quartz-RequiredModules")
 								if depends then
 									for module in depends:gmatch('([^, ]+)') do
-										if not self:GetModule(module, true) then
+										if not addon:GetModule(module, true) then
 											local success, reason = LoadAddOn('Quartz_'..module)
 											if not success then
 												error(k..' requires '..module..' module, which could not load: '..reason)
@@ -158,7 +156,7 @@ function Quartz:OnEnable(first)
 									end
 								end
 								LoadAddOn('Quartz_'..k)
-								self:ToggleModuleActive(k, true)
+								addon:ToggleModuleActive(k, true)
 							end,
 							order = 99,
 						},
@@ -170,6 +168,7 @@ function Quartz:OnEnable(first)
 	end
 	applySettings()
 end
+
 function Quartz:OnDisable()
 	CastingBarFrame.RegisterEvent = nil
 	CastingBarFrame:UnregisterAllEvents()
@@ -198,19 +197,19 @@ do
 end
 do
 	local function set(field, value)
-		self.db.profile[field] = value
+		addon.db.profile[field] = value
 		applySettings()
 	end
 	local function get(field)
-		return self.db.profile[field]
+		return db[field]
 	end
 	
 	local function setcolor(field, ...)
-		self.db.profile[field] = {...}
+		db[field] = {...}
 		applySettings()
 	end
 	local function getcolor(field)
-		return unpack(self.db.profile[field])
+		return unpack(db[field])
 	end
 	options = {
 		type = 'group',

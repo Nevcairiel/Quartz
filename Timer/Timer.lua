@@ -15,15 +15,14 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
-local L = AceLibrary("AceLocale-2.2"):new("Quartz")
 
 local Quartz = Quartz
-if Quartz:HasModule('Timer') then
-	return
-end
-local QuartzTimer = Quartz:NewModule('Timer')
+local QuartzTimer = Quartz:NewModule("Timer")
 local self = QuartzTimer
 local QuartzMirror = Quartz:GetModule('Mirror')
+
+local L = LibStub("AceLocale-3.0"):GetLocale("Quartz")
+
 local new, del = Quartz.new, Quartz.del
 
 local GetTime = GetTime

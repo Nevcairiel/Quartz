@@ -15,15 +15,15 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
-local media = LibStub("LibSharedMedia-3.0")
-local L = AceLibrary("AceLocale-2.2"):new("Quartz")
 
 local Quartz = Quartz
-if Quartz:HasModule('Mirror') then
-	return
-end
-local QuartzMirror = Quartz:NewModule('Mirror', 'AceHook-2.1')
+local QuartzMirror = Quartz:NewModule("Mirror", "AceHook-3.0")
 local self = QuartzMirror
+
+local L = LibStub("AceLocale-3.0"):GetLocale("Quartz")
+
+local media = LibStub("LibSharedMedia-3.0")
+
 local new, del = Quartz.new, Quartz.del
 
 local GetTime = GetTime

@@ -15,16 +15,16 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
-local L = AceLibrary("AceLocale-2.2"):new("Quartz")
+
+local Quartz = Quartz
+local QuartzTradeskill = Quartz:NewModule("Tradeskill", "AceHook-3.0")
+local self = QuartzTradeskill
+local QuartzPlayer = Quartz:GetModule('Player')
+
+local L = LibStub("AceLocale-3.0"):GetLocale("Quartz")
 
 local castBar, castBarText, castBarTimeText, castBarIcon, castBarSpark, castBarParent
 
-local Quartz = Quartz
-if Quartz:HasModule('Tradeskill') then
-	return
-end
-local QuartzTradeskill = Quartz:NewModule('Tradeskill', 'AceHook-2.1')
-local QuartzPlayer = Quartz:GetModule('Player')
 
 local repeattimes, castname, duration, totaltime, starttime, casting, bail
 local completedcasts = 0

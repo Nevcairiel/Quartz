@@ -15,8 +15,16 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
-local L = AceLibrary("AceLocale-2.2"):new("Quartz")
+
+local Quartz = Quartz
+local QuartzSwing = Quartz:NewModule("Swing")
+local self = QuartzSwing
+local QuartzPlayer = Quartz:GetModule('Player')
+
+local L = LibStub("AceLocale-3.0"):GetLocale("Quartz")
+
 local media = LibStub("LibSharedMedia-3.0")
+
 local autoshotname = GetSpellInfo(75)
 local resetspells = {
 	[GetSpellInfo(845)] = true, -- Cleave
@@ -26,19 +34,14 @@ local resetspells = {
 	[GetSpellInfo(1464)] = true, -- Slam
 	[GetSpellInfo(56815)] = true, -- Rune Strike
 }
+
 local resetautoshotspells = {
 	[GetSpellInfo(19434)] = true, -- Aimed Shot
 }
+
 local _, playerclass = UnitClass('player')
 local unpack = unpack
 local math_abs = math.abs
-
-local Quartz = Quartz
-if Quartz:HasModule('Swing') then
-	return
-end
-local QuartzSwing = Quartz:NewModule('Swing')
-local QuartzPlayer = Quartz:GetModule('Player')
 
 local GetTime = GetTime
 

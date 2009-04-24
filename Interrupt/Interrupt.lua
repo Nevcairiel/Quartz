@@ -15,24 +15,29 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
-local L = AceLibrary("AceLocale-2.2"):new("Quartz")
-local db
-if Quartz:HasModule('Interrupt') then
-	return
-end
-local QuartzInterrupt = Quartz:NewModule('Interrupt')
+
+local Quartz = Quartz
+local QuartzInterrupt = Quartz:NewModule("Interrupt")
+local self = QuartzInterrupt
 local QuartzPlayer = Quartz:GetModule('Player')
 
+local L = LibStub("AceLocale-3.0"):GetLocale("Quartz")
+
+local db
+
 local SPELLINTERRUPTOTHERSELF = SPELLINTERRUPTOTHERSELF
+
 function QuartzInterrupt:OnInitialize()
 	db = Quartz:AcquireDBNamespace("Interrupt")
 	Quartz:RegisterDefaults("Interrupt", "profile", {
 		interruptcolor = {0,0,0},
 	})
 end
+
 function QuartzInterrupt:OnEnable()
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 end
+
 function QuartzInterrupt:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, combatEvent, _, sourceName, _, _, _, destFlags)
 	if combatEvent == 'SPELL_INTERRUPT' and destFlags == 0x511 then
 		QuartzPlayer.castBarText:SetText(L["INTERRUPTED (%s)"]:format((sourceName or UNKNOWN):upper()))
@@ -40,6 +45,7 @@ function QuartzInterrupt:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, combatEve
 		QuartzPlayer.stopTime = GetTime()
 	end
 end
+
 Quartz.options.args.Interrupt = {
 	type = 'group',
 	name = L["Interrupt"],

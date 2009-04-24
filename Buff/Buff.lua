@@ -16,15 +16,13 @@
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
 
-local media = LibStub("LibSharedMedia-3.0")
-local L = AceLibrary("AceLocale-2.2"):new("Quartz")
-
 local Quartz = Quartz
-if Quartz:HasModule('Buff') then
-	return
-end
-local QuartzBuff = Quartz:NewModule('Buff')
+local QuartzBuff = Quartz:NewModule("Buff")
 local self = QuartzBuff
+
+local L = LibStub("AceLocale-3.0"):GetLocale("Quartz")
+
+local media = LibStub("LibSharedMedia-3.0")
 
 local GetTime = GetTime
 local table_sort = table.sort

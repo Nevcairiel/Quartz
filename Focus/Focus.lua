@@ -15,13 +15,12 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
-local L = AceLibrary("AceLocale-2.2"):new("Quartz")
 
 local Quartz = Quartz
-if Quartz:HasModule('Focus') then
-	return
-end
-local QuartzFocus = Quartz:NewModule('Focus')
+local QuartzFocus = Quartz:NewModule("Focus")
+local self = QuartzFocus
+
+local L = LibStub("AceLocale-3.0"):GetLocale("Quartz")
 
 local media = LibStub("LibSharedMedia-3.0")
 
