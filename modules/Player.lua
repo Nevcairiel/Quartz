@@ -87,7 +87,7 @@ local options = {
 				castBarParent:EnableMouse(false)
 				castBarParent:SetScript('OnDragStart', nil)
 				castBarParent:SetScript('OnDragStop', nil)
-				if not (self.channeling or self.casting) then
+				if not (mod.channeling or mod.casting) then
 					castBarParent:Hide()
 				end
 			else
@@ -339,7 +339,7 @@ local options = {
 			get = get,
 			set = set,
 			disabled = function()
-				return db.profile.hidenametext or not db.profile.spellrank
+				return db.hidenametext or not db.spellrank
 			end,
 			--passValue = 'spellrankstyle',
 			validate = {L["Number"], L["Roman"], L["Full Text"], L["Roman Full Text"]},
@@ -443,11 +443,11 @@ local options = {
 			desc = L["Move the CastBar to center of the screen along the specified axis"],
 			get = false,
 			set = function(v)
-				local scale = db.profile.scale
+				local scale = db.scale
 				if v == L["Horizontal"] then
-					db.profile.x = (UIParent:GetWidth() / 2 - (db.profile.w * scale) / 2) / scale
+					db.x = (UIParent:GetWidth() / 2 - (db.w * scale) / 2) / scale
 				else -- L["Vertical"]
-					db.profile.y = (UIParent:GetHeight() / 2 - (db.profile.h * scale) / 2) / scale
+					db.y = (UIParent:GetHeight() / 2 - (db.h * scale) / 2) / scale
 				end
 				mod.ApplySettings()
 			end,
@@ -461,7 +461,7 @@ local options = {
 		get = false,
 		set = function(v)
 			local from = Quartz3:AcquireDBNamespace(v)
-			Quartz3:CopySettings(from.profile, db.profile)
+			Quartz3:CopySettings(from.profile, mod.db.profile)
 			mod.ApplySettings()
 		end,
 		validate = {L["Target"], L["Focus"], L["Pet"]},
@@ -483,14 +483,14 @@ end
 
 local function OnUpdate()
 	local currentTime = GetTime()
-	local startTime = self.startTime
-	local endTime = self.endTime
-	local delay = self.delay
-	if self.casting then
+	local startTime = mod.startTime
+	local endTime = mod.endTime
+	local delay = mod.delay
+	if mod.casting then
 	if currentTime > endTime then
-		self.casting = nil
-		self.fadeOut = true
-		self.stopTime = currentTime
+		mod.casting = nil
+		mod.fadeOut = true
+		mod.stopTime = currentTime
 	end
 	
 	local showTime = math_min(currentTime, endTime)
@@ -498,51 +498,51 @@ local function OnUpdate()
 	local perc = (showTime-startTime) / (endTime - startTime)
 	castBar:SetValue(perc)
 	castBarSpark:ClearAllPoints()
-	castBarSpark:SetPoint('CENTER', castBar, 'LEFT', perc * db.profile.w, 0)
+	castBarSpark:SetPoint('CENTER', castBar, 'LEFT', perc * db.w, 0)
 	
 	if delay and delay ~= 0 then
-		if db.profile.hidecasttime then
+		if db.hidecasttime then
 			castBarTimeText:SetText(("|cffff0000+%.1f|cffffffff %s"):format(delay, timenum(endTime - showTime)))
 		else
 			castBarTimeText:SetText(("|cffff0000+%.1f|cffffffff %s / %s"):format(delay, timenum(endTime - showTime), timenum(endTime - startTime, true)))
 		end
 	else
-		if db.profile.hidecasttime then
+		if db.hidecasttime then
 			castBarTimeText:SetText(timenum(endTime - showTime))
 		else
 			castBarTimeText:SetText(("%s / %s"):format(timenum(endTime - showTime), timenum(endTime - startTime, true)))
 		end
 	end
-	elseif self.channeling then
+	elseif mod.channeling then
 	if currentTime > endTime then
-		self.channeling = nil
-		self.fadeOut = true
-		self.stopTime = currentTime
+		mod.channeling = nil
+		mod.fadeOut = true
+		mod.stopTime = currentTime
 	end
 	local remainingTime = endTime - currentTime
 	local perc = remainingTime / (endTime - startTime)
 	castBar:SetValue(perc)
 	castBarTimeText:SetText(("%.1f"):format(remainingTime))
 	castBarSpark:ClearAllPoints()
-	castBarSpark:SetPoint('CENTER', castBar, 'LEFT', perc * db.profile.w, 0)
+	castBarSpark:SetPoint('CENTER', castBar, 'LEFT', perc * db.w, 0)
 	
 	if delay and delay ~= 0 then
-		if db.profile.hidecasttime then
+		if db.hidecasttime then
 			castBarTimeText:SetText(("|cffFF0000-%.1f|cffffffff %s"):format(delay, timenum(remainingTime)))
 		else
 			castBarTimeText:SetText(("|cffFF0000-%.1f|cffffffff %s / %s"):format(delay, timenum(remainingTime), timenum(endTime - startTime, true)))
 		end
 	else
-		if db.profile.hidecasttime then
+		if db.hidecasttime then
 			castBarTimeText:SetText(timenum(remainingTime))
 		else
 			castBarTimeText:SetText(("%s / %s"):format(timenum(remainingTime), timenum(endTime - startTime, true)))
 		end
 	end
-	elseif self.fadeOut then
+	elseif mod.fadeOut then
 	castBarSpark:Hide()
 	local alpha
-	local stopTime = self.stopTime
+	local stopTime = mod.stopTime
 	if stopTime then
 		alpha = stopTime - currentTime + 1
 	else
@@ -552,10 +552,10 @@ local function OnUpdate()
 		alpha = 1
 	end
 	if alpha <= 0 then
-		self.stopTime = nil
+		mod.stopTime = nil
 		castBarParent:Hide()
 	else
-		castBarParent:SetAlpha(alpha*db.profile.alpha)
+		castBarParent:SetAlpha(alpha*db.alpha)
 	end
 	else
 	castBarParent:Hide()
@@ -590,8 +590,8 @@ do
 	}
 
 	function setnametext(name, rank)
-	if db.profile.spellrank and rank then
-		local rankstyle = db.profile.spellrankstyle
+	if db.spellrank and rank then
+		local rankstyle = db.spellrankstyle
 		if rankstyle == L["Number"] then
 			local num = tonumber(rank:match(L["Rank (%d+)"]))
 			if num and num > 0 then
@@ -625,9 +625,9 @@ do
 		castBarText:SetText(name)
 	end
 	
-	if db.profile.targetname and self.targetName and (self.targetName ~= '') then
+	if db.targetname and mod.targetName and (mod.targetName ~= '') then
 		local castText = castBarText:GetText() or nil
-		if castText then castBarText:SetText(castText .. " -> " .. self.targetName) end
+		if castText then castBarText:SetText(castText .. " -> " .. mod.targetName) end
 	end
 	end
 end
@@ -637,8 +637,8 @@ function mod:GetOptions()
 end
 
 function mod:OnInitialize()
-	self.db = Quartz3.db:RegisterNamespace("Player", defaults)
-	db = self.db.profile
+	mod.db = Quartz3.db:RegisterNamespace("Player", defaults)
+	db = mod.db.profile
 
 	castBarParent = CreateFrame('Frame', 'Quartz3CastBar', UIParent)
 	castBarParent:SetFrameStrata('MEDIUM')
@@ -656,33 +656,35 @@ function mod:OnInitialize()
 	
 	castBarParent:Hide()
 	
-	self.castBarParent = castBarParent
-	self.castBar = castBar
-	self.castBarText = castBarText
-	self.castBarTimeText = castBarTimeText
-	self.castBarIcon = castBarIcon
-	self.castBarSpark = castBarSpark
+	mod.castBarParent = castBarParent
+	mod.castBar = castBar
+	mod.castBarText = castBarText
+	mod.castBarTimeText = castBarTimeText
+	mod.castBarIcon = castBarIcon
+	mod.castBarSpark = castBarSpark
 	
-	self.playerName = UnitName("player");
+	mod.playerName = UnitName("player");
 end
 
 
 function mod:OnEnable()
-	self:RegisterEvent("UNIT_SPELLCAST_SENT")
-	self:RegisterEvent("UNIT_SPELLCAST_START")
-	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
-	self:RegisterEvent("UNIT_SPELLCAST_STOP")
-	self:RegisterEvent("UNIT_SPELLCAST_FAILED")
-	self:RegisterEvent("UNIT_SPELLCAST_DELAYED")
-	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
-	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
-	self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
-	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_INTERRUPTED", "UNIT_SPELLCAST_INTERRUPTED")
-	media.RegisterCallback(self, "LibSharedMedia_SetGlobal", function(mtype, override)
+	mod:RegisterEvent("UNIT_SPELLCAST_SENT")
+	mod:RegisterEvent("UNIT_SPELLCAST_START")
+	mod:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
+	mod:RegisterEvent("UNIT_SPELLCAST_STOP")
+	mod:RegisterEvent("UNIT_SPELLCAST_FAILED")
+	mod:RegisterEvent("UNIT_SPELLCAST_DELAYED")
+	mod:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
+	mod:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
+	mod:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
+	mod:RegisterEvent("UNIT_SPELLCAST_CHANNEL_INTERRUPTED", "UNIT_SPELLCAST_INTERRUPTED")
+	media.RegisterCallback(mod, "LibSharedMedia_SetGlobal", function(mtype, override)
 	if mtype == "statusbar" then
 		castBar:SetStatusBarTexture(media:Fetch("statusbar", override))
 	end
 	end)
+
+	mod:ApplySettings()
 end
 
 function mod:OnDisable()
@@ -703,9 +705,9 @@ function mod:UNIT_SPELLCAST_SENT(event, unit, spell, rank, target)
 	return
 	end
 	if target then
-	self.targetName = target;
+	mod.targetName = target;
 	else
-	self.targetName = self.playerName;
+	mod.targetName = mod.playerName;
 	end
 end
 
@@ -717,12 +719,12 @@ function mod:UNIT_SPELLCAST_START(event, unit)
 
 	startTime = startTime / 1000
 	endTime = endTime / 1000
-	self.startTime = startTime
-	self.endTime = endTime
-	self.delay = 0
-	self.casting = true
-	self.channeling = nil
-	self.fadeOut = nil
+	mod.startTime = startTime
+	mod.endTime = endTime
+	mod.delay = 0
+	mod.casting = true
+	mod.channeling = nil
+	mod.fadeOut = nil
 
 	castBar:SetStatusBarColor(unpack(Quartz3.db.profile.castingcolor))
 	
@@ -757,12 +759,12 @@ function mod:UNIT_SPELLCAST_CHANNEL_START(event, unit)
 	
 	startTime = startTime / 1000
 	endTime = endTime / 1000
-	self.startTime = startTime
-	self.endTime = endTime
-	self.delay = 0
-	self.casting = nil
-	self.channeling = true
-	self.fadeOut = nil
+	mod.startTime = startTime
+	mod.endTime = endTime
+	mod.delay = 0
+	mod.casting = nil
+	mod.channeling = true
+	mod.fadeOut = nil
 
 	castBar:SetStatusBarColor(unpack(Quartz3.db.profile.channelingcolor))
 	
@@ -792,11 +794,11 @@ function mod:UNIT_SPELLCAST_STOP(event, unit)
 	if unit ~= 'player' then
 	return
 	end
-	if self.casting then
-	self.targetName = nil
-	self.casting = nil
-	self.fadeOut = true
-	self.stopTime = GetTime()
+	if mod.casting then
+	mod.targetName = nil
+	mod.casting = nil
+	mod.fadeOut = true
+	mod.stopTime = GetTime()
 	
 	castBar:SetValue(1.0)
 	castBar:SetStatusBarColor(unpack(Quartz3.db.profile.completecolor))
@@ -809,10 +811,10 @@ function mod:UNIT_SPELLCAST_CHANNEL_STOP(event, unit)
 	if unit ~= 'player' then
 	return
 	end
-	if self.channeling then
-	self.channeling = nil
-	self.fadeOut = true
-	self.stopTime = GetTime()
+	if mod.channeling then
+	mod.channeling = nil
+	mod.fadeOut = true
+	mod.stopTime = GetTime()
 	
 	castBar:SetValue(0)
 	castBar:SetStatusBarColor(unpack(Quartz3.db.profile.completecolor))
@@ -822,15 +824,15 @@ function mod:UNIT_SPELLCAST_CHANNEL_STOP(event, unit)
 end
 
 function mod:UNIT_SPELLCAST_FAILED(event, unit)
-	if unit ~= 'player' or self.channeling or self.casting then 
+	if unit ~= 'player' or mod.channeling or mod.casting then 
 	return
 	end
-	self.targetName = nil
-	self.casting = nil
-	self.channeling = nil
-	self.fadeOut = true
-	if not self.stopTime then
-	self.stopTime = GetTime()
+	mod.targetName = nil
+	mod.casting = nil
+	mod.channeling = nil
+	mod.fadeOut = true
+	if not mod.stopTime then
+	mod.stopTime = GetTime()
 	end
 	castBar:SetValue(1.0)
 	castBar:SetStatusBarColor(unpack(Quartz3.db.profile.failcolor))
@@ -842,12 +844,12 @@ function mod:UNIT_SPELLCAST_INTERRUPTED(event, unit)
 	if unit ~= 'player' then
 	return
 	end
-	self.targetName = nil
-	self.casting = nil
-	self.channeling = nil
-	self.fadeOut = true
-	if not self.stopTime then
-	self.stopTime = GetTime()
+	mod.targetName = nil
+	mod.casting = nil
+	mod.channeling = nil
+	mod.fadeOut = true
+	if not mod.stopTime then
+	mod.stopTime = GetTime()
 	end
 	castBar:SetValue(1.0)
 	castBar:SetStatusBarColor(unpack(Quartz3.db.profile.failcolor))
@@ -859,34 +861,34 @@ function mod:UNIT_SPELLCAST_DELAYED(event, unit)
 	if unit ~= 'player' then
 	return
 	end
-	local oldStart = self.startTime
+	local oldStart = mod.startTime
 	local spell, rank, displayName, icon, startTime, endTime = UnitCastingInfo(unit)
 	if not startTime then
 	return castBarParent:Hide()
 	end
 	startTime = startTime / 1000
 	endTime = endTime / 1000
-	self.startTime = startTime
-	self.endTime = endTime
+	mod.startTime = startTime
+	mod.endTime = endTime
 
-	self.delay = (self.delay or 0) + (startTime - (oldStart or startTime))
+	mod.delay = (mod.delay or 0) + (startTime - (oldStart or startTime))
 end
 
 function mod:UNIT_SPELLCAST_CHANNEL_UPDATE(event, unit)
 	if unit ~= 'player' then
 	return
 	end
-	local oldStart = self.startTime
+	local oldStart = mod.startTime
 	local spell, rank, displayName, icon, startTime, endTime = UnitChannelInfo(unit)
 	if not startTime then
 	return castBarParent:Hide()
 	end
 	startTime = startTime / 1000
 	endTime = endTime / 1000
-	self.startTime = startTime
-	self.endTime = endTime
+	mod.startTime = startTime
+	mod.endTime = endTime
 	
-	self.delay = (self.delay or 0) + ((oldStart or startTime) - startTime)
+	mod.delay = (mod.delay or 0) + ((oldStart or startTime) - startTime)
 end
 
 do
@@ -897,12 +899,12 @@ do
 	if castBarParent then
 		local db = mod.db.profile
 		
-		castBarParent = self.castBarParent
-		castBar = self.castBar
-		castBarText = self.castBarText
-		castBarTimeText = self.castBarTimeText
-		castBarIcon = self.castBarIcon
-		castBarSpark = self.castBarSpark
+		castBarParent = mod.castBarParent
+		castBar = mod.castBar
+		castBarText = mod.castBarText
+		castBarTimeText = mod.castBarTimeText
+		castBarIcon = mod.castBarIcon
+		castBarSpark = mod.castBarSpark
 		
 		castBarParent:ClearAllPoints()
 		if not db.x then
@@ -1055,23 +1057,23 @@ do
 	castBarParent:StartMoving()
 	end
 	local function dragstop()
-	db.profile.x = castBarParent:GetLeft()
-	db.profile.y = castBarParent:GetBottom()
+	db.x = castBarParent:GetLeft()
+	db.y = castBarParent:GetBottom()
 	castBarParent:StopMovingOrSizing()
 	end
 	local function nothing()
-	castBarParent:SetAlpha(db.profile.alpha)
+	castBarParent:SetAlpha(db.alpha)
 	end
 	local function hideiconoptions()
-	return db.profile.hideicon
+	return db.hideicon
 	end
 	local function hidetimetextoptions()
-	return db.profile.hidetimetext
+	return db.hidetimetext
 	end
 	local function hidecasttimeprecision()
-	return db.profile.hidetimetext or db.profile.hidecasttime
+	return db.hidetimetext or db.hidecasttime
 	end
 	local function hidenametextoptions()
-	return db.profile.hidenametext
+	return db.hidenametext
 	end
 end
