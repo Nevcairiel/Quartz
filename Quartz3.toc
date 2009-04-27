@@ -4,7 +4,7 @@
 ## Author: Nymbia
 ## X-eMail: nymbia@gmail.com
 ## X-License: GPL v2
-## OptionalDeps: Ace3, LibSharedMedia-3.0, FlightMap, InFlight, FuBar_ToFu
+## OptionalDeps: Ace3, LibSharedMedia-3.0, AceGUI-3.0-SharedMediaWidgets, FlightMap, InFlight, FuBar_ToFu
 ## SavedVariables: Quartz3DB
 
 ## X-Credits: Ammo (some code based on PitBull_CastBar), kergoth (Tradeskill Merge module idea), Roartindon (Lag Embed mode for Latency module)

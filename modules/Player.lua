@@ -137,7 +137,7 @@ local options = {
 		--passValue = 'w',
 	},
 	x = {
-		type = 'text',
+		type = 'input',
 		name = L["X"],
 		desc = L["Set an exact X value for this bar's position."],
 		get = get,
@@ -147,10 +147,10 @@ local options = {
 		validate = function(v)
 			return tonumber(v) and true
 		end,
-		usage = L["Number"],
+		--usage = L["Number"],
 	},
 	y = {
-		type = 'text',
+		type = 'input',
 		name = L["Y"],
 		desc = L["Set an exact Y value for this bar's position."],
 		get = get,
@@ -160,7 +160,7 @@ local options = {
 		validate = function(v)
 			return tonumber(v) and true
 		end,
-		usage = L["Number"],
+		--usage = L["Number"],
 	},
 	scale = {
 		type = 'range',
@@ -211,14 +211,14 @@ local options = {
 		--passValue = 'iconalpha',
 	},
 	iconposition = {
-		type = 'text',
+		type = 'select',
 		name = L["Icon Position"],
 		desc = L["Set where the Spell Cast icon appears"],
 		get = get,
 		set = set,
 		disabled = hideiconoptions,
 		--passValue = 'iconposition',
-		validate = {L["Left"], L["Right"]},
+		values = {L["Left"], L["Right"]},
 		order = 301,
 	},
 	icongap = {
@@ -235,20 +235,22 @@ local options = {
 		--passValue = 'icongap',
 	},
 	texture = {
-		type = 'text',
+		type = 'select',
+		dialogControl = 'LSM30_Statusbar',
 		name = L["Texture"],
 		desc = L["Set the Cast Bar Texture"],
-		validate = media:List('statusbar'),
+		values = AceGUIWidgetLSMlists.statusbar,
 		order = 302,
 		get = get,
 		set = set,
 		--passValue = 'texture',
 	},
 	font = {
-		type = 'text',
+		type = 'select',
+		dialogControl = 'LSM30_Font',
 		name = L["Font"],
 		desc = L["Set the font used in the Name and Time texts"],
-		validate = media:List('font'),
+		values = AceGUIWidgetLSMlists.font,
 		order = 400,
 		get = get,
 		set = set,
@@ -264,13 +266,13 @@ local options = {
 		order = 401,
 	},
 	nametextposition = {
-		type = 'text',
+		type = 'select',
 			name = L["Name Text Position"],
 			desc = L["Set the alignment of the spell name text"],
 			get = get,
 			set = set,
 			--passValue = 'nametextposition',
-			validate = {L["Left"], L["Right"], L["Center"]},
+			values = {L["Left"], L["Right"], L["Center"]},
 			disabled = hidenametextoptions,
 			order = 402,
 		},
@@ -333,7 +335,7 @@ local options = {
 			order = 405,
 		},
 		spellrankstyle = {
-			type = 'text',
+			type = 'select',
 			name = L["Spell Rank Style"],
 			desc = L["Set the display style of the spell rank"],
 			get = get,
@@ -342,7 +344,7 @@ local options = {
 				return db.hidenametext or not db.spellrank
 			end,
 			--passValue = 'spellrankstyle',
-			validate = {L["Number"], L["Roman"], L["Full Text"], L["Roman Full Text"]},
+			values = {L["Number"], L["Roman"], L["Full Text"], L["Roman Full Text"]},
 			order = 406,
 		},
 		hidetimetext = {
@@ -391,13 +393,13 @@ local options = {
 			--passValue = 'timefontsize',
 		},
 		timetextposition = {
-			type = 'text',
+			type = 'select',
 			name = L["Time Text Position"],
 			desc = L["Set the alignment of the time text"],
 			get = get,
 			set = set,
 			--passValue = 'timetextposition',
-			validate = {L["Left"], L["Right"], L["Center"], L["Cast Start Side"], L["Cast End Side"]},
+			values = {L["Left"], L["Right"], L["Center"], L["Cast Start Side"], L["Cast End Side"]},
 			disabled = hidetimetextoptions,
 			order = 415,
 		},
@@ -428,17 +430,18 @@ local options = {
 			order = 417,
 		},
 		border = {
-			type = 'text',
+			type = 'select',
+			dialogControl = 'LSM30_Border',
 			name = L["Border"],
 			desc = L["Set the border style"],
 			get = get,
 			set = set,
 			--passValue = 'border',
-			validate = media:List('border'),
+			values = AceGUIWidgetLSMlists.border,
 			order = 418,
 		},
 		snaptocenter = {
-			type = 'text',
+			type = 'select',
 			name = L["Snap to Center"],
 			desc = L["Move the CastBar to center of the screen along the specified axis"],
 			get = false,
@@ -451,11 +454,11 @@ local options = {
 				end
 				mod.ApplySettings()
 			end,
-			validate = {L["Horizontal"], L["Vertical"]},
+			values = {L["Horizontal"], L["Vertical"]},
 			order = 503,
 		},
 	copysettings = {
-		type = 'text',
+		type = 'select',
 		name = L["Copy Settings From"],
 		desc = L["Select a bar from which to copy settings"],
 		get = false,
@@ -464,7 +467,7 @@ local options = {
 			Quartz3:CopySettings(from.profile, mod.db.profile)
 			mod.ApplySettings()
 		end,
-		validate = {L["Target"], L["Focus"], L["Pet"]},
+		values = {L["Target"], L["Focus"], L["Pet"]},
 		order = 504
 	},
 }
