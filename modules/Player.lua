@@ -32,6 +32,16 @@ local castTimeFormatString
 
 local castBar, castBarText, castBarTimeText, castBarIcon, castBarSpark, castBarParent, db
 
+local function set(field, value)
+	db[field] = value
+	mod.ApplySettings()
+end
+
+local function get(field)
+	return db[field]
+end
+
+
 local defaults = {
 	profile = {
 	hideblizz = true,
