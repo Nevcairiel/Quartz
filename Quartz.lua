@@ -29,7 +29,7 @@ local options = {
 			desc = L["Hide the icon for spells with no icon"],
 			get = get,
 			set = set,
-			passValue = 'hidesamwise',
+			--passValue = 'hidesamwise',
 			order = 101,
 		},
 		colors = {
@@ -45,7 +45,7 @@ local options = {
 					order = 98,
 					get = getcolor,
 					set = setcolor,
-					passValue = 'spelltextcolor',
+					--passValue = 'spelltextcolor',
 				},
 				timetextcolor = {
 					type = 'color',
@@ -54,7 +54,7 @@ local options = {
 					order = 98,
 					get = getcolor,
 					set = setcolor,
-					passValue = 'timetextcolor',
+					--passValue = 'timetextcolor',
 				},
 				header = {
 					type = 'header',
@@ -66,7 +66,7 @@ local options = {
 					desc = L["Set the color of the cast bar when %s"]:format(L["Casting"]),
 					get = getcolor,
 					set = setcolor,
-					passValue = 'castingcolor',
+					--passValue = 'castingcolor',
 				},
 				channelingcolor = {
 					type = 'color',
@@ -74,7 +74,7 @@ local options = {
 					desc = L["Set the color of the cast bar when %s"]:format(L["Channeling"]),
 					get = getcolor,
 					set = setcolor,
-					passValue = 'channelingcolor',
+					--passValue = 'channelingcolor',
 				},
 				completecolor = {
 					type = 'color',
@@ -82,7 +82,7 @@ local options = {
 					desc = L["Set the color of the cast bar when %s"]:format(L["Complete"]),
 					get = getcolor,
 					set = setcolor,
-					passValue = 'completecolor',
+					--passValue = 'completecolor',
 				},
 				failcolor = {
 					type = 'color',
@@ -90,7 +90,7 @@ local options = {
 					desc = L["Set the color of the cast bar when %s"]:format(L["Failed"]),
 					get = getcolor,
 					set = setcolor,
-					passValue = 'failcolor',
+					--passValue = 'failcolor',
 				},
 				sparkcolor = {
 					type = 'color',
@@ -99,7 +99,7 @@ local options = {
 					get = getcolor,
 					set = setcolor,
 					hasAlpha = true,
-					passValue = 'sparkcolor',
+					--passValue = 'sparkcolor',
 				},
 				backgroundcolor = {
 					type = 'color',
@@ -107,7 +107,7 @@ local options = {
 					desc = L["Set the color of the casting bar background"],
 					get = getcolor,
 					set = setcolor,
-					passValue = 'backgroundcolor',
+					--passValue = 'backgroundcolor',
 					order = 101,
 				},
 				backgroundalpha = {
@@ -120,7 +120,7 @@ local options = {
 					step = 0.025,
 					get = get,
 					set = set,
-					passValue = 'backgroundalpha',
+					--passValue = 'backgroundalpha',
 					order = 102,
 				},
 				bordercolor = {
@@ -129,7 +129,7 @@ local options = {
 					desc = L["Set the color of the casting bar border"],
 					get = getcolor,
 					set = setcolor,
-					passValue = 'bordercolor',
+					--passValue = 'bordercolor',
 					order = 103,
 				},
 				borderalpha = {
@@ -142,7 +142,7 @@ local options = {
 					step = 0.025,
 					get = get,
 					set = set,
-					passValue = 'borderalpha',
+					--passValue = 'borderalpha',
 					order = 104,
 				},
 			},
