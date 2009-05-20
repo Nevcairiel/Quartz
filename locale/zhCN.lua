@@ -1,8 +1,6 @@
 -- Chinese simp Translation: ela, valkyrie@CWDG
 -- CWDG site: http://cwowaddon.com
-
-local AceLocale = LibStub:GetLibrary("AceLocale-3.0")
-local L = AceLocale:NewLocale("Quartz3", "zhCN", true)
+local L = LibStub:GetLibrary("AceLocale-3.0", true):NewLocale("Quartz3", "zhCN", true)
 if not L then return end
 
 L["Quartz"] = "Quartz"

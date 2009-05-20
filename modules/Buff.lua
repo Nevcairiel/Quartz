@@ -15,84 +15,35 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
+local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
+local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
-local Quartz = LibStub("AceAddon-3.0"):GetAddon("Quartz")
-local L = LibStub("AceLocale-3.0"):GetLocale("Quartz")
-
-local QuartzBuff = Quartz:NewModule("Buff", "AceEvent-3.0")
-local self = QuartzBuff
+local MODNAME = L["Buff"]
+local Buff = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
 
 local media = LibStub("LibSharedMedia-3.0")
 
-local GetTime = GetTime
-local table_sort = table.sort
-local math_ceil = math.ceil
+local GetTime = _G.GetTime
+local sort = _G.table.sort
+local ceil = _G.math.ceil
+local pairs = _G.pairs
+local ipairs =_G.ipairs
+local unpack = _G.unpack
+local tonumber = _G.tonumber
 
-local db
+local UnitIsUnit = _G.UnitIsUnit
+local UnitBuff = _G.UnitBuff
+local UnitDebuff = _G.UnitDebuff
+
 local targetlocked = true
 local focuslocked = true
+local db, options
 
-local new, del = Quartz.new, Quartz.del
+local new, del = Quartz3.new, Quartz3.del
 local OnUpdate
-do
-	local min = L["%dm"]
-	local function timenum(num)
-		if num <= 10 then
-			return ('%.1f'):format(num)
-		elseif num <= 60 then
-			return ('%d'):format(num)
-		else
-			return min:format(math_ceil(num / 60))
-		end
-	end
-	function OnUpdate(frame)
-		local currentTime = GetTime()
-		local endTime = frame.endTime
-		if currentTime > endTime then
-			self:UpdateBars()
-		else
-			local remaining = (currentTime - frame.startTime)
-			frame:SetValue(endTime - remaining)
-			frame.timetext:SetText(timenum(endTime - currentTime))
-		end
-		
-	end
-end
-local function OnShow(frame)
-	frame:SetScript('OnUpdate', OnUpdate)
-end
-local function OnHide(frame)
-	frame:SetScript('OnUpdate', nil)
-end
 
-local framefactory = {
-	__index = function(t,k)
-		local bar = CreateFrame('StatusBar', nil, UIParent)
-		t[k] = bar
-		bar:SetFrameStrata('MEDIUM')
-		bar:Hide()
-		bar:SetScript('OnShow', OnShow)
-		bar:SetScript('OnHide', OnHide)
-		bar:SetBackdrop({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16})
-		bar:SetBackdropColor(0,0,0)
-		bar.text = bar:CreateFontString(nil, 'OVERLAY')
-		bar.timetext = bar:CreateFontString(nil, 'OVERLAY')
-		bar.icon = bar:CreateTexture(nil, 'DIALOG')
-		if k == 1 then
-			bar:SetMovable(true)
-			bar:RegisterForDrag('LeftButton')
-			bar:SetClampedToScreen(true)
-		end
-		self:ApplySettings()
-		return bar
-	end
-}
-local targetbars = setmetatable({}, framefactory)
-local focusbars = setmetatable({}, framefactory)
-
-function QuartzBuff:OnInitialize()
-	db = Quartz:AcquireDBNamespace("Buff")
-	Quartz:RegisterDefaults("Buff", "profile", {
+local defaults = {
+	profile = {
 		target = true,
 		targetbuffs = true,
 		targetdebuffs = true,
@@ -151,9 +102,75 @@ function QuartzBuff:OnInitialize()
 		bufftextcolor = {1,1,1},
 		
 		timesort = true,
-	})
+	}
+}
+
+do
+	local min = L["%dm"]
+	local function timenum(num)
+		if num <= 10 then
+			return ('%.1f'):format(num)
+		elseif num <= 60 then
+			return ('%d'):format(num)
+		else
+			return min:format(ceil(num / 60))
+		end
+	end
+	function OnUpdate(frame)
+		local currentTime = GetTime()
+		local endTime = frame.endTime
+		if currentTime > endTime then
+			Buff:UpdateBars()
+		else
+			local remaining = (currentTime - frame.startTime)
+			frame:SetValue(endTime - remaining)
+			frame.timetext:SetText(timenum(endTime - currentTime))
+		end
+		
+	end
 end
-function QuartzBuff:OnEnable()
+
+local function OnShow(frame)
+	frame:SetScript('OnUpdate', OnUpdate)
+end
+local function OnHide(frame)
+	frame:SetScript('OnUpdate', nil)
+end
+
+local framefactory = {
+	__index = function(t,k)
+		local bar = CreateFrame('StatusBar', nil, UIParent)
+		t[k] = bar
+		bar:SetFrameStrata('MEDIUM')
+		bar:Hide()
+		bar:SetScript('OnShow', OnShow)
+		bar:SetScript('OnHide', OnHide)
+		bar:SetBackdrop({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16})
+		bar:SetBackdropColor(0,0,0)
+		bar.text = bar:CreateFontString(nil, 'OVERLAY')
+		bar.timetext = bar:CreateFontString(nil, 'OVERLAY')
+		bar.icon = bar:CreateTexture(nil, 'DIALOG')
+		if k == 1 then
+			bar:SetMovable(true)
+			bar:RegisterForDrag('LeftButton')
+			bar:SetClampedToScreen(true)
+		end
+		self:ApplySettings()
+		return bar
+	end
+}
+local targetbars = setmetatable({}, framefactory)
+local focusbars = setmetatable({}, framefactory)
+
+function Buff:OnInitialize()
+	self.db = Mapster.db:RegisterNamespace(MODNAME, defaults)
+	db = self.db.profile
+	
+	self:SetEnabledState(Mapster:GetModuleEnabled(MODNAME))
+	Mapster:RegisterModuleOptions(MODNAME, getOptions, MODNAME)
+end
+
+function Buff:OnEnable()
 	self:RegisterBucketEvent("UNIT_AURA", 0.5)
 	self:RegisterEvent("PLAYER_TARGET_CHANGED", "UpdateBars")
 	self:RegisterEvent("PLAYER_FOCUS_CHANGED", "UpdateBars")
@@ -169,7 +186,7 @@ function QuartzBuff:OnEnable()
 	end)
 	Quartz.ApplySettings()
 end
-function QuartzBuff:OnDisable()
+function Buff:OnDisable()
 	targetbars[1].Hide = nil
 	targetbars[1]:EnableMouse(false)
 	targetbars[1]:SetScript('OnDragStart', nil)
@@ -185,7 +202,7 @@ function QuartzBuff:OnDisable()
 		v:Hide()
 	end
 end
-function QuartzBuff:UNIT_AURA(units)
+function Buff:UNIT_AURA(units)
 	for unit in pairs(units) do
 		if unit == 'target' then
 			self:UpdateTargetBars()
@@ -195,7 +212,7 @@ function QuartzBuff:UNIT_AURA(units)
 		end
 	end
 end
-function QuartzBuff:CheckForUpdate()
+function Buff:CheckForUpdate()
 	if targetbars[1]:IsShown() then
 		self:UpdateTargetBars()
 	end
@@ -203,7 +220,7 @@ function QuartzBuff:CheckForUpdate()
 		self:UpdateFocusBars()
 	end
 end
-function QuartzBuff:UpdateBars()
+function Buff:UpdateBars()
 	self:UpdateTargetBars()
 	self:UpdateFocusBars()
 end
@@ -225,7 +242,7 @@ do
 	end
 	local tmp = {}
 	local called = false -- prevent recursive calls when new bars are created.
-	function QuartzBuff:UpdateTargetBars()
+	function Buff:UpdateTargetBars()
 		if called then
 			return
 		end
@@ -274,7 +291,7 @@ do
 					end
 				end
 			end
-			table_sort(tmp, sort)
+			sort(tmp, sort)
 			local maxindex = 0
 			for k,v in ipairs(tmp) do
 				maxindex = k
@@ -329,7 +346,7 @@ do
 		end
 		called = false
 	end
-	function QuartzBuff:UpdateFocusBars()
+	function Buff:UpdateFocusBars()
 		if called then
 			return
 		end
@@ -378,7 +395,7 @@ do
 					end
 				end
 			end
-			table_sort(tmp, sort)
+			sort(tmp, sort)
 			local maxindex = 0
 			for k,v in ipairs(tmp) do
 				maxindex = k
@@ -625,8 +642,8 @@ do
 		
 		return direction
 	end
-	function QuartzBuff:ApplySettings()
-		if Quartz:IsModuleActive('Buff') and db then
+	function Buff:ApplySettings()
+		if Quartz3:IsModuleActive('Buff') and db then
 			local db = db.profile
 			local direction
 			if db.targetanchor ~= L["Free"] then
@@ -652,17 +669,16 @@ do
 		end
 	end
 end
+
 do
 	local function set(field, value)
 		db.profile[field] = value
-		Quartz.ApplySettings()
 	end
 	local function get(field)
 		return db.profile[field]
 	end
 	local function setcolor(field, ...)
 		db.profile[field] = {...}
-		Quartz.ApplySettings()
 	end
 	local function getcolor(field)
 		return unpack(db.profile[field])
@@ -725,21 +741,18 @@ do
 	local function focusnothing()
 		focusbars[1]:SetAlpha(db.profile.buffalpha)
 	end
-	Quartz.options.args.Buff = {
-		type = 'group',
-		name = L["Buff"],
-		desc = L["Buff"],
-		order = 600,
-		args = {
+
+	function Buff:GetOptions()
+		if not options then options = {
 			toggle = {
 				type = 'toggle',
 				name = L["Enable"],
 				desc = L["Enable"],
 				get = function()
-					return Quartz:IsModuleActive('Buff')
+					return Quartz3:IsModuleEnabled(MODNAME)
 				end,
 				set = function(v)
-					Quartz:ToggleModuleActive('Buff', v)
+					Quartz3:SetModuleEnabled(MODNAME, v)
 				end,
 				order = 100,
 			},
@@ -1333,6 +1346,8 @@ do
 					},
 				},
 			},
-		},
-	}
+		}
+		return options
+		end
+	end
 end

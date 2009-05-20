@@ -1,7 +1,5 @@
 -- Traditional Chinese localization by lahow@baha (purple)
-
-local AceLocale = LibStub:GetLibrary("AceLocale-3.0")
-local L = AceLocale:NewLocale("Quartz3", "zhTW", true)
+local L = LibStub:GetLibrary("AceLocale-3.0", true):NewLocale("Quartz3", "zhTW", true)
 if not L then return end
 
 L["Quartz"] = "Quartz"

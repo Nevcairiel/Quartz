@@ -1,5 +1,4 @@
-local AceLocale = LibStub:GetLibrary("AceLocale-3.0")
-local L = AceLocale:NewLocale("Quartz3", "enUS", true)
+local L = LibStub:GetLibrary("AceLocale-3.0", true):NewLocale("Quartz3", "enUS", true)
 if not L then return end
 
 L["Modules"] = true

@@ -34,6 +34,7 @@ libs\LibSharedMedia-3.0\lib.xml
 locale.xml
 
 Quartz.lua
+Config.lua
 
 modules.xml
 
