@@ -15,107 +15,43 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
+local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
+local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
-local Quartz = LibStub("AceAddon-3.0"):GetAddon("Quartz")
-local L = LibStub("AceLocale-3.0"):GetLocale("Quartz")
-
-local QuartzPlayer = Quartz:GetModule("Player")
-local QuartzFlight = Quartz:NewModule("Flight", "AceHook-3.0", "AceEvent-3.0")
-local self = QuartzFlight
+local MODNAME = L["Flight"]
+local Flight = Quartz3:NewModule(MODNAME, "AceHook-3.0", "AceEvent-3.0")
+local Player = Quartz3:GetModule(L["Player"])
+local self = Flight
 
 local db
 
-function QuartzFlight:OnInitialize()
-	db = Quartz:AcquireDBNamespace("Flight")
-	Quartz:RegisterDefaults("Flight", "profile", {
+local defaults = {
+	profile = {
 		color = {0.7, 1, 0.7},
 		deplete = false,
-	})
-end
-if InFlight then
-	function QuartzFlight:OnEnable()
-		LoadAddOn('InFlight') --!!delete
-		self:Hook(InFlight, "StartTimer")
-	end
-	function QuartzFlight:StartTimer(object, ...)
-		self.hooks[object].StartTimer(object, ...)
-		
-		local f = InFlightBar
-		local _, duration = f:GetMinMaxValues()
-		local _, locText = f:GetRegions()
-		local destination = locText:GetText()
+		},
+	}
 
-		self:BeginFlight(duration, destination)
-	end
-elseif ToFu then
-	function QuartzFlight:OnEnable()
-		self:RegisterEvent("ToFu_StartFlight")
-	end
-	function QuartzFlight:ToFu_StartFlight(start, destination, duration)
-		if duration and duration > 0 then
-			self:BeginFlight(duration, destination)
-		end
-	end
-elseif FlightMapTimes_BeginFlight then
-	function QuartzFlight:OnEnable()
-		self:Hook("FlightMapTimes_BeginFlight")
-	end
-	function QuartzFlight:FlightMapTimes_BeginFlight(duration, destination)
-		if duration and duration > 0 then
-			self:BeginFlight(duration, destination)
-		end
-		return self.hooks.FlightMapTimes_BeginFlight(duration, destination)
-	end
-end
-function QuartzFlight:BeginFlight(duration, destination)
-	QuartzPlayer.casting = true
-	QuartzPlayer.startTime = GetTime()
-	QuartzPlayer.endTime = GetTime() + duration
-	QuartzPlayer.delay = 0
-	QuartzPlayer.fadeOut = nil
-	if db.profile.deplete then
-		QuartzPlayer.casting = nil
-		QuartzPlayer.channeling = true
-	else
-		QuartzPlayer.casting = true
-		QuartzPlayer.channeling = nil
-	end
-	
-	QuartzPlayer.castBar:SetStatusBarColor(unpack(db.profile.color))
-	
-	QuartzPlayer.castBar:SetValue(0)
-	QuartzPlayer.castBarParent:Show()
-	QuartzPlayer.castBarParent:SetAlpha(QuartzPlayer.db.profile.alpha)
-	
-	QuartzPlayer.castBarSpark:Show()
-	QuartzPlayer.castBarIcon:SetTexture(nil)
-	QuartzPlayer.castBarText:SetText(destination)
-	
-	local position = QuartzPlayer.db.profile.timetextposition
-	if position == L["Cast Start Side"] then
-		QuartzPlayer.castBarTimeText:SetPoint('LEFT', QuartzPlayer.castBar, 'LEFT', QuartzPlayer.db.profile.timetextx, QuartzPlayer.db.profile.timetexty)
-		QuartzPlayer.castBarTimeText:SetJustifyH("LEFT")
-	elseif position == L["Cast End Side"] then
-		QuartzPlayer.castBarTimeText:SetPoint('RIGHT', QuartzPlayer.castBar, 'RIGHT', -1 * QuartzPlayer.db.profile.timetextx, QuartzPlayer.db.profile.timetexty)
-		QuartzPlayer.castBarTimeText:SetJustifyH("RIGHT")
-	end
-end
+local getOptions
+local options
 do
 	local function setcolor(field, ...)
 		db.profile[field] = {...}
-		Quartz.ApplySettings()
+		Quartz3.ApplySettings()
 	end
 	local function getcolor(field)
 		return unpack(db.profile[field])
 	end
 	local function set(field, value)
 		db.profile[field] = value
-		Quartz.ApplySettings()
+		Quartz3.ApplySettings()
 	end
 	local function get(field)
 		return db.profile[field]
 	end
-	Quartz.options.args.Flight = {
+
+	function getOptions() 
+	options = options or {
 		type = 'group',
 		name = L["Flight"],
 		desc = L["Flight"],
@@ -126,10 +62,10 @@ do
 				name = L["Enable"],
 				desc = L["Enable"],
 				get = function()
-					return Quartz:IsModuleActive('Flight')
+					return Quartz3:IsModuleActive('Flight')
 				end,
 				set = function(v)
-					Quartz:ToggleModuleActive('Flight', v)
+					Quartz3:ToggleModuleActive('Flight', v)
 				end,
 				order = 100,
 			},
@@ -153,4 +89,85 @@ do
 			},
 		},
 	}
+	return options
+	end
+end
+
+
+function Flight:OnInitialize()
+	self.db = Quartz3.db:RegisterNamespace(MODNAME, defaults)
+	db = self.db.profile
+	
+	self:SetEnabledState(Quartz3:GetModuleEnabled(MODNAME))
+	Quartz3:RegisterModuleOptions(MODNAME, getOptions, MODNAME)
+end
+
+if InFlight then
+	function Flight:OnEnable()
+		LoadAddOn('InFlight') --!!delete
+		self:Hook(InFlight, "StartTimer")
+	end
+	function Flight:StartTimer(object, ...)
+		self.hooks[object].StartTimer(object, ...)
+		
+		local f = InFlightBar
+		local _, duration = f:GetMinMaxValues()
+		local _, locText = f:GetRegions()
+		local destination = locText:GetText()
+
+		self:BeginFlight(duration, destination)
+	end
+
+elseif ToFu then
+	function Flight:OnEnable()
+		self:RegisterEvent("ToFu_StartFlight")
+	end
+	function Flight:ToFu_StartFlight(start, destination, duration)
+		if duration and duration > 0 then
+			self:BeginFlight(duration, destination)
+		end
+	end
+elseif FlightMapTimes_BeginFlight then
+	function Flight:OnEnable()
+		self:Hook("FlightMapTimes_BeginFlight")
+	end
+	function Flight:FlightMapTimes_BeginFlight(duration, destination)
+		if duration and duration > 0 then
+			self:BeginFlight(duration, destination)
+		end
+		return self.hooks.FlightMapTimes_BeginFlight(duration, destination)
+	end
+end
+function Flight:BeginFlight(duration, destination)
+	Player.casting = true
+	Player.startTime = GetTime()
+	Player.endTime = GetTime() + duration
+	Player.delay = 0
+	Player.fadeOut = nil
+	if db.profile.deplete then
+		Player.casting = nil
+		Player.channeling = true
+	else
+		Player.casting = true
+		Player.channeling = nil
+	end
+	
+	Player.castBar:SetStatusBarColor(unpack(db.profile.color))
+	
+	Player.castBar:SetValue(0)
+	Player.castBarParent:Show()
+	Player.castBarParent:SetAlpha(Player.db.profile.alpha)
+	
+	Player.castBarSpark:Show()
+	Player.castBarIcon:SetTexture(nil)
+	Player.castBarText:SetText(destination)
+	
+	local position = Player.db.profile.timetextposition
+	if position == L["Cast Start Side"] then
+		Player.castBarTimeText:SetPoint('LEFT', Player.castBar, 'LEFT', Player.db.profile.timetextx, Player.db.profile.timetexty)
+		Player.castBarTimeText:SetJustifyH("LEFT")
+	elseif position == L["Cast End Side"] then
+		Player.castBarTimeText:SetPoint('RIGHT', Player.castBar, 'RIGHT', -1 * Player.db.profile.timetextx, Player.db.profile.timetexty)
+		Player.castBarTimeText:SetJustifyH("RIGHT")
+	end
 end
