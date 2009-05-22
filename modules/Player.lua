@@ -37,45 +37,6 @@ local locked = true
 local db
 local getOptions
 
-local function dragstart()
-	castBarParent:StartMoving()
-end
-
-local function dragstop()
-	db.x = castBarParent:GetLeft()
-	db.y = castBarParent:GetBottom()
-	castBarParent:StopMovingOrSizing()
-end
-
-local function nothing()
-	castBarParent:SetAlpha(db.alpha)
-end
-
-local function hideiconoptions()
-	return db.hideicon
-end
-
-local function hidetimetextoptions()
-	return db.hidetimetext
-end
-
-local function hidecasttimeprecision()
-	return db.hidetimetext or db.hidecasttime
-end
-
-local function hidenametextoptions()
-	return db.hidenametext
-end
-
-local function set(field, value)
-	db[field] = value
-end
-
-local function get(field)
-	return db[field]
-end
-
-
 local defaults = {
 	profile = {
 	hideblizz = true,
@@ -110,409 +71,449 @@ local defaults = {
 	}
 }
 
-local options
-function Buff:getOptions()
-	if not options then
-		 options = {
-			lock = {
-				type = 'toggle',
-				name = L["Lock"],
-				desc = L["Toggle Cast Bar lock"],
-				get = function()
-						return locked
-				end,
-				set = function(v)
-					if v then
-						castBarParent.Hide = nil
-						castBarParent:EnableMouse(false)
-						castBarParent:SetScript('OnDragStart', nil)
-						castBarParent:SetScript('OnDragStop', nil)
-						if not (Player.channeling or Player.casting) then
-							castBarParent:Hide()
-						end
-					else
-						castBarParent:Show()
-						castBarParent:EnableMouse(true)
-						castBarParent:SetScript('OnDragStart', dragstart)
-						castBarParent:SetScript('OnDragStop', dragstop) 
-						castBarParent:SetAlpha(1)
-						castBarParent.Hide = nothing
-						castBarIcon:SetTexture("Interface\\Icons\\Temp")
-					end
-					locked = v
-				end,
-			order = 100,
-			},
-			hideblizz = {
-				type = 'toggle',
-				name = L["Disable Blizzard Cast Bar"],
-				desc = L["Disable and hide the default UI's casting bar"],
-				get = get,
-				set = set,
-				--passValue = 'hideblizz',
-				order = 101,
-			},
-			h = {
-				type = 'range',
-				name = L["Height"],
-				desc = L["Height"],
-				min = 10,
-				max = 50,
-				step = 1,
-				order = 200,
-				get = get,
-				set = set,
-				--passValue = 'h',
-			},
-			w = {
-				type = 'range',
-				name = L["Width"],
-				desc = L["Width"],
-				min = 50,
-				max = 1500,
-				step = 5,
-				order = 200,
-				get = get,
-				set = set,
-				--passValue = 'w',
-			},
-			x = {
-				type = 'input',
-				name = L["X"],
-				desc = L["Set an exact X value for this bar's position."],
-				get = get,
-				set = set,
-				--passValue = 'x',
-				order = 200,
-				validate = function(v)
-					return tonumber(v) and true
-				end,
-				--usage = L["Number"],
-			},
-			y = {
-				type = 'input',
-				name = L["Y"],
-				desc = L["Set an exact Y value for this bar's position."],
-				get = get,
-				set = set,
-				--passValue = 'y',
-				order = 200,
-				validate = function(v)
-							return tonumber(v) and true
-				end,
-				--usage = L["Number"],
-			},
-			scale = {
-				type = 'range',
-				name = L["Scale"],
-				desc = L["Scale"],
-				min = 0.2,
-				max = 1,
-				step = 0.025,
-				order = 201,
-				get = get,
-				set = set,
-				--passValue = 'scale',
-			},
-			alpha = {
-				type = 'range',
-				name = L["Alpha"],
-				desc = L["Alpha"],
-				isPercent = true,
-				min = 0.1,
-				max = 1,
-				step = 0.025,
-				order = 202,
-				get = get,
-				set = set,
-				--passValue = 'alpha',
-			},
-			hideicon = {
-				type = 'toggle',
-				name = L["Hide Icon"],
-				desc = L["Hide Spell Cast Icon"],
-				get = get,
-				set = set,
-				--passValue = 'hideicon',
-				order = 301,
-			},
-			iconalpha = {
-				type = 'range',
-				name = L["Icon Alpha"],
-				desc = L["Set the Spell Cast icon alpha"],
-				isPercent = true,
-				min = 0.1,
-				max = 1,
-				step = 0.025,
-				order = 301,
-				get = get,
-				set = set,
-				disabled = hideiconoptions,
-				--passValue = 'iconalpha',
-			},
-			iconposition = {
-				type = 'select',
-				name = L["Icon Position"],
-				desc = L["Set where the Spell Cast icon appears"],
-				get = get,
-				set = set,
-				disabled = hideiconoptions,
-				--passValue = 'iconposition',
-				values = {L["Left"], L["Right"]},
-				order = 301,
-			},
-			icongap = {
-				type = 'range',
-				name = L["Icon Gap"],
-				desc = L["Space between the cast bar and the icon."],
-				min = -35,
-				max = 35,
-				step = 1,
-				order = 301,
-				get = get,
-				set = set,
-				disabled = hideiconoptions,
-				--passValue = 'icongap',
-			},
-			texture = {
-				type = 'select',
-				dialogControl = 'LSM30_Statusbar',
-				name = L["Texture"],
-				desc = L["Set the Cast Bar Texture"],
-				values = AceGUIWidgetLSMlists.statusbar,
-				order = 302,
-				get = get,
-				set = set,
-				--passValue = 'texture',
-			},
-			font = {
-				type = 'select',
-				dialogControl = 'LSM30_Font',
-				name = L["Font"],
-				desc = L["Set the font used in the Name and Time texts"],
-				values = AceGUIWidgetLSMlists.font,
-				order = 400,
-				get = get,
-				set = set,
-				--passValue = 'font',
-			},
-			hidenametext = {
-				type = 'toggle',
-				name = L["Hide Name Text"],
-				desc = L["Disable the text that displays the spell name/rank"],
-				get = get,
-				set = set,
-				--passValue = 'hidenametext',
-				order = 401,
-			},
-			nametextposition = {
-				type = 'select',
-					name = L["Name Text Position"],
-					desc = L["Set the alignment of the spell name text"],
-					get = get,
-					set = set,
-					--passValue = 'nametextposition',
-					values = {L["Left"], L["Right"], L["Center"]},
-					disabled = hidenametextoptions,
-					order = 402,
-			},
-			nametextx = {
-					type = 'range',
-					name = L["Name Text X Offset"],
-					desc = L["Adjust the X position of the name text"],
-					get = get,
-					set = set,
-					--passValue = 'nametextx',
-					min = -35,
-					max = 35,
-					step = 1,
-					disabled = hidenametextoptions,
-					order = 402,
-			},
-			nametexty = {
-					type = 'range',
-					name = L["Name Text Y Offset"],
-					desc = L["Adjust the Y position of the name text"],
-					get = get,
-					set = set,
-					--passValue = 'nametexty',
-					min = -35,
-					max = 35,
-					step = 1,
-					disabled = hidenametextoptions,
-					order = 402,
-			},
-			namefontsize = {
-					type = 'range',
-					name = L["Name Text Font Size"],
-					desc = L["Set the size of the spell name text"],
-					min = 7,
-					max = 20,
-					step = 1,
-					order = 403,
-					get = get,
-					set = set,
-					disabled = hidenametextoptions,
-					--passValue = 'fontsize',
-			},
-			targetname = {
-					type = 'toggle',
-					name = L["Target Name"],
-					desc = L["Display target name of spellcasts after spell name"],
-					get = get,
-					set = set,
-					--passValue = 'targetname',
-					order = 404,
-			},			
-			spellrank = {
-					type = 'toggle',
-					name = L["Spell Rank"],
-					desc = L["Display the rank of spellcasts alongside their name"],
-					get = get,
-					set = set,
-					disabled = hidenametextoptions,
-					--passValue = 'spellrank',
-					order = 405,
-			},
-			spellrankstyle = {
-					type = 'select',
-					name = L["Spell Rank Style"],
-					desc = L["Set the display style of the spell rank"],
-					get = get,
-					set = set,
-					disabled = function()
-						return db.hidenametext or not db.spellrank
-					end,
-					--passValue = 'spellrankstyle',
-					values = {L["Number"], L["Roman"], L["Full Text"], L["Roman Full Text"]},
-					order = 406,
-			},
-			hidetimetext = {
-					type = 'toggle',
-					name = L["Hide Time Text"],
-					desc = L["Disable the text that displays the time remaining on your cast"],
-					get = get,
-					set = set,
-					--passValue = 'hidetimetext',
-					order = 411,
-			},
-			hidecasttime = {
-					type = 'toggle',
-					name = L["Hide Cast Time"],
-					desc = L["Disable the text that displays the total cast time"],
-					get = get,
-					set = set,
-					--passValue = 'hidecasttime',
-					disabled = hidetimetextoptions,
-					order = 412,
-			},
-			casttimeprecision = {
-					type = 'range',
-					name = L["Cast Time Precision"],
-					desc = L["Set the precision (i.e. number of decimal places) for the cast time text"],
-					min = 1,
-					max = 3,
-					step = 1,
-					order = 413,
-					get = get,
-					set = set,
-					disabled = hidecasttimeprecision,
-					--passValue = 'casttimeprecision',
-			},
-			timefontsize = {
-					type = 'range',
-					name = L["Time Font Size"],
-					desc = L["Set the size of the time text"],
-					min = 7,
-					max = 20,
-					step = 1,
-					order = 414,
-					get = get,
-					set = set,
-					disabled = hidetimetextoptions,
-					--passValue = 'timefontsize',
-			},
-			timetextposition = {
-					type = 'select',
-					name = L["Time Text Position"],
-					desc = L["Set the alignment of the time text"],
-					get = get,
-					set = set,
-					--passValue = 'timetextposition',
-					values = {L["Left"], L["Right"], L["Center"], L["Cast Start Side"], L["Cast End Side"]},
-					disabled = hidetimetextoptions,
-					order = 415,
-			},
-			timetextx = {
-					type = 'range',
-					name = L["Time Text X Offset"],
-					desc = L["Adjust the X position of the time text"],
-					get = get,
-					set = set,
-					--passValue = 'timetextx',
-					min = -35,
-					max = 35,
-					step = 1,
-					disabled = hidetimetextoptions,
-					order = 416,
-			},
-			timetexty = {
-					type = 'range',
-					name = L["Time Text Y Offset"],
-					desc = L["Adjust the Y position of the time text"],
-					get = get,
-					set = set,
-					--passValue = 'timetexty',
-					min = -35,
-					max = 35,
-					step = 1,
-					disabled = hidetimetextoptions,
-					order = 417,
-			},
-			border = {
-					type = 'select',
-					dialogControl = 'LSM30_Border',
-					name = L["Border"],
-					desc = L["Set the border style"],
-					get = get,
-					set = set,
-					--passValue = 'border',
-					values = AceGUIWidgetLSMlists.border,
-					order = 418,
-			},
-			snaptocenter = {
-					type = 'select',
-					name = L["Snap to Center"],
-					desc = L["Move the CastBar to center of the screen along the specified axis"],
-					get = false,
-					set = function(v)
-						local scale = db.scale
-						if v == L["Horizontal"] then
-							db.x = (UIParent:GetWidth() / 2 - (db.w * scale) / 2) / scale
-						else -- L["Vertical"]
-							db.y = (UIParent:GetHeight() / 2 - (db.h * scale) / 2) / scale
-						end
-						Player.ApplySettings()
-					end,
-					values = {L["Horizontal"], L["Vertical"]},
-					order = 503,
-			},
-		copysettings = {
-			type = 'select',
-			name = L["Copy Settings From"],
-			desc = L["Select a bar from which to copy settings"],
-			get = false,
-			set = function(v)
-					local from = Quartz3:AcquireDBNamespace(v)
-					Quartz3:CopySettings(from.profile, Player.db.profile)
-					Player.ApplySettings()
-			end,
-			values = {L["Target"], L["Focus"], L["Pet"]},
-			order = 504
-		},
-	}
+do 
+	local function dragstart()
+		castBarParent:StartMoving()
 	end
-	return options
+
+	local function dragstop()
+		db.x = castBarParent:GetLeft()
+		db.y = castBarParent:GetBottom()
+		castBarParent:StopMovingOrSizing()
+	end
+
+	local function nothing()
+		castBarParent:SetAlpha(db.alpha)
+	end
+
+	local function hideiconoptions()
+		return db.hideicon
+	end
+
+	local function hidetimetextoptions()
+		return db.hidetimetext
+	end
+
+	local function hidecasttimeprecision()
+		return db.hidetimetext or db.hidecasttime
+	end
+
+	local function hidenametextoptions()
+		return db.hidenametext
+	end
+	
+	local function set(field, value)
+		db[field] = value
+	end
+	
+	local function get(field)
+		return db[field]
+	end
+
+	local options
+	function getOptions()
+		if not options then
+			 options = {
+				lock = {
+					type = 'toggle',
+					name = L["Lock"],
+					desc = L["Toggle Cast Bar lock"],
+					get = function()
+							return locked
+					end,
+					set = function(v)
+						if v then
+							castBarParent.Hide = nil
+							castBarParent:EnableMouse(false)
+							castBarParent:SetScript('OnDragStart', nil)
+							castBarParent:SetScript('OnDragStop', nil)
+							if not (Player.channeling or Player.casting) then
+								castBarParent:Hide()
+							end
+						else
+							castBarParent:Show()
+							castBarParent:EnableMouse(true)
+							castBarParent:SetScript('OnDragStart', dragstart)
+							castBarParent:SetScript('OnDragStop', dragstop) 
+							castBarParent:SetAlpha(1)
+							castBarParent.Hide = nothing
+							castBarIcon:SetTexture("Interface\\Icons\\Temp")
+						end
+						locked = v
+					end,
+				order = 100,
+				},
+				hideblizz = {
+					type = 'toggle',
+					name = L["Disable Blizzard Cast Bar"],
+					desc = L["Disable and hide the default UI's casting bar"],
+					get = get,
+					set = set,
+					--passValue = 'hideblizz',
+					order = 101,
+				},
+				h = {
+					type = 'range',
+					name = L["Height"],
+					desc = L["Height"],
+					min = 10,
+					max = 50,
+					step = 1,
+					order = 200,
+					get = get,
+					set = set,
+					--passValue = 'h',
+				},
+				w = {
+					type = 'range',
+					name = L["Width"],
+					desc = L["Width"],
+					min = 50,
+					max = 1500,
+					step = 5,
+					order = 200,
+					get = get,
+					set = set,
+					--passValue = 'w',
+				},
+				x = {
+					type = 'input',
+					name = L["X"],
+					desc = L["Set an exact X value for this bar's position."],
+					get = get,
+					set = set,
+					--passValue = 'x',
+					order = 200,
+					validate = function(v)
+						return tonumber(v) and true
+					end,
+					--usage = L["Number"],
+				},
+				y = {
+					type = 'input',
+					name = L["Y"],
+					desc = L["Set an exact Y value for this bar's position."],
+					get = get,
+					set = set,
+					--passValue = 'y',
+					order = 200,
+					validate = function(v)
+								return tonumber(v) and true
+					end,
+					--usage = L["Number"],
+				},
+				scale = {
+					type = 'range',
+					name = L["Scale"],
+					desc = L["Scale"],
+					min = 0.2,
+					max = 1,
+					step = 0.025,
+					order = 201,
+					get = get,
+					set = set,
+					--passValue = 'scale',
+				},
+				alpha = {
+					type = 'range',
+					name = L["Alpha"],
+					desc = L["Alpha"],
+					isPercent = true,
+					min = 0.1,
+					max = 1,
+					step = 0.025,
+					order = 202,
+					get = get,
+					set = set,
+					--passValue = 'alpha',
+				},
+				hideicon = {
+					type = 'toggle',
+					name = L["Hide Icon"],
+					desc = L["Hide Spell Cast Icon"],
+					get = get,
+					set = set,
+					--passValue = 'hideicon',
+					order = 301,
+				},
+				iconalpha = {
+					type = 'range',
+					name = L["Icon Alpha"],
+					desc = L["Set the Spell Cast icon alpha"],
+					isPercent = true,
+					min = 0.1,
+					max = 1,
+					step = 0.025,
+					order = 301,
+					get = get,
+					set = set,
+					disabled = hideiconoptions,
+					--passValue = 'iconalpha',
+				},
+				iconposition = {
+					type = 'select',
+					name = L["Icon Position"],
+					desc = L["Set where the Spell Cast icon appears"],
+					get = get,
+					set = set,
+					disabled = hideiconoptions,
+					--passValue = 'iconposition',
+					values = {L["Left"], L["Right"]},
+					order = 301,
+				},
+				icongap = {
+					type = 'range',
+					name = L["Icon Gap"],
+					desc = L["Space between the cast bar and the icon."],
+					min = -35,
+					max = 35,
+					step = 1,
+					order = 301,
+					get = get,
+					set = set,
+					disabled = hideiconoptions,
+					--passValue = 'icongap',
+				},
+				texture = {
+					type = 'select',
+					dialogControl = 'LSM30_Statusbar',
+					name = L["Texture"],
+					desc = L["Set the Cast Bar Texture"],
+					values = AceGUIWidgetLSMlists.statusbar,
+					order = 302,
+					get = get,
+					set = set,
+					--passValue = 'texture',
+				},
+				font = {
+					type = 'select',
+					dialogControl = 'LSM30_Font',
+					name = L["Font"],
+					desc = L["Set the font used in the Name and Time texts"],
+					values = AceGUIWidgetLSMlists.font,
+					order = 400,
+					get = get,
+					set = set,
+					--passValue = 'font',
+				},
+				hidenametext = {
+					type = 'toggle',
+					name = L["Hide Name Text"],
+					desc = L["Disable the text that displays the spell name/rank"],
+					get = get,
+					set = set,
+					--passValue = 'hidenametext',
+					order = 401,
+				},
+				nametextposition = {
+					type = 'select',
+						name = L["Name Text Position"],
+						desc = L["Set the alignment of the spell name text"],
+						get = get,
+						set = set,
+						--passValue = 'nametextposition',
+						values = {L["Left"], L["Right"], L["Center"]},
+						disabled = hidenametextoptions,
+						order = 402,
+				},
+				nametextx = {
+						type = 'range',
+						name = L["Name Text X Offset"],
+						desc = L["Adjust the X position of the name text"],
+						get = get,
+						set = set,
+						--passValue = 'nametextx',
+						min = -35,
+						max = 35,
+						step = 1,
+						disabled = hidenametextoptions,
+						order = 402,
+				},
+				nametexty = {
+						type = 'range',
+						name = L["Name Text Y Offset"],
+						desc = L["Adjust the Y position of the name text"],
+						get = get,
+						set = set,
+						--passValue = 'nametexty',
+						min = -35,
+						max = 35,
+						step = 1,
+						disabled = hidenametextoptions,
+						order = 402,
+				},
+				namefontsize = {
+						type = 'range',
+						name = L["Name Text Font Size"],
+						desc = L["Set the size of the spell name text"],
+						min = 7,
+						max = 20,
+						step = 1,
+						order = 403,
+						get = get,
+						set = set,
+						disabled = hidenametextoptions,
+						--passValue = 'fontsize',
+				},
+				targetname = {
+						type = 'toggle',
+						name = L["Target Name"],
+						desc = L["Display target name of spellcasts after spell name"],
+						get = get,
+						set = set,
+						--passValue = 'targetname',
+						order = 404,
+				},			
+				spellrank = {
+						type = 'toggle',
+						name = L["Spell Rank"],
+						desc = L["Display the rank of spellcasts alongside their name"],
+						get = get,
+						set = set,
+						disabled = hidenametextoptions,
+						--passValue = 'spellrank',
+						order = 405,
+				},
+				spellrankstyle = {
+						type = 'select',
+						name = L["Spell Rank Style"],
+						desc = L["Set the display style of the spell rank"],
+						get = get,
+						set = set,
+						disabled = function()
+							return db.hidenametext or not db.spellrank
+						end,
+						--passValue = 'spellrankstyle',
+						values = {L["Number"], L["Roman"], L["Full Text"], L["Roman Full Text"]},
+						order = 406,
+				},
+				hidetimetext = {
+						type = 'toggle',
+						name = L["Hide Time Text"],
+						desc = L["Disable the text that displays the time remaining on your cast"],
+						get = get,
+						set = set,
+						--passValue = 'hidetimetext',
+						order = 411,
+				},
+				hidecasttime = {
+						type = 'toggle',
+						name = L["Hide Cast Time"],
+						desc = L["Disable the text that displays the total cast time"],
+						get = get,
+						set = set,
+						--passValue = 'hidecasttime',
+						disabled = hidetimetextoptions,
+						order = 412,
+				},
+				casttimeprecision = {
+						type = 'range',
+						name = L["Cast Time Precision"],
+						desc = L["Set the precision (i.e. number of decimal places) for the cast time text"],
+						min = 1,
+						max = 3,
+						step = 1,
+						order = 413,
+						get = get,
+						set = set,
+						disabled = hidecasttimeprecision,
+						--passValue = 'casttimeprecision',
+				},
+				timefontsize = {
+						type = 'range',
+						name = L["Time Font Size"],
+						desc = L["Set the size of the time text"],
+						min = 7,
+						max = 20,
+						step = 1,
+						order = 414,
+							get = get,
+						set = set,
+						disabled = hidetimetextoptions,
+						--passValue = 'timefontsize',
+				},
+				timetextposition = {
+						type = 'select',
+						name = L["Time Text Position"],
+						desc = L["Set the alignment of the time text"],
+						get = get,
+						set = set,
+						--passValue = 'timetextposition',
+						values = {L["Left"], L["Right"], L["Center"], L["Cast Start Side"], L["Cast End Side"]},
+						disabled = hidetimetextoptions,
+						order = 415,
+				},
+				timetextx = {
+						type = 'range',
+						name = L["Time Text X Offset"],
+						desc = L["Adjust the X position of the time text"],
+						get = get,
+						set = set,
+						--passValue = 'timetextx',
+						min = -35,
+						max = 35,
+						step = 1,
+						disabled = hidetimetextoptions,
+						order = 416,
+				},
+				timetexty = {
+						type = 'range',
+						name = L["Time Text Y Offset"],
+						desc = L["Adjust the Y position of the time text"],
+						get = get,
+						set = set,
+						--passValue = 'timetexty',
+						min = -35,
+						max = 35,
+						step = 1,
+						disabled = hidetimetextoptions,
+						order = 417,
+				},
+				border = {
+						type = 'select',
+						dialogControl = 'LSM30_Border',
+						name = L["Border"],
+						desc = L["Set the border style"],
+						get = get,
+						set = set,
+						--passValue = 'border',
+						values = AceGUIWidgetLSMlists.border,
+						order = 418,
+				},
+				snaptocenter = {
+						type = 'select',
+						name = L["Snap to Center"],
+						desc = L["Move the CastBar to center of the screen along the specified axis"],
+						get = false,
+						set = function(v)
+							local scale = db.scale
+							if v == L["Horizontal"] then
+								db.x = (UIParent:GetWidth() / 2 - (db.w * scale) / 2) / scale
+							else -- L["Vertical"]
+								db.y = (UIParent:GetHeight() / 2 - (db.h * scale) / 2) / scale
+							end
+							Player.ApplySettings()
+						end,
+						values = {L["Horizontal"], L["Vertical"]},
+						order = 503,
+				},
+			copysettings = {
+				type = 'select',
+				name = L["Copy Settings From"],
+				desc = L["Select a bar from which to copy settings"],
+				get = false,
+				set = function(v)
+						local from = Quartz3:AcquireDBNamespace(v)
+						Quartz3:CopySettings(from.profile, Player.db.profile)
+						Player.ApplySettings()
+				end,
+				values = {L["Target"], L["Focus"], L["Pet"]},
+				order = 504
+			},
+		}
+		end
+		return options
+	end
 end
 
 local function timenum(num, isCastTime)
@@ -676,10 +677,6 @@ do
 		if castText then castBarText:SetText(castText .. " -> " .. Player.targetName) end
 	end
 	end
-end
-
-function Player:GetOptions()
-	return options
 end
 
 function Player:OnInitialize()
