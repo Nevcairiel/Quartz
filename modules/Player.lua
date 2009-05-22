@@ -20,8 +20,10 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
 local MODNAME = L["Player"]
 local Player = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
+local Latency = Quartz3:GetModule(L["Latency"])
 
 local media = LibStub("LibSharedMedia-3.0")
+local lsmlist = AceGUIWidgetLSMlists
 
 local math_min = _G.math.min
 local unpack = _G.unpack
@@ -279,7 +281,7 @@ do
 					dialogControl = 'LSM30_Statusbar',
 					name = L["Texture"],
 					desc = L["Set the Cast Bar Texture"],
-					values = AceGUIWidgetLSMlists.statusbar,
+					values = lsmlist.statusbar,
 					order = 302,
 					get = get,
 					set = set,
@@ -290,7 +292,7 @@ do
 					dialogControl = 'LSM30_Font',
 					name = L["Font"],
 					desc = L["Set the font used in the Name and Time texts"],
-					values = AceGUIWidgetLSMlists.font,
+					values = lsmlist.font,
 					order = 400,
 					get = get,
 					set = set,
@@ -477,7 +479,7 @@ do
 						get = get,
 						set = set,
 						--passValue = 'border',
-						values = AceGUIWidgetLSMlists.border,
+						values = lsmlist.border,
 						order = 418,
 				},
 				snaptocenter = {
@@ -503,8 +505,8 @@ do
 				desc = L["Select a bar from which to copy settings"],
 				get = false,
 				set = function(v)
-						local from = Quartz3:AcquireDBNamespace(v)
-						Quartz3:CopySettings(from.profile, Player.db.profile)
+						local from = Quartz3:GetModule(v)
+						Quartz3:CopySettings(from.db.profile, Player.db.profile)
 						Player.ApplySettings()
 				end,
 				values = {L["Target"], L["Focus"], L["Pet"]},
@@ -612,11 +614,10 @@ end
 Player.OnUpdate = OnUpdate
 
 local function OnHide()
-	local ql = Quartz3:GetModule("Latency", true)
-	if ql then
-		if ql:IsEnabled() and ql.lagbox then
-					ql.lagbox:Hide()
-					ql.lagtext:Hide()
+	if Latency then
+		if Latency:IsEnabled() and Latency.lagbox then
+					Latency.lagbox:Hide()
+					Latency.lagtext:Hide()
 		end
 	end
 	castBarParent:SetScript('OnUpdate', nil)
@@ -693,7 +694,9 @@ function Player:OnInitialize()
 	castBarParent:SetMovable(true)
 	castBarParent:RegisterForDrag('LeftButton')
 	castBarParent:SetClampedToScreen(true)
-	
+
+	self.Bar = castBarParent
+
 	castBar = CreateFrame("StatusBar", nil, castBarParent)
 	castBarText = castBar:CreateFontString(nil, 'OVERLAY')
 	castBarTimeText = castBar:CreateFontString(nil, 'OVERLAY')

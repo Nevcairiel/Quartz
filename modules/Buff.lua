@@ -20,6 +20,9 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
 local MODNAME = L["Buff"]
 local Buff = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
+local Player = Quartz3:GetModule(L["Player"])
+local Focus = Quartz3:GetModule(L["Focus"])
+local Target = Quartz3:GetModule(L["Focus"])
 
 local media = LibStub("LibSharedMedia-3.0")
 
@@ -41,6 +44,8 @@ local db, options
 
 local new, del = Quartz3.new, Quartz3.del
 local OnUpdate
+
+local showicons
 
 local defaults = {
 	profile = {
@@ -155,521 +160,14 @@ local framefactory = {
 			bar:RegisterForDrag('LeftButton')
 			bar:SetClampedToScreen(true)
 		end
-		self:ApplySettings()
+		Buff:ApplySettings()
 		return bar
 	end
 }
 local targetbars = setmetatable({}, framefactory)
 local focusbars = setmetatable({}, framefactory)
 
-function Buff:OnInitialize()
-	self.db = Mapster.db:RegisterNamespace(MODNAME, defaults)
-	db = self.db.profile
-	
-	self:SetEnabledState(Mapster:GetModuleEnabled(MODNAME))
-	Mapster:RegisterModuleOptions(MODNAME, getOptions, MODNAME)
-end
-
-function Buff:OnEnable()
-	self:RegisterBucketEvent("UNIT_AURA", 0.5)
-	self:RegisterEvent("PLAYER_TARGET_CHANGED", "UpdateBars")
-	self:RegisterEvent("PLAYER_FOCUS_CHANGED", "UpdateBars")
-	media.RegisterCallback(self, "LibSharedMedia_SetGlobal", function(mtype, override)
-		if mtype == "statusbar" then
-			for i, v in pairs(targetbars) do
-				v:SetStatusBarTexture(media:Fetch("statusbar", override))
-			end
-			for i, v in pairs(focusbars) do
-				v:SetStatusBarTexture(media:Fetch("statusbar", override))
-			end
-		end
-	end)
-	Quartz.ApplySettings()
-end
-function Buff:OnDisable()
-	targetbars[1].Hide = nil
-	targetbars[1]:EnableMouse(false)
-	targetbars[1]:SetScript('OnDragStart', nil)
-	targetbars[1]:SetScript('OnDragStop', nil)
-	for _, v in pairs(targetbars) do
-		v:Hide()
-	end
-	focusbars[1].Hide = nil
-	focusbars[1]:EnableMouse(false)
-	focusbars[1]:SetScript('OnDragStart', nil)
-	focusbars[1]:SetScript('OnDragStop', nil)
-	for _, v in pairs(focusbars) do
-		v:Hide()
-	end
-end
-function Buff:UNIT_AURA(units)
-	for unit in pairs(units) do
-		if unit == 'target' then
-			self:UpdateTargetBars()
-		end
-		if unit == 'focus' or UnitIsUnit('focus', unit) then
-			self:UpdateFocusBars()
-		end
-	end
-end
-function Buff:CheckForUpdate()
-	if targetbars[1]:IsShown() then
-		self:UpdateTargetBars()
-	end
-	if focusbars[1]:IsShown() then
-		self:UpdateFocusBars()
-	end
-end
-function Buff:UpdateBars()
-	self:UpdateTargetBars()
-	self:UpdateFocusBars()
-end
-do
-	local function sort(a,b)
-		if db.profile.timesort then
-			if a.isbuff == b.isbuff then
-				return a.remaining < b.remaining
-			else
-				return a.isbuff
-			end
-		else
-			if a.isbuff == b.isbuff then
-				return a.name < b.name
-			else
-				return a.isbuff
-			end
-		end
-	end
-	local tmp = {}
-	local called = false -- prevent recursive calls when new bars are created.
-	function Buff:UpdateTargetBars()
-		if called then
-			return
-		end
-		called = true
-		local db = db.profile
-		if db.target then
-			local currentTime = GetTime()
-			for k in pairs(tmp) do
-				tmp[k] = del(tmp[k])
-			end
-			if db.targetbuffs then
-				for i = 1, 32 do
-					local name, rank, texture, applications, _, duration, expirationTime, caster = UnitBuff('target', i)
-					local remaining = expirationTime and (expirationTime - GetTime()) or nil
-					if not name then
-						break
-					end
-					if (caster=="player" or caster=="pet" or caster=="vehicle") and duration > 0 then
-						local t = new()
-						tmp[#tmp+1] = t
-						t.name = name
-						t.texture = texture
-						t.duration = duration
-						t.remaining = remaining
-						t.isbuff = true
-						t.applications = applications
-					end
-				end
-			end
-			if db.targetdebuffs then
-				for i = 1, 40 do
-					local name, rank, texture, applications, dispeltype, duration, expirationTime, caster = UnitDebuff('target', i)
-					local remaining =  expirationTime and (expirationTime - GetTime()) or nil
-					if not name then
-						break
-					end
-					if (caster=="player" or caster=="pet" or caster=="vehicle") and duration > 0 then
-						local t = new()
-						tmp[#tmp+1] = t
-						t.name = name
-						t.texture = texture
-						t.duration = duration
-						t.remaining = remaining
-						t.dispeltype = dispeltype
-						t.applications = applications
-					end
-				end
-			end
-			sort(tmp, sort)
-			local maxindex = 0
-			for k,v in ipairs(tmp) do
-				maxindex = k
-				local bar = targetbars[k]
-				if v.applications > 1 then
-					bar.text:SetText(('%s (%s)'):format(v.name, v.applications))
-				else
-					bar.text:SetText(v.name)
-				end
-				bar.icon:SetTexture(v.texture)
-				local elapsed = (v.duration - v.remaining)
-				local startTime, endTime = (currentTime - elapsed), (currentTime + v.remaining)
-				bar.startTime = startTime
-				bar.endTime = endTime
-				bar:SetMinMaxValues(startTime, endTime)
-				bar:Show()
-				if v.isbuff then
-					bar:SetStatusBarColor(unpack(db.buffcolor))
-				else
-					if db.debuffsbytype then
-						local dispeltype = v.dispeltype
-						if dispeltype then
-							bar:SetStatusBarColor(unpack(db[dispeltype]))
-						else
-							bar:SetStatusBarColor(unpack(db.debuffcolor))
-						end
-					else
-						bar:SetStatusBarColor(unpack(db.debuffcolor))
-					end
-				end
-			end
-			for i = maxindex+1, #targetbars do
-				targetbars[i]:Hide()
-			end
-		else
-			targetbars[1].Hide = nil
-			targetbars[1]:EnableMouse(false)
-			targetbars[1]:SetScript('OnDragStart', nil)
-			targetbars[1]:SetScript('OnDragStop', nil)
-			for _, v in ipairs(targetbars) do
-				v:Hide()
-			end
-		end
-		if targetbars[1]:IsShown() then
-			if not self:IsEventScheduled('Quartz_Buff-AutoUpdate') then
-				self:ScheduleRepeatingEvent('Quartz_Buff-AutoUpdate', self.CheckForUpdate, 3, self)
-			end
-		elseif not focusbars[1]:IsShown() then
-			if self:IsEventScheduled('Quartz_Buff-AutoUpdate') then
-				self:CancelScheduledEvent('Quartz_Buff-AutoUpdate')
-			end
-		end
-		called = false
-	end
-	function Buff:UpdateFocusBars()
-		if called then
-			return
-		end
-		called = true
-		local db = db.profile
-		if db.focus then
-			local currentTime = GetTime()
-			for k in pairs(tmp) do
-				tmp[k] = del(tmp[k])
-			end
-			if db.focusbuffs then
-				for i = 1, 32 do
-					local name, rank, texture, applications, dispeltype, duration, expirationTime, caster = UnitBuff('focus', i)
-					local remaining =  expirationTime and (expirationTime - GetTime()) or nil
-					if not name then
-						break
-					end
-					if (caster=="player" or caster=="pet" or caster=="vehicle") and duration > 0 then
-						local t = new()
-						tmp[#tmp+1] = t
-						t.name = name
-						t.texture = texture
-						t.duration = duration
-						t.remaining = remaining
-						t.isbuff = true
-						t.applications = applications
-					end
-				end
-			end
-			if db.focusdebuffs then
-				for i = 1, 40 do
-					local name, rank, texture, applications, dispeltype, duration, expirationTime, caster = UnitDebuff('focus', i)
-					local remaining =  expirationTime and (expirationTime - GetTime()) or nil
-					if not name then
-						break
-					end
-					if (caster=="player" or caster=="pet" or caster=="vehicle") and duration > 0 then
-						local t = new()
-						tmp[#tmp+1] = t
-						t.name = name
-						t.texture = texture
-						t.duration = duration
-						t.remaining = remaining
-						t.dispeltype = dispeltype
-						t.applications = applications
-					end
-				end
-			end
-			sort(tmp, sort)
-			local maxindex = 0
-			for k,v in ipairs(tmp) do
-				maxindex = k
-				local bar = focusbars[k]
-				if v.applications > 1 then
-					bar.text:SetText(('%s (%s)'):format(v.name, v.applications))
-				else
-					bar.text:SetText(v.name)
-				end
-				bar.icon:SetTexture(v.texture)
-				local elapsed = (v.duration - v.remaining)
-				local startTime, endTime = (currentTime - elapsed), (currentTime + v.remaining)
-				bar.startTime = startTime
-				bar.endTime = endTime
-				bar:SetMinMaxValues(startTime, endTime)
-				bar:Show()
-				if v.isbuff then
-					bar:SetStatusBarColor(unpack(db.buffcolor))
-				else
-					if db.debuffsbytype then
-						local dispeltype = v.dispeltype
-						if dispeltype then
-							bar:SetStatusBarColor(unpack(db[dispeltype]))
-						else
-							bar:SetStatusBarColor(unpack(db.debuffcolor))
-						end
-					else
-						bar:SetStatusBarColor(unpack(db.debuffcolor))
-					end
-				end
-			end
-			for i = maxindex+1, #focusbars do
-				focusbars[i]:Hide()
-			end
-		else
-			focusbars[1].Hide = nil
-			focusbars[1]:EnableMouse(false)
-			focusbars[1]:SetScript('OnDragStart', nil)
-			focusbars[1]:SetScript('OnDragStop', nil)
-			for _, v in ipairs(focusbars) do
-				v:Hide()
-			end
-		end
-		if focusbars[1]:IsShown() then
-			if not self:IsEventScheduled('Quartz_Buff-AutoUpdate') then
-				self:ScheduleRepeatingEvent('Quartz_Buff-AutoUpdate', self.CheckForUpdate, 3, self)
-			end
-		elseif not targetbars[1]:IsShown() then
-			if self:IsEventScheduled('Quartz_Buff-AutoUpdate') then
-				self:CancelScheduledEvent('Quartz_Buff-AutoUpdate')
-			end
-		end
-		called = false
-	end
-end
-do
-	local function apply(unit, i, bar, db, direction)
-		local bars, position, icons, iconside, gap, spacing, offset, anchor, x, y, grow, height, width
-		local qpdb = Quartz:AcquireDBNamespace("Player").profile
-		if unit == 'target' then
-			bars = targetbars
-			position = db.targetposition
-			icons = db.targeticons
-			iconside = db.targeticonside
-			gap = db.targetgap
-			spacing = db.targetspacing
-			offset = db.targetoffset
-			anchor = db.targetanchor
-			x = db.targetx
-			y = db.targety
-			grow = db.targetgrowdirection
-			width = db.targetwidth
-			height = db.targetheight
-		else
-			bars = focusbars
-			position = db.focusposition
-			icons = db.focusicons
-			iconside = db.focusiconside
-			gap = db.focusgap
-			spacing = db.focusspacing
-			offset = db.focusoffset
-			anchor = db.focusanchor
-			x = db.focusx
-			y = db.focusy
-			grow = db.focusgrowdirection
-			width = db.focuswidth
-			height = db.focusheight
-		end
-		bar:ClearAllPoints()
-		bar:SetStatusBarTexture(media:Fetch('statusbar', db.bufftexture))
-		bar:SetWidth(width)
-		bar:SetHeight(height)
-		bar:SetScale(qpdb.scale)
-		bar:SetAlpha(db.buffalpha)
-		
-		if anchor == L["Free"] then
-			if i == 1 then
-				bar:SetPoint('BOTTOMLEFT', UIParent, 'BOTTOMLEFT', x, y)
-				if grow == L["Up"] then
-					direction = 1
-				else --L["Down"]
-					direction = -1
-				end
-			else
-				if direction == 1 then
-					bar:SetPoint('BOTTOMRIGHT', bars[i-1], 'TOPRIGHT', 0, spacing)
-				else -- -1
-					bar:SetPoint('TOPRIGHT', bars[i-1], 'BOTTOMRIGHT', 0, -1 * spacing)
-				end
-			end
-		else
-			if i == 1 then
-				local anchorframe
-				if anchor == L["Focus"] and QuartzFocusBar then
-					anchorframe = QuartzFocusBar
-				elseif anchor == L["Target"] and QuartzTargetBar then
-					anchorframe = QuartzTargetBar
-				else -- L["Player"]
-					anchorframe = QuartzCastBar
-				end
-				
-				if position == L["Top"] then
-					direction = 1
-					bar:SetPoint('BOTTOM', anchorframe, 'TOP', 0, gap)
-				elseif position == L["Bottom"] then
-					direction = -1
-					bar:SetPoint('TOP', anchorframe, 'BOTTOM', 0, -1 * gap)
-				elseif position == L["Top Right"] then
-					direction = 1
-					bar:SetPoint('BOTTOMRIGHT', anchorframe, 'TOPRIGHT', -1 * offset, gap)
-				elseif position == L["Bottom Right"] then
-					direction = -1
-					bar:SetPoint('TOPRIGHT', anchorframe, 'BOTTOMRIGHT', -1 * offset, -1 * gap)
-				elseif position == L["Top Left"] then
-					direction = 1
-					bar:SetPoint('BOTTOMLEFT', anchorframe, 'TOPLEFT', offset, gap)
-				elseif position == L["Bottom Left"] then
-					direction = -1
-					bar:SetPoint('TOPLEFT', anchorframe, 'BOTTOMLEFT', offset, -1 * gap)
-				elseif position == L["Left (grow up)"] then
-					if iconside == L["Right"] and showicons then
-						offset = offset + height
-					end
-					if qpdb.iconposition == L["Left"] and not qpdb.hideicon then
-						offset = offset + qpdb.h
-					end
-					direction = 1
-					bar:SetPoint('BOTTOMRIGHT', anchorframe, 'BOTTOMLEFT', -1 * offset, gap)
-				elseif position == L["Left (grow down)"] then
-					if iconside == L["Right"] and showicons then
-						offset = offset + height
-					end
-					if qpdb.iconposition == L["Left"] and not qpdb.hideicon then
-						offset = offset + qpdb.h
-					end
-					direction = -1
-					bar:SetPoint('TOPRIGHT', anchorframe, 'TOPLEFT', -3 * offset, -1 * gap)
-				elseif position == L["Right (grow up)"] then
-					if iconside == L["Left"] and showicons then
-						offset = offset + height
-					end
-					if qpdb.iconposition == L["Right"] and not qpdb.hideicon then
-						offset = offset + qpdb.h
-					end
-					direction = 1
-					bar:SetPoint('BOTTOMLEFT', anchorframe, 'BOTTOMRIGHT', offset, gap)
-				elseif position == L["Right (grow down)"] then
-					if iconside == L["Left"] and showicons then
-						offset = offset + height
-					end
-					if qpdb.iconposition == L["Right"] and not qpdb.hideicon then
-						offset = offset + qpdb.h
-					end
-					direction = -1
-					bar:SetPoint('TOPLEFT', anchorframe, 'TOPRIGHT', offset, -1 * gap)
-				end
-			else
-				if direction == 1 then
-					bar:SetPoint('BOTTOMRIGHT', bars[i-1], 'TOPRIGHT', 0, spacing)
-				else -- -1
-					bar:SetPoint('TOPRIGHT', bars[i-1], 'BOTTOMRIGHT', 0, -1 * spacing)
-				end
-			end
-		end
-		
-		local timetext = bar.timetext
-		if db.bufftimetext then
-			timetext:Show()
-			timetext:ClearAllPoints()
-			timetext:SetWidth(width)
-			timetext:SetPoint("RIGHT", bar, "RIGHT", -2, 0)
-			timetext:SetJustifyH("RIGHT")
-		else
-			timetext:Hide()
-		end
-		timetext:SetFont(media:Fetch('font', db.bufffont), db.bufffontsize)
-		timetext:SetShadowColor( 0, 0, 0, 1)
-		timetext:SetShadowOffset( 0.8, -0.8 )
-		timetext:SetTextColor(unpack(db.bufftextcolor))
-		timetext:SetNonSpaceWrap(false)
-		timetext:SetHeight(height)
-		
-		local temptext = timetext:GetText()
-		timetext:SetText('10.0')
-		local normaltimewidth = timetext:GetStringWidth()
-		timetext:SetText(temptext)
-		
-		local text = bar.text
-		if db.buffnametext then
-			text:Show()
-			text:ClearAllPoints()
-			text:SetPoint("LEFT", bar, "LEFT", 2, 0)
-			text:SetJustifyH("LEFT")
-			if db.bufftimetext then
-				text:SetWidth(width - normaltimewidth)
-			else
-				text:SetWidth(width)
-			end
-		else
-			text:Hide()
-		end
-		text:SetFont(media:Fetch('font', db.bufffont), db.bufffontsize)
-		text:SetShadowColor( 0, 0, 0, 1)
-		text:SetShadowOffset( 0.8, -0.8 )
-		text:SetTextColor(unpack(db.bufftextcolor))
-		text:SetNonSpaceWrap(false)
-		text:SetHeight(height)
-		
-		local icon = bar.icon
-		if icons then
-			icon:Show()
-			icon:SetWidth(height-1)
-			icon:SetHeight(height-1)
-			icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
-			icon:ClearAllPoints()
-			if iconside == L["Left"] then
-				icon:SetPoint('RIGHT', bar, "LEFT", -1, 0)
-			else
-				icon:SetPoint('LEFT', bar, "RIGHT", 1, 0)
-			end
-		else
-			icon:Hide()
-		end
-		
-		return direction
-	end
-	function Buff:ApplySettings()
-		if Quartz3:IsModuleActive('Buff') and db then
-			local db = db.profile
-			local direction
-			if db.targetanchor ~= L["Free"] then
-				targetbars[1].Hide = nil
-				targetbars[1]:EnableMouse(false)
-				targetbars[1]:SetScript('OnDragStart', nil)
-				targetbars[1]:SetScript('OnDragStop', nil)
-			end
-			if db.focusanchor ~= L["Free"] then
-				focusbars[1].Hide = nil
-				focusbars[1]:EnableMouse(false)
-				focusbars[1]:SetScript('OnDragStart', nil)
-				focusbars[1]:SetScript('OnDragStop', nil)
-			end
-			for i, v in pairs(targetbars) do
-				direction = apply('target', i, v, db, direction)
-			end
-			direction = nil
-			for i, v in pairs(focusbars) do
-				direction = apply('focus', i, v, db, direction)
-			end
-			self:UpdateBars()
-		end
-	end
-end
-
+local getOptions
 do
 	local function set(field, value)
 		db.profile[field] = value
@@ -742,7 +240,8 @@ do
 		focusbars[1]:SetAlpha(db.profile.buffalpha)
 	end
 
-	function Buff:GetOptions()
+	local options
+	function getOptions()
 		if not options then options = {
 			toggle = {
 				type = 'toggle',
@@ -839,7 +338,7 @@ do
 								bar:EnableMouse(false)
 								bar:SetScript('OnDragStart', nil)
 								bar:SetScript('OnDragStop', nil)
-								self:UpdateBars()
+								Buff:UpdateBars()
 							else
 								bar:Show()
 								bar:EnableMouse(true)
@@ -1051,7 +550,7 @@ do
 								bar:EnableMouse(false)
 								bar:SetScript('OnDragStart', nil)
 								bar:SetScript('OnDragStop', nil)
-								self:UpdateBars()
+								Buff:UpdateBars()
 							else
 								bar:Show()
 								bar:EnableMouse(true)
@@ -1351,3 +850,512 @@ do
 		end
 	end
 end
+
+function Buff:OnInitialize()
+	self.db = Quartz3.db:RegisterNamespace(MODNAME, defaults)
+	db = self.db.profile
+	
+	self:SetEnabledState(Quartz3:GetModuleEnabled(MODNAME))
+	Quartz3:RegisterModuleOptions(MODNAME, getOptions, MODNAME)
+end
+
+function Buff:OnEnable()
+	self:RegisterBucketEvent("UNIT_AURA", 0.5)
+	self:RegisterEvent("PLAYER_TARGET_CHANGED", "UpdateBars")
+	self:RegisterEvent("PLAYER_FOCUS_CHANGED", "UpdateBars")
+	media.RegisterCallback(self, "LibSharedMedia_SetGlobal", function(mtype, override)
+		if mtype == "statusbar" then
+			for i, v in pairs(targetbars) do
+				v:SetStatusBarTexture(media:Fetch("statusbar", override))
+			end
+			for i, v in pairs(focusbars) do
+				v:SetStatusBarTexture(media:Fetch("statusbar", override))
+			end
+		end
+	end)
+	Quartz3.ApplySettings()
+end
+function Buff:OnDisable()
+	targetbars[1].Hide = nil
+	targetbars[1]:EnableMouse(false)
+	targetbars[1]:SetScript('OnDragStart', nil)
+	targetbars[1]:SetScript('OnDragStop', nil)
+	for _, v in pairs(targetbars) do
+		v:Hide()
+	end
+	focusbars[1].Hide = nil
+	focusbars[1]:EnableMouse(false)
+	focusbars[1]:SetScript('OnDragStart', nil)
+	focusbars[1]:SetScript('OnDragStop', nil)
+	for _, v in pairs(focusbars) do
+		v:Hide()
+	end
+end
+function Buff:UNIT_AURA(units)
+	for unit in pairs(units) do
+		if unit == 'target' then
+			self:UpdateTargetBars()
+		end
+		if unit == 'focus' or UnitIsUnit('focus', unit) then
+			self:UpdateFocusBars()
+		end
+	end
+end
+function Buff:CheckForUpdate()
+	if targetbars[1]:IsShown() then
+		self:UpdateTargetBars()
+	end
+	if focusbars[1]:IsShown() then
+		self:UpdateFocusBars()
+	end
+end
+function Buff:UpdateBars()
+	self:UpdateTargetBars()
+	self:UpdateFocusBars()
+end
+do
+	local function sort(a,b)
+		if db.profile.timesort then
+			if a.isbuff == b.isbuff then
+				return a.remaining < b.remaining
+			else
+				return a.isbuff
+			end
+		else
+			if a.isbuff == b.isbuff then
+				return a.name < b.name
+			else
+				return a.isbuff
+			end
+		end
+	end
+	local tmp = {}
+	local called = false -- prevent recursive calls when new bars are created.
+	function Buff:UpdateTargetBars()
+		if called then
+			return
+		end
+		called = true
+		local db = db.profile
+		if db.target then
+			local currentTime = GetTime()
+			for k in pairs(tmp) do
+				tmp[k] = del(tmp[k])
+			end
+			if db.targetbuffs then
+				for i = 1, 32 do
+					local name, rank, texture, applications, _, duration, expirationTime, caster = UnitBuff('target', i)
+					local remaining = expirationTime and (expirationTime - GetTime()) or nil
+					if not name then
+						break
+					end
+					if (caster=="player" or caster=="pet" or caster=="vehicle") and duration > 0 then
+						local t = new()
+						tmp[#tmp+1] = t
+						t.name = name
+						t.texture = texture
+						t.duration = duration
+						t.remaining = remaining
+						t.isbuff = true
+						t.applications = applications
+					end
+				end
+			end
+			if db.targetdebuffs then
+				for i = 1, 40 do
+					local name, rank, texture, applications, dispeltype, duration, expirationTime, caster = UnitDebuff('target', i)
+					local remaining =  expirationTime and (expirationTime - GetTime()) or nil
+					if not name then
+						break
+					end
+					if (caster=="player" or caster=="pet" or caster=="vehicle") and duration > 0 then
+						local t = new()
+						tmp[#tmp+1] = t
+						t.name = name
+						t.texture = texture
+						t.duration = duration
+						t.remaining = remaining
+						t.dispeltype = dispeltype
+						t.applications = applications
+					end
+				end
+			end
+			sort(tmp, sort)
+			local maxindex = 0
+			for k,v in ipairs(tmp) do
+				maxindex = k
+				local bar = targetbars[k]
+				if v.applications > 1 then
+					bar.text:SetText(('%s (%s)'):format(v.name, v.applications))
+				else
+					bar.text:SetText(v.name)
+				end
+				bar.icon:SetTexture(v.texture)
+				local elapsed = (v.duration - v.remaining)
+				local startTime, endTime = (currentTime - elapsed), (currentTime + v.remaining)
+				bar.startTime = startTime
+				bar.endTime = endTime
+				bar:SetMinMaxValues(startTime, endTime)
+				bar:Show()
+				if v.isbuff then
+					bar:SetStatusBarColor(unpack(db.buffcolor))
+				else
+					if db.debuffsbytype then
+						local dispeltype = v.dispeltype
+						if dispeltype then
+							bar:SetStatusBarColor(unpack(db[dispeltype]))
+						else
+							bar:SetStatusBarColor(unpack(db.debuffcolor))
+						end
+					else
+						bar:SetStatusBarColor(unpack(db.debuffcolor))
+					end
+				end
+			end
+			for i = maxindex+1, #targetbars do
+				targetbars[i]:Hide()
+			end
+		else
+			targetbars[1].Hide = nil
+			targetbars[1]:EnableMouse(false)
+			targetbars[1]:SetScript('OnDragStart', nil)
+			targetbars[1]:SetScript('OnDragStop', nil)
+			for _, v in ipairs(targetbars) do
+				v:Hide()
+			end
+		end
+		if targetbars[1]:IsShown() then
+			if not self:IsEventScheduled('Quartz3_Buff-AutoUpdate') then
+				self:ScheduleRepeatingEvent('Quartz3_Buff-AutoUpdate', self.CheckForUpdate, 3, self)
+			end
+		elseif not focusbars[1]:IsShown() then
+			if self:IsEventScheduled('Quartz3_Buff-AutoUpdate') then
+				self:CancelScheduledEvent('Quartz3_Buff-AutoUpdate')
+			end
+		end
+		called = false
+	end
+	function Buff:UpdateFocusBars()
+		if called then
+			return
+		end
+		called = true
+		local db = db.profile
+		if db.focus then
+			local currentTime = GetTime()
+			for k in pairs(tmp) do
+				tmp[k] = del(tmp[k])
+			end
+			if db.focusbuffs then
+				for i = 1, 32 do
+					local name, rank, texture, applications, dispeltype, duration, expirationTime, caster = UnitBuff('focus', i)
+					local remaining =  expirationTime and (expirationTime - GetTime()) or nil
+					if not name then
+						break
+					end
+					if (caster=="player" or caster=="pet" or caster=="vehicle") and duration > 0 then
+						local t = new()
+						tmp[#tmp+1] = t
+						t.name = name
+						t.texture = texture
+						t.duration = duration
+						t.remaining = remaining
+						t.isbuff = true
+						t.applications = applications
+					end
+				end
+			end
+			if db.focusdebuffs then
+				for i = 1, 40 do
+					local name, rank, texture, applications, dispeltype, duration, expirationTime, caster = UnitDebuff('focus', i)
+					local remaining =  expirationTime and (expirationTime - GetTime()) or nil
+					if not name then
+						break
+					end
+					if (caster=="player" or caster=="pet" or caster=="vehicle") and duration > 0 then
+						local t = new()
+						tmp[#tmp+1] = t
+						t.name = name
+						t.texture = texture
+						t.duration = duration
+						t.remaining = remaining
+						t.dispeltype = dispeltype
+						t.applications = applications
+					end
+				end
+			end
+			sort(tmp, sort)
+			local maxindex = 0
+			for k,v in ipairs(tmp) do
+				maxindex = k
+				local bar = focusbars[k]
+				if v.applications > 1 then
+					bar.text:SetText(('%s (%s)'):format(v.name, v.applications))
+				else
+					bar.text:SetText(v.name)
+				end
+				bar.icon:SetTexture(v.texture)
+				local elapsed = (v.duration - v.remaining)
+				local startTime, endTime = (currentTime - elapsed), (currentTime + v.remaining)
+				bar.startTime = startTime
+				bar.endTime = endTime
+				bar:SetMinMaxValues(startTime, endTime)
+				bar:Show()
+				if v.isbuff then
+					bar:SetStatusBarColor(unpack(db.buffcolor))
+				else
+					if db.debuffsbytype then
+						local dispeltype = v.dispeltype
+						if dispeltype then
+							bar:SetStatusBarColor(unpack(db[dispeltype]))
+						else
+							bar:SetStatusBarColor(unpack(db.debuffcolor))
+						end
+					else
+						bar:SetStatusBarColor(unpack(db.debuffcolor))
+					end
+				end
+			end
+			for i = maxindex+1, #focusbars do
+				focusbars[i]:Hide()
+			end
+		else
+			focusbars[1].Hide = nil
+			focusbars[1]:EnableMouse(false)
+			focusbars[1]:SetScript('OnDragStart', nil)
+			focusbars[1]:SetScript('OnDragStop', nil)
+			for _, v in ipairs(focusbars) do
+				v:Hide()
+			end
+		end
+		if focusbars[1]:IsShown() then
+			if not self:IsEventScheduled('Quartz_Buff-AutoUpdate') then
+				self:ScheduleRepeatingEvent('Quartz_Buff-AutoUpdate', self.CheckForUpdate, 3, self)
+			end
+		elseif not targetbars[1]:IsShown() then
+			if self:IsEventScheduled('Quartz_Buff-AutoUpdate') then
+				self:CancelScheduledEvent('Quartz_Buff-AutoUpdate')
+			end
+		end
+		called = false
+	end
+end
+do
+	local function apply(unit, i, bar, db, direction)
+		local bars, position, icons, iconside, gap, spacing, offset, anchor, x, y, grow, height, width
+		local qpdb = Player.db.profile
+		if unit == 'target' then
+			bars = targetbars
+			position = db.targetposition
+			icons = db.targeticons
+			iconside = db.targeticonside
+			gap = db.targetgap
+			spacing = db.targetspacing
+			offset = db.targetoffset
+			anchor = db.targetanchor
+			x = db.targetx
+			y = db.targety
+			grow = db.targetgrowdirection
+			width = db.targetwidth
+			height = db.targetheight
+		else
+			bars = focusbars
+			position = db.focusposition
+			icons = db.focusicons
+			iconside = db.focusiconside
+			gap = db.focusgap
+			spacing = db.focusspacing
+			offset = db.focusoffset
+			anchor = db.focusanchor
+			x = db.focusx
+			y = db.focusy
+			grow = db.focusgrowdirection
+			width = db.focuswidth
+			height = db.focusheight
+		end
+		bar:ClearAllPoints()
+		bar:SetStatusBarTexture(media:Fetch('statusbar', db.bufftexture))
+		bar:SetWidth(width)
+		bar:SetHeight(height)
+		bar:SetScale(qpdb.scale)
+		bar:SetAlpha(db.buffalpha)
+		
+		if anchor == L["Free"] then
+			if i == 1 then
+				bar:SetPoint('BOTTOMLEFT', UIParent, 'BOTTOMLEFT', x, y)
+				if grow == L["Up"] then
+					direction = 1
+				else --L["Down"]
+					direction = -1
+				end
+			else
+				if direction == 1 then
+					bar:SetPoint('BOTTOMRIGHT', bars[i-1], 'TOPRIGHT', 0, spacing)
+				else -- -1
+					bar:SetPoint('TOPRIGHT', bars[i-1], 'BOTTOMRIGHT', 0, -1 * spacing)
+				end
+			end
+		else
+			if i == 1 then
+				local anchorframe
+				if anchor == L["Focus"] and Focus.Bar then
+					anchorframe = Focus.Bar
+				elseif anchor == L["Target"] and Target.Bar then
+					anchorframe = Target.Bar
+				else -- L["Player"]
+					anchorframe = Player.Bar
+				end
+				
+				if position == L["Top"] then
+					direction = 1
+					bar:SetPoint('BOTTOM', anchorframe, 'TOP', 0, gap)
+				elseif position == L["Bottom"] then
+					direction = -1
+					bar:SetPoint('TOP', anchorframe, 'BOTTOM', 0, -1 * gap)
+				elseif position == L["Top Right"] then
+					direction = 1
+					bar:SetPoint('BOTTOMRIGHT', anchorframe, 'TOPRIGHT', -1 * offset, gap)
+				elseif position == L["Bottom Right"] then
+					direction = -1
+					bar:SetPoint('TOPRIGHT', anchorframe, 'BOTTOMRIGHT', -1 * offset, -1 * gap)
+				elseif position == L["Top Left"] then
+					direction = 1
+					bar:SetPoint('BOTTOMLEFT', anchorframe, 'TOPLEFT', offset, gap)
+				elseif position == L["Bottom Left"] then
+					direction = -1
+					bar:SetPoint('TOPLEFT', anchorframe, 'BOTTOMLEFT', offset, -1 * gap)
+				elseif position == L["Left (grow up)"] then
+					if iconside == L["Right"] and showicons then
+						offset = offset + height
+					end
+					if qpdb.iconposition == L["Left"] and not qpdb.hideicon then
+						offset = offset + qpdb.h
+					end
+					direction = 1
+					bar:SetPoint('BOTTOMRIGHT', anchorframe, 'BOTTOMLEFT', -1 * offset, gap)
+				elseif position == L["Left (grow down)"] then
+					if iconside == L["Right"] and showicons then
+						offset = offset + height
+					end
+					if qpdb.iconposition == L["Left"] and not qpdb.hideicon then
+						offset = offset + qpdb.h
+					end
+					direction = -1
+					bar:SetPoint('TOPRIGHT', anchorframe, 'TOPLEFT', -3 * offset, -1 * gap)
+				elseif position == L["Right (grow up)"] then
+					if iconside == L["Left"] and showicons then
+						offset = offset + height
+					end
+					if qpdb.iconposition == L["Right"] and not qpdb.hideicon then
+						offset = offset + qpdb.h
+					end
+					direction = 1
+					bar:SetPoint('BOTTOMLEFT', anchorframe, 'BOTTOMRIGHT', offset, gap)
+				elseif position == L["Right (grow down)"] then
+					if iconside == L["Left"] and showicons then
+						offset = offset + height
+					end
+					if qpdb.iconposition == L["Right"] and not qpdb.hideicon then
+						offset = offset + qpdb.h
+					end
+					direction = -1
+					bar:SetPoint('TOPLEFT', anchorframe, 'TOPRIGHT', offset, -1 * gap)
+				end
+			else
+				if direction == 1 then
+					bar:SetPoint('BOTTOMRIGHT', bars[i-1], 'TOPRIGHT', 0, spacing)
+				else -- -1
+					bar:SetPoint('TOPRIGHT', bars[i-1], 'BOTTOMRIGHT', 0, -1 * spacing)
+				end
+			end
+		end
+		
+		local timetext = bar.timetext
+		if db.bufftimetext then
+			timetext:Show()
+			timetext:ClearAllPoints()
+			timetext:SetWidth(width)
+			timetext:SetPoint("RIGHT", bar, "RIGHT", -2, 0)
+			timetext:SetJustifyH("RIGHT")
+		else
+			timetext:Hide()
+		end
+		timetext:SetFont(media:Fetch('font', db.bufffont), db.bufffontsize)
+		timetext:SetShadowColor( 0, 0, 0, 1)
+		timetext:SetShadowOffset( 0.8, -0.8 )
+		timetext:SetTextColor(unpack(db.bufftextcolor))
+		timetext:SetNonSpaceWrap(false)
+		timetext:SetHeight(height)
+		
+		local temptext = timetext:GetText()
+		timetext:SetText('10.0')
+		local normaltimewidth = timetext:GetStringWidth()
+		timetext:SetText(temptext)
+		
+		local text = bar.text
+		if db.buffnametext then
+			text:Show()
+			text:ClearAllPoints()
+			text:SetPoint("LEFT", bar, "LEFT", 2, 0)
+			text:SetJustifyH("LEFT")
+			if db.bufftimetext then
+				text:SetWidth(width - normaltimewidth)
+			else
+				text:SetWidth(width)
+			end
+		else
+			text:Hide()
+		end
+		text:SetFont(media:Fetch('font', db.bufffont), db.bufffontsize)
+		text:SetShadowColor( 0, 0, 0, 1)
+		text:SetShadowOffset( 0.8, -0.8 )
+		text:SetTextColor(unpack(db.bufftextcolor))
+		text:SetNonSpaceWrap(false)
+		text:SetHeight(height)
+		
+		local icon = bar.icon
+		if icons then
+			icon:Show()
+			icon:SetWidth(height-1)
+			icon:SetHeight(height-1)
+			icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+			icon:ClearAllPoints()
+			if iconside == L["Left"] then
+				icon:SetPoint('RIGHT', bar, "LEFT", -1, 0)
+			else
+				icon:SetPoint('LEFT', bar, "RIGHT", 1, 0)
+			end
+		else
+			icon:Hide()
+		end
+		
+		return direction
+	end
+	function Buff:ApplySettings()
+		if Quartz3:IsModuleActive('Buff') and db then
+			local db = db.profile
+			local direction
+			if db.targetanchor ~= L["Free"] then
+				targetbars[1].Hide = nil
+				targetbars[1]:EnableMouse(false)
+				targetbars[1]:SetScript('OnDragStart', nil)
+				targetbars[1]:SetScript('OnDragStop', nil)
+			end
+			if db.focusanchor ~= L["Free"] then
+				focusbars[1].Hide = nil
+				focusbars[1]:EnableMouse(false)
+				focusbars[1]:SetScript('OnDragStart', nil)
+				focusbars[1]:SetScript('OnDragStop', nil)
+			end
+			for i, v in pairs(targetbars) do
+				direction = apply('target', i, v, db, direction)
+			end
+			direction = nil
+			for i, v in pairs(focusbars) do
+				direction = apply('focus', i, v, db, direction)
+			end
+			self:UpdateBars()
+		end
+	end
+end
+
