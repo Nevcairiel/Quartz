@@ -15,12 +15,12 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
+local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
+local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
-local Quartz = LibStub("AceAddon-3.0"):GetAddon("Quartz")
-local L = LibStub("AceLocale-3.0"):GetLocale("Quartz")
-
-local QuartzFocus = Quartz:NewModule("Focus", "AceEvent-3.0")
-local self = QuartzFocus
+local MODNAME = L["Focus"]
+local Focus = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
+local self = Focus
 
 local media = LibStub("LibSharedMedia-3.0")
 

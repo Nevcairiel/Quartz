@@ -44,12 +44,12 @@ function Quartz3:OnInitialize()
 
 	self:SetupOptions()
 
-	self.db.RegisterCallback(self, "OnProfileChanged", "UpdateProfile")
-	self.db.RegisterCallback(self, "OnProfileCopied", "UpdateProfile")
-	self.db.RegisterCallback(self, "OnProfileReset", "UpdateProfile")
+	self.db.RegisterCallback(self, "OnProfileChanged", "ApplySettings")
+	self.db.RegisterCallback(self, "OnProfileCopied", "ApplySettings")
+	self.db.RegisterCallback(self, "OnProfileReset", "ApplySettings")
 
-        media.RegisterCallback(self, "LibSharedMedia_Registered", "UpdateProfile")
-        media.RegisterCallback(self, "LibSharedMedia_SetGlobal", "UpdateProfile")
+        media.RegisterCallback(self, "LibSharedMedia_Registered", "ApplySettings")
+        media.RegisterCallback(self, "LibSharedMedia_SetGlobal", "ApplySettings")
 
 	media:Register("statusbar", "Frost", "Interface\\AddOns\\Quartz3\\textures\\Frost")
 	media:Register("statusbar", "Healbot", "Interface\\AddOns\\Quartz3\\textures\\Healbot")

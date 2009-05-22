@@ -1,7 +1,7 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
 ..\FrameXML\UI.xsd">
 <Script file="modules\Player.lua"/>
-<!--<Script file="modules\Target.lua"/>
+<Script file="modules\Target.lua"/>
 <Script file="modules\Focus.lua"/>
 <Script file="modules\Pet.lua"/>
 <Script file="modules\Latency.lua"/>
@@ -13,5 +13,5 @@
 <Script file="modules\Swing.lua"/>
 <Script file="modules\Interrupt.lua"/>
 <Script file="modules\Range.lua"/>
-<Script file="modules\Flight.lua"/>-->
+<Script file="modules\Flight.lua"/>
 </Ui>
