@@ -15,21 +15,36 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
+local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
+local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
-local Quartz = LibStub("AceAddon-3.0"):GetAddon("Quartz")
-local L = LibStub("AceLocale-3.0"):GetLocale("Quartz")
+local MODNAME = L["GCD"]
+local GCD = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
+local Player = Quartz3:GetModule(L["Player"])
 
-local QuartzPlayer = Quartz:GetModule("Player")
-local QuartzGCD = Quartz:NewModule("GCD", "AceEvent-3.0")
-local self = QuartzGCD
-
-local unpack = unpack
-local GetTime = GetTime
+local unpack = _G.unpack
+local GetTime = _G.GetTime
+local BOOKTYPE_SPELL = _G.BOOKTYPE_SPELL
 
 local gcdbar, gcdbar_width, gcdspark, db
 local starttime, duration, warned, spell1id, spell2id, usingspell
 
-local BOOKTYPE_SPELL = BOOKTYPE_SPELL
+local getOptions
+
+local defaults = {
+	profile = {
+		sparkcolor = {1, 1, 1},
+		gcdalpha = 0.9,
+		gcdheight = 4,
+		gcdposition = L["Bottom"],
+		gcdgap = -4,
+		
+		deplete = false,
+		
+		x = 500,
+		y = 300,
+	}
+}
 
 local function OnUpdate()
 	gcdspark:ClearAllPoints()
@@ -44,38 +59,30 @@ local function OnUpdate()
 		end
 	end
 end
+
 local function OnHide()
 	gcdbar:SetScript('OnUpdate', nil)
 	usingspell = nil
 end
+
 local function OnShow()
 	gcdbar:SetScript('OnUpdate', OnUpdate)
 end
 
-function QuartzGCD:OnInitialize()
-	db = Quartz:AcquireDBNamespace("GCD")
-	Quartz:RegisterDefaults("GCD", "profile", {
-		sparkcolor = {1, 1, 1},
-		gcdalpha = 0.9,
-		gcdheight = 4,
-		gcdposition = L["Bottom"],
-		gcdgap = -4,
-		
-		deplete = false,
-		
-		x = 500,
-		y = 300,
-	})
-	Quartz:RegisterDefaults("GCD", "char", {
-		spell = '',
-		backupspell = '',
-	})
+function GCD:OnInitialize()
+	self.db = Quartz3.db:RegisterNamespace(MODNAME, defaults)
+	db = self.db.profile
+	
+	self:SetEnabledState(Quartz3:GetModuleEnabled(MODNAME))
+	Quartz3:RegisterModuleOptions(MODNAME, getOptions, MODNAME)
+
 end
-function QuartzGCD:OnEnable()
+
+function GCD:OnEnable()
 	self:RegisterEvent("ACTIONBAR_UPDATE_COOLDOWN")
 	self:RegisterEvent("SPELLS_CHANGED", "ApplySettings")
 	if not gcdbar then
-		gcdbar = CreateFrame('Frame', 'QuartzGCDBar', UIParent)
+		gcdbar = CreateFrame('Frame', 'Quartz3GCDBar', UIParent)
 		gcdbar:SetFrameStrata('HIGH')
 		gcdbar:SetScript('OnShow', OnShow)
 		gcdbar:SetScript('OnHide', OnHide)
@@ -86,13 +93,13 @@ function QuartzGCD:OnEnable()
 		gcdspark = gcdbar:CreateTexture(nil, 'DIALOG')
 		gcdbar:Hide()
 	end
-	Quartz.ApplySettings()
+	Quartz3.ApplySettings()
 end
-function QuartzGCD:OnDisable()
+function GCD:OnDisable()
 	gcdbar:Hide()
 end
 
-function QuartzGCD:ACTIONBAR_UPDATE_COOLDOWN()
+function GCD:ACTIONBAR_UPDATE_COOLDOWN()
 	if spell1id then
 		local start, dur = GetSpellCooldown(spell1id, BOOKTYPE_SPELL)
 		if dur > 0 and dur <= 2 then
@@ -118,21 +125,21 @@ function QuartzGCD:ACTIONBAR_UPDATE_COOLDOWN()
 		end
 	end
 end
-function QuartzGCD:ApplySettings()
-	if gcdbar and Quartz:IsModuleActive('GCD') then
+function GCD:ApplySettings()
+	if gcdbar and Quartz3:GetModuleEnabled(L["GCD"]) then
 		local ldb = db.profile
 		gcdbar:ClearAllPoints()
 		gcdbar:SetHeight(ldb.gcdheight)
-		gcdbar_width = QuartzCastBar:GetWidth() - 8
+		gcdbar_width = Player.Bar:GetWidth() - 8
 		gcdbar:SetWidth(gcdbar_width)
 		gcdbar:SetBackdrop({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16})
 		gcdbar:SetBackdropColor(0,0,0)
 		gcdbar:SetAlpha(ldb.gcdalpha)
-		gcdbar:SetScale(QuartzPlayer.db.profile.scale)
+		gcdbar:SetScale(Player.db.profile.scale)
 		if ldb.gcdposition == L["Bottom"] then
-			gcdbar:SetPoint("TOP", QuartzCastBar, "BOTTOM", 0, -1 * ldb.gcdgap)
+			gcdbar:SetPoint("TOP", Player.Bar, "BOTTOM", 0, -1 * ldb.gcdgap)
 		elseif ldb.gcdposition == L["Top"] then
-			gcdbar:SetPoint("BOTTOM", QuartzCastBar, "TOP", 0, ldb.gcdgap)
+			gcdbar:SetPoint("BOTTOM", Player.Bar, "TOP", 0, ldb.gcdgap)
 		else -- L["Free"]
 			gcdbar:SetPoint('BOTTOMLEFT', UIParent, 'BOTTOMLEFT', ldb.x, ldb.y)
 		end
@@ -145,7 +152,7 @@ function QuartzGCD:ApplySettings()
 		
 		if db.char.spell == '' then
 			if not warned then
-				Quartz:Print(L["Spell_Warning"])
+				self:Print(L["Spell_Warning"])
 				warned = true
 			end
 		else
@@ -165,18 +172,19 @@ function QuartzGCD:ApplySettings()
 		end
 	end
 end
+
 do
 	local locked = true
 	local function set(field, value)
 		db.profile[field] = value
-		Quartz.ApplySettings()
+		Quartz3.ApplySettings()
 	end
 	local function get(field)
 		return db.profile[field]
 	end
 	local function setcolor(field, ...)
 		db.profile[field] = {...}
-		Quartz.ApplySettings()
+		Quartz3.ApplySettings()
 	end
 	local function getcolor(field)
 		return unpack(db.profile[field])
@@ -192,9 +200,9 @@ do
 				end
 			end
 		end
-		Quartz:Print(L["Invalid Spell"])
+		Quartz3:Print(L["Invalid Spell"])
 		db.char[field] = ''
-		Quartz.ApplySettings()
+		Quartz3.ApplySettings()
 	end
 	local function getspell(field)
 		return db.char[field]
@@ -209,7 +217,10 @@ do
 		db.profile.y = gcdbar:GetBottom()
 		gcdbar:StopMovingOrSizing()
 	end
-	Quartz.options.args.GCD = {
+
+	local options
+	function getOptions()
+	options = options or {
 		type = 'group',
 		name = L["Global Cooldown"],
 		desc = L["Global Cooldown"],
@@ -220,10 +231,10 @@ do
 				name = L["Enable"],
 				desc = L["Enable"],
 				get = function()
-					return Quartz:IsModuleActive('GCD')
+					return Quartz3:GetModuleEnabled(L["GCD"])
 				end,
 				set = function(v)
-					Quartz:ToggleModuleActive('GCD', v)
+					Quartz3:SetModuleEnabled(L["GCD"], v)
 				end,
 				order = 100,
 			},
@@ -375,4 +386,6 @@ do
 			},
 		},
 	}
+	return options
+	end
 end
