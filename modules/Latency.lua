@@ -15,23 +15,23 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
+local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
+local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
-local Quartz = LibStub("AceAddon-3.0"):GetAddon("Quartz")
-local L = LibStub("AceLocale-3.0"):GetLocale("Quartz")
-
-local QuartzPlayer = Quartz:GetModule("Player")
-local QuartzLatency = Quartz:NewModule("Latency", "AceHook-3.0", "AceEvent-3.0")
-local self = QuartzLatency
+local MODNAME = L["Latency"]
+local Latency = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
+local Player = Quartz3:GetModule(L["Player"])
 
 local media = LibStub("LibSharedMedia-3.0")
 
 local unpack = unpack
 
 local lagbox, lagtext, db, timeDiff, sendTime, castBar, alignoutside
-	
-function QuartzLatency:OnInitialize()
-	db = Quartz:AcquireDBNamespace("Latency")
-	Quartz:RegisterDefaults("Latency", "profile", {
+
+local getOptions
+
+local defaults = {
+	profile = {
 		lagcolor = {1, 0, 0},
 		lagalpha = 0.6,
 		lagtext = true,
@@ -47,14 +47,23 @@ function QuartzLatency:OnInitialize()
 		-- lagpadding is applied only if lagembed is enabled
 		lagembed = false,
 		lagpadding = 0.0,
-	})
-end
-function QuartzLatency:OnEnable()
-	self:Hook(QuartzPlayer, "UNIT_SPELLCAST_START")
-	self:Hook(QuartzPlayer, "UNIT_SPELLCAST_DELAYED")
+	}
+}
+
+function Latency:OnInitialize()
+	self.db = Quartz3.db:RegisterNamespace(MODNAME, defaults)
+	db = self.db.profile
 	
-	self:Hook(QuartzPlayer, "UNIT_SPELLCAST_CHANNEL_START")
-	self:Hook(QuartzPlayer, "UNIT_SPELLCAST_CHANNEL_UPDATE")
+	self:SetEnabledState(Quartz3:GetModuleEnabled(MODNAME))
+	Quartz3:RegisterModuleOptions(MODNAME, getOptions, MODNAME)
+end
+
+function Latency:OnEnable()
+	self:Hook(Player, "UNIT_SPELLCAST_START")
+	self:Hook(Player, "UNIT_SPELLCAST_DELAYED")
+	
+	self:Hook(Player, "UNIT_SPELLCAST_CHANNEL_START")
+	self:Hook(Player, "UNIT_SPELLCAST_CHANNEL_UPDATE")
 	
 	self:RegisterEvent("UNIT_SPELLCAST_SENT")
 	
@@ -65,31 +74,31 @@ function QuartzLatency:OnEnable()
 		end
 	end)
 	if not lagbox then
-		castBar = QuartzPlayer.castBar
+		castBar = Player.castBar
 		lagbox = castBar:CreateTexture(nil, 'BACKGROUND')
 		lagtext = castBar:CreateFontString(nil, 'OVERLAY')
 		self.lagbox = lagbox
 		self.lagtext = lagtext
 	end
-	Quartz.ApplySettings()
+	Quartz3.ApplySettings()
 end
-function QuartzLatency:OnDisable()
+function Latency:OnDisable()
 	lagbox:Hide()
 	lagtext:Hide()
 end
-function QuartzLatency:UNIT_SPELLCAST_SENT(event, unit)
+function Latency:UNIT_SPELLCAST_SENT(event, unit)
 	if unit ~= 'player' then
 		return
 	end
 	sendTime = GetTime()
 end
-function QuartzLatency:UNIT_SPELLCAST_START(object, unit)
+function Latency:UNIT_SPELLCAST_START(object, unit)
 	self.hooks[object].UNIT_SPELLCAST_START(object, unit)
 	if unit ~= 'player' or not sendTime then
 		return
 	end
-	local startTime = QuartzPlayer.startTime
-	local endTime = QuartzPlayer.endTime
+	local startTime = Player.startTime
+	local endTime = Player.endTime
 	if not endTime then
 		return
 	end
@@ -106,16 +115,16 @@ function QuartzLatency:UNIT_SPELLCAST_START(object, unit)
 		lagbox:SetTexCoord(0,perc,0,1)
 		
 		startTime = startTime - timeDiff + db.profile.lagpadding
-		QuartzPlayer.startTime = startTime
+		Player.startTime = startTime
 		endTime = endTime - timeDiff + db.profile.lagpadding
-		QuartzPlayer.endTime = endTime
+		Player.endTime = endTime
 	else
 		side = 'RIGHT'
 		lagbox:SetTexCoord(1-perc,1,0,1)
 	end
 	lagbox:SetDrawLayer(side == 'LEFT' and "OVERLAY" or "BACKGROUND")
 	lagbox:SetPoint(side, castBar, side)
-	lagbox:SetWidth(QuartzPlayer.db.profile.w * perc)
+	lagbox:SetWidth(Player.db.profile.w * perc)
 	lagbox:Show()
 	
 	if db.profile.lagtext then
@@ -149,27 +158,27 @@ function QuartzLatency:UNIT_SPELLCAST_START(object, unit)
 		lagtext:Hide()
 	end
 end
-function QuartzLatency:UNIT_SPELLCAST_DELAYED(object, unit)
+function Latency:UNIT_SPELLCAST_DELAYED(object, unit)
 	self.hooks[object].UNIT_SPELLCAST_DELAYED(object, unit)
 	if unit ~= 'player' then
 		return
 	end
 	
 	if db.profile.lagembed then
-		local startTime = QuartzPlayer.startTime - timeDiff + db.profile.lagpadding
-		QuartzPlayer.startTime = startTime
-		local endTime = QuartzPlayer.endTime - timeDiff + db.profile.lagpadding
-		QuartzPlayer.endTime = endTime
+		local startTime = Player.startTime - timeDiff + db.profile.lagpadding
+		Player.startTime = startTime
+		local endTime = Player.endTime - timeDiff + db.profile.lagpadding
+		Player.endTime = endTime
 	end
 end
-function QuartzLatency:UNIT_SPELLCAST_CHANNEL_START(object, unit)
+function Latency:UNIT_SPELLCAST_CHANNEL_START(object, unit)
 	self.hooks[object].UNIT_SPELLCAST_CHANNEL_START(object, unit)
 	if unit ~= 'player' or not sendTime then
 		return
 	end
 
-	local startTime = QuartzPlayer.startTime
-	local endTime = QuartzPlayer.endTime
+	local startTime = Player.startTime
+	local endTime = Player.endTime
 	timeDiff = GetTime() - sendTime
 	
 	local castlength = endTime - startTime
@@ -183,16 +192,16 @@ function QuartzLatency:UNIT_SPELLCAST_CHANNEL_START(object, unit)
 		lagbox:SetTexCoord(1-perc,1,0,1)
 		
 		startTime = startTime - timeDiff + db.profile.lagpadding
-		QuartzPlayer.startTime = startTime
+		Player.startTime = startTime
 		endTime = endTime - timeDiff + db.profile.lagpadding
-		QuartzPlayer.endTime = endTime
+		Player.endTime = endTime
 	else
 		side = 'LEFT'
 		lagbox:SetTexCoord(perc,1,0,1)
 	end
 	lagbox:SetDrawLayer(side == 'LEFT' and "OVERLAY" or "BACKGROUND")
 	lagbox:SetPoint(side, castBar, side)
-	lagbox:SetWidth(QuartzPlayer.db.profile.w * perc)
+	lagbox:SetWidth(Player.db.profile.w * perc)
 	lagbox:Show()
 	
 	if db.profile.lagtext then
@@ -226,32 +235,32 @@ function QuartzLatency:UNIT_SPELLCAST_CHANNEL_START(object, unit)
 		lagtext:Hide()
 	end
 end
-function QuartzLatency:UNIT_SPELLCAST_CHANNEL_UPDATE(object, unit)
+function Latency:UNIT_SPELLCAST_CHANNEL_UPDATE(object, unit)
 	self.hooks[object].UNIT_SPELLCAST_CHANNEL_UPDATE(object, unit)
 	if unit ~= 'player' then
 		return
 	end
 	
 	if db.profile.lagembed then
-		local startTime = QuartzPlayer.startTime - timeDiff + db.profile.lagpadding
-		QuartzPlayer.startTime = startTime
-		local endTime = QuartzPlayer.endTime - timeDiff + db.profile.lagpadding
-		QuartzPlayer.endTime = endTime
+		local startTime = Player.startTime - timeDiff + db.profile.lagpadding
+		Player.startTime = startTime
+		local endTime = Player.endTime - timeDiff + db.profile.lagpadding
+		Player.endTime = endTime
 	end
 end
-function QuartzLatency:UNIT_SPELLCAST_INTERRUPTED(event, unit)
+function Latency:UNIT_SPELLCAST_INTERRUPTED(event, unit)
 	if unit == 'player' then
 		lagbox:Hide()
 		lagtext:Hide()
 	end
 end
-function QuartzLatency:ApplySettings()
-	if lagbox and Quartz:IsModuleActive('Latency') then
-		castBar = QuartzPlayer.castBar
+function Latency:ApplySettings()
+	if lagbox and Quartz3:GetModuleEnabled(MODNAME) then
+		castBar = Player.castBar
 		
 		local db = db.profile
 		lagbox:SetHeight(castBar:GetHeight())
-		lagbox:SetTexture(media:Fetch('statusbar', QuartzPlayer.db.profile.texture))
+		lagbox:SetTexture(media:Fetch('statusbar', Player.db.profile.texture))
 		lagbox:SetAlpha(db.lagalpha)
 		lagbox:SetVertexColor(unpack(db.lagcolor))
 		
@@ -297,17 +306,18 @@ function QuartzLatency:ApplySettings()
 		end
 	end
 end
+
 do
 	local function set(field, value)
 		db.profile[field] = value
-		Quartz.ApplySettings()
+		Quartz3.ApplySettings()
 	end
 	local function get(field)
 		return db.profile[field]
 	end
 	local function setcolor(field, ...)
 		db.profile[field] = {...}
-		Quartz.ApplySettings()
+		Quartz3.ApplySettings()
 	end
 	local function getcolor(field)
 		return unpack(db.profile[field])
@@ -315,7 +325,10 @@ do
 	local function hidelagtextoptions()
 		return not db.profile.lagtext
 	end
-	Quartz.options.args.Latency = {
+
+	local options
+	function getOptions()
+		options = options or {
 		type = 'group',
 		name = L["Latency"],
 		desc = L["Latency"],
@@ -326,10 +339,10 @@ do
 				name = L["Enable"],
 				desc = L["Enable"],
 				get = function()
-					return Quartz:IsModuleActive('Latency')
+					return Quartz3:GetModuleEnabled(MODNAME)
 				end,
 				set = function(v)
-					Quartz:ToggleModuleActive('Latency', v)
+					Quartz3:SetModuleEnabled(MODNAME, v)
 				end,
 				order = 100,
 			},
@@ -451,4 +464,6 @@ do
 			},
 		},
 	}
+	return options
+	end
 end

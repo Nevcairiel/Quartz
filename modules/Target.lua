@@ -243,10 +243,10 @@ do
 				name = L["Enable"],
 				desc = L["Enable"],
 				get = function()
-					return Quartz3:GetModuleEnabled('Target')
+					return Quartz3:GetModuleEnabled(MODNAME)
 				end,
 				set = function(v)
-					Quartz3:SetModuleEnabled('Target', v)
+					Quartz3:SetModuleEnabled(MODNAME, v)
 				end,
 				order = 99,
 			},

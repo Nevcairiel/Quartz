@@ -15,151 +15,41 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
-
-local Quartz = LibStub("AceAddon-3.0"):GetAddon("Quartz")
+local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz")
 
-local QuartzMirror = Quartz:NewModule("Mirror", "AceHook-3.0", "AceEvent-3.0")
-local self = QuartzMirror
+local MODNAME = L["Mirror"]
+local Mirror = Quartz3:NewModule(MODNAME, "AceHook-3.0", "AceEvent-3.0")
+local Player = Quartz3:GetModule(L["Player"])
+local Focus = Quartz3:GetModule(L["Focus"])
+local Target = Quartz3:GetModule(L["Target"])
 
 local media = LibStub("LibSharedMedia-3.0")
 
-local new, del = Quartz.new, Quartz.del
+local new, del = Quartz3.new, Quartz3.del
 
-local GetTime = GetTime
-local table_sort = table.sort
-local math_ceil = math.ceil
+local GetTime = _G.GetTime
+local table_sort = _G.table.sort
+local math_ceil = _G.math.ceil
+local ipairs = _G.ipairs
+local pairs = _G.pairs
+local tonumber = _G.tonumber
+local unpack = _G.unpack
 
-local GetMirrorTimerProgress = GetMirrorTimerProgress
-local GetMirrorTimerInfo = GetMirrorTimerInfo
+local GetCorpseRecoveryDelay = _G.GetCorpseRecoveryDelay
+local GetMirrorTimerProgress = _G.GetMirrorTimerProgress
+local GetMirrorTimerInfo = _G.GetMirrorTimerInfo
+local UnitHealth = _G.UnitHealth
 
 local db
-local _G = getfenv(0)
 
 local gametimebase, gametimetostart
 local locked = true
 
-local icons = {
-	BREATH = 'Interface\\Icons\\Spell_Shadow_DemonBreath',
-	EXHAUSTION = 'Interface\\Icons\\Ability_Suffocate',
-	FEIGNDEATH = 'Interface\\Icons\\Ability_Rogue_FeignDeath',
-	CAMP = 'Interface\\Icons\\INV_Misc_GroupLooking',
-	DEATH = 'Interface\\Icons\\Ability_Vanish',
-	QUIT = 'Interface\\Icons\\INV_Misc_GroupLooking',
-	DUEL_OUTOFBOUNDS = 'Interface\\Icons\\Ability_Rogue_Sprint',
-	INSTANCE_BOOT = 'Interface\\Icons\\INV_Misc_Rune_01',
-	CONFIRM_SUMMON = 'Interface\\Icons\\Spell_Shadow_Twilight',
-	AREA_SPIRIT_HEAL = 'Interface\\Icons\\Spell_Holy_Resurrection',
-	REZTIMER = '',
-	RESURRECT_NO_SICKNESS = '',
-	PARTY_INVITE = '',
-	DUEL_REQUESTED = '',
-	GAMESTART = '',
-}
-local popups = {
-	CAMP = L["Logout"],
-	DEATH = L["Release"],
-	QUIT = L["Quit"],
-	DUEL_OUTOFBOUNDS = L["Forfeit Duel"],
-	INSTANCE_BOOT = L["Instance Boot"],
-	CONFIRM_SUMMON = L["Summon"],
-	AREA_SPIRIT_HEAL = L["AOE Rez"],
-	REZTIMER = L["Resurrect Timer"], --GetCorpseRecoveryDelay
-	RESURRECT_NO_SICKNESS = L["Resurrect"], --only show if timeleft < delay
-	RESURRECT_NO_TIMER = L["Resurrect"],
-	PARTY_INVITE = L["Party Invite"],
-	DUEL_REQUESTED = L["Duel Request"],
-	GAMESTART = L["Game Start"],
-}
-local timeoutoverrides = {
-	DEATH = 360,
-	AREA_SPIRIT_HEAL = 30,
-	INSTANCE_BOOT = 60,
-	CONFIRM_SUMMON = 120,
-	GAMESTART = 60,
-}
+local getOptions
 
-QuartzMirror.ExternalTimers = setmetatable({}, {__index = function(t,k)
-	local v = new()
-	t[k] = v
-	return v
-	--[[
-	startTime
-	endTime
-	icon
-	color
-	]]
-end})
-
-local mirrorOnUpdate, fakeOnUpdate
-do
-	local function timenum(num)
-		if num <= 10 then
-			return ('%.1f'):format(num)
-		elseif num <= 60 then
-			return ('%d'):format(num)
-		elseif num <= 3600 then
-			return ('%d:%02d'):format(num / 60, num % 60)
-		else
-			return ('%d:%02d'):format(num / 3600, (num % 3600) / 60)
-		end
-	end
-	function mirrorOnUpdate(frame)
-		local progress = GetMirrorTimerProgress(frame.mode) / 1000
-		local duration = frame.duration
-		progress = progress > duration and duration or progress
-		frame:SetValue(progress)
-		frame.timetext:SetText(timenum(progress))
-	end
-	function fakeOnUpdate(frame)
-		local currentTime = GetTime()
-		local endTime = frame.endTime
-		
-		local frame_num = frame.framenum
-		if frame_num > 0 then
-			local popup = _G["StaticPopup"..frame_num] -- hate to do this, but I can't think of a better way.
-			if popup.which ~= frame.which or not popup:IsVisible() then
-				return self:UpdateBars()
-			end
-		end
-		
-		if currentTime > endTime then
-			self:UpdateBars()
-		else
-			local remaining = (currentTime - frame.startTime)
-			frame:SetValue(endTime - remaining)
-			frame.timetext:SetText(timenum(endTime - currentTime))
-		end
-	end
-end
-local function OnHide(frame)
-	frame:SetScript('OnUpdate', nil)
-end
-local mirrorbars = setmetatable({}, {
-	__index = function(t,k)
-		local bar = CreateFrame('StatusBar', nil, UIParent)
-		t[k] = bar
-		bar:SetFrameStrata('MEDIUM')
-		bar:Hide()
-		bar:SetScript('OnHide', OnHide)
-		bar:SetBackdrop({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16})
-		bar:SetBackdropColor(0,0,0)
-		bar.text = bar:CreateFontString(nil, 'OVERLAY')
-		bar.timetext = bar:CreateFontString(nil, 'OVERLAY')
-		bar.icon = bar:CreateTexture(nil, 'DIALOG')
-		if k == 1 then
-			bar:SetMovable(true)
-			bar:RegisterForDrag('LeftButton')
-			bar:SetClampedToScreen(true)
-		end
-		self:ApplySettings()
-		return bar
-	end
-})
-
-function QuartzMirror:OnInitialize()
-	db = Quartz:AcquireDBNamespace("Mirror")
-	Quartz:RegisterDefaults("Mirror", "profile", {
+local defaults = {
+	profile = {
 		mirroricons = true,
 		mirroriconside = L["Left"],
 		
@@ -208,15 +98,142 @@ function QuartzMirror:OnInitialize()
 		showmirror = true,
 		showstatic = true,
 		showpvp = true,
-	})
+	}
+}
+
+local icons = {
+	BREATH = 'Interface\\Icons\\Spell_Shadow_DemonBreath',
+	EXHAUSTION = 'Interface\\Icons\\Ability_Suffocate',
+	FEIGNDEATH = 'Interface\\Icons\\Ability_Rogue_FeignDeath',
+	CAMP = 'Interface\\Icons\\INV_Misc_GroupLooking',
+	DEATH = 'Interface\\Icons\\Ability_Vanish',
+	QUIT = 'Interface\\Icons\\INV_Misc_GroupLooking',
+	DUEL_OUTOFBOUNDS = 'Interface\\Icons\\Ability_Rogue_Sprint',
+	INSTANCE_BOOT = 'Interface\\Icons\\INV_Misc_Rune_01',
+	CONFIRM_SUMMON = 'Interface\\Icons\\Spell_Shadow_Twilight',
+	AREA_SPIRIT_HEAL = 'Interface\\Icons\\Spell_Holy_Resurrection',
+	REZTIMER = '',
+	RESURRECT_NO_SICKNESS = '',
+	PARTY_INVITE = '',
+	DUEL_REQUESTED = '',
+	GAMESTART = '',
+}
+local popups = {
+	CAMP = L["Logout"],
+	DEATH = L["Release"],
+	QUIT = L["Quit"],
+	DUEL_OUTOFBOUNDS = L["Forfeit Duel"],
+	INSTANCE_BOOT = L["Instance Boot"],
+	CONFIRM_SUMMON = L["Summon"],
+	AREA_SPIRIT_HEAL = L["AOE Rez"],
+	REZTIMER = L["Resurrect Timer"], --GetCorpseRecoveryDelay
+	RESURRECT_NO_SICKNESS = L["Resurrect"], --only show if timeleft < delay
+	RESURRECT_NO_TIMER = L["Resurrect"],
+	PARTY_INVITE = L["Party Invite"],
+	DUEL_REQUESTED = L["Duel Request"],
+	GAMESTART = L["Game Start"],
+}
+local timeoutoverrides = {
+	DEATH = 360,
+	AREA_SPIRIT_HEAL = 30,
+	INSTANCE_BOOT = 60,
+	CONFIRM_SUMMON = 120,
+	GAMESTART = 60,
+}
+
+Mirror.ExternalTimers = setmetatable({}, {__index = function(t,k)
+	local v = new()
+	t[k] = v
+	return v
+	--[[
+	startTime
+	endTime
+	icon
+	color
+	]]
+end})
+
+local mirrorOnUpdate, fakeOnUpdate
+do
+	local function timenum(num)
+		if num <= 10 then
+			return ('%.1f'):format(num)
+		elseif num <= 60 then
+			return ('%d'):format(num)
+		elseif num <= 3600 then
+			return ('%d:%02d'):format(num / 60, num % 60)
+		else
+			return ('%d:%02d'):format(num / 3600, (num % 3600) / 60)
+		end
+	end
+	function mirrorOnUpdate(frame)
+		local progress = GetMirrorTimerProgress(frame.mode) / 1000
+		local duration = frame.duration
+		progress = progress > duration and duration or progress
+		frame:SetValue(progress)
+		frame.timetext:SetText(timenum(progress))
+	end
+	function fakeOnUpdate(frame)
+		local currentTime = GetTime()
+		local endTime = frame.endTime
+		
+		local frame_num = frame.framenum
+		if frame_num > 0 then
+			local popup = _G["StaticPopup"..frame_num] -- hate to do this, but I can't think of a better way.
+			if popup.which ~= frame.which or not popup:IsVisible() then
+				return Mirror:UpdateBars()
+			end
+		end
+		
+		if currentTime > endTime then
+			Mirror:UpdateBars()
+		else
+			local remaining = (currentTime - frame.startTime)
+			frame:SetValue(endTime - remaining)
+			frame.timetext:SetText(timenum(endTime - currentTime))
+		end
+	end
 end
-function QuartzMirror:OnEnable()
+local function OnHide(frame)
+	frame:SetScript('OnUpdate', nil)
+end
+local mirrorbars = setmetatable({}, {
+	__index = function(t,k)
+		local bar = CreateFrame('StatusBar', nil, UIParent)
+		t[k] = bar
+		bar:SetFrameStrata('MEDIUM')
+		bar:Hide()
+		bar:SetScript('OnHide', OnHide)
+		bar:SetBackdrop({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16})
+		bar:SetBackdropColor(0,0,0)
+		bar.text = bar:CreateFontString(nil, 'OVERLAY')
+		bar.timetext = bar:CreateFontString(nil, 'OVERLAY')
+		bar.icon = bar:CreateTexture(nil, 'DIALOG')
+		if k == 1 then
+			bar:SetMovable(true)
+			bar:RegisterForDrag('LeftButton')
+			bar:SetClampedToScreen(true)
+		end
+		Mirror:ApplySettings()
+		return bar
+	end
+})
+
+function Mirror:OnInitialize()
+	self.db = Quartz3.db:RegisterNamespace(MODNAME, defaults)
+	db = self.db.profile
+	
+	self:SetEnabledState(Quartz3:GetModuleEnabled(MODNAME))
+	Quartz3:RegisterModuleOptions(MODNAME, getOptions, MODNAME)
+
+end
+function Mirror:OnEnable()
 	self:RegisterEvent("MIRROR_TIMER_PAUSE", "UpdateBars")
 	self:RegisterEvent("MIRROR_TIMER_START", "UpdateBars")
 	self:RegisterEvent("MIRROR_TIMER_STOP", "UpdateBars")
 	self:RegisterEvent("PLAYER_UNGHOST", "UpdateBars")
 	self:RegisterEvent("PLAYER_ALIVE", "UpdateBars")
-	self:RegisterEvent("QuartzMirror_UpdateCustom", "UpdateBars")
+	self:RegisterEvent("Quartz3Mirror_UpdateCustom", "UpdateBars")
 	self:RegisterEvent("CHAT_MSG_BG_SYSTEM_NEUTRAL")
 	self:SecureHook("StaticPopup_Show", "UpdateBars")
 	media.RegisterCallback(self, "LibSharedMedia_SetGlobal", function(mtype, override)
@@ -226,9 +243,9 @@ function QuartzMirror:OnEnable()
 			end
 		end
 	end)
-	Quartz.ApplySettings()
+	Quartz3.ApplySettings()
 end
-function QuartzMirror:OnDisable()
+function Mirror:OnDisable()
 	mirrorbars[1].Hide = nil
 	mirrorbars[1]:EnableMouse(false)
 	mirrorbars[1]:SetScript('OnDragStart', nil)
@@ -347,7 +364,7 @@ do
 			end
 		end
 		
-		local external = self.ExternalTimers
+		local external = Mirror.ExternalTimers
 		for name, v in pairs(external) do
 			local endTime = v.endTime
 			if not v.startTime or not endTime then
@@ -407,13 +424,13 @@ do
 			mirrorbars[i]:Hide()
 		end
 	end
-	function QuartzMirror:UpdateBars()
-		if not self:IsEventScheduled('QuartzMirrorUpdate') then
-			self:ScheduleEvent('QuartzMirrorUpdate', update, 0) -- API funcs don't return helpful crap until after the event.
+	function Mirror:UpdateBars()
+		if not self:IsEventScheduled('Quartz3MirrorUpdate') then
+			self:ScheduleEvent('Quartz3MirrorUpdate', update, 0) -- API funcs don't return helpful crap until after the event.
 		end
 	end
 end
-function QuartzMirror:CHAT_MSG_BG_SYSTEM_NEUTRAL(event, msg)
+function Mirror:CHAT_MSG_BG_SYSTEM_NEUTRAL(event, msg)
 	if msg:match(L["1 minute"]) or msg:match(L["One minute until"]) then
 		gametimebase = GetTime()
 		gametimetostart = 60
@@ -429,7 +446,7 @@ end
 do
 	local function apply(i, bar, db, direction)
 		local position, showicons, iconside, gap, spacing, offset
-		local qpdb = Quartz:AcquireDBNamespace("Player").profile
+		local qpdb = Player.db.profile 
 		
 		position = db.mirrorposition
 		showicons = db.mirroricons
@@ -464,12 +481,12 @@ do
 			if i == 1 then
 				local anchorframe
 				local anchor = db.mirroranchor
-				if anchor == L["Focus"] and QuartzFocusBar then
-					anchorframe = QuartzFocusBar
-				elseif anchor == L["Target"] and QuartzTargetBar then
-					anchorframe = QuartzTargetBar
+				if anchor == L["Focus"] and Focus.Bar then
+					anchorframe = Focus.Bar
+				elseif anchor == L["Target"] and Target.Bar then
+					anchorframe = Target.Bar
 				else -- L["Player"]
-					anchorframe = QuartzCastBar
+					anchorframe = Player.Bar
 				end
 				
 				if position == L["Top"] then
@@ -597,8 +614,8 @@ do
 		
 		return direction
 	end
-	function QuartzMirror:ApplySettings()
-		if Quartz:IsModuleActive('Mirror') and db then
+	function Mirror:ApplySettings()
+		if self:IsEnabled() and db then
 			local db = db.profile
 			local direction
 			if db.mirroranchor ~= L["Free"] then
@@ -628,17 +645,18 @@ do
 		end
 	end
 end
+
 do
 	local function set(field, value)
 		db.profile[field] = value
-		Quartz.ApplySettings()
+		Quartz3.ApplySettings()
 	end
 	local function get(field)
 		return db.profile[field]
 	end
 	local function setcolor(field, ...)
 		db.profile[field] = {...}
-		Quartz.ApplySettings()
+		Quartz3.ApplySettings()
 	end
 	local function getcolor(field)
 		return unpack(db.profile[field])
@@ -681,7 +699,10 @@ do
 		L["Right (grow up)"],
 		L["Right (grow down)"],
 	}
-	Quartz.options.args.Mirror = {
+
+	local options
+	function getOptions()
+		options = options or {
 		type = 'group',
 		name = L["Mirror"],
 		desc = L["Mirror"],
@@ -692,10 +713,10 @@ do
 				name = L["Enable"],
 				desc = L["Enable"],
 				get = function()
-					return Quartz:IsModuleActive('Mirror')
+					return Quartz3:GetModuleEnabled(MODNAME)
 				end,
 				set = function(v)
-					Quartz:ToggleModuleActive('Mirror', v)
+					Quartz3:SetModuleEnabled(MODNAME, v)
 				end,
 				order = 99,
 			},
@@ -722,7 +743,7 @@ do
 						mirrorbars[1]:EnableMouse(false)
 						mirrorbars[1]:SetScript('OnDragStart', nil)
 						mirrorbars[1]:SetScript('OnDragStop', nil)
-						self:UpdateBars()
+						Mirror:UpdateBars()
 					else
 						mirrorbars[1]:Show()
 						mirrorbars[1]:EnableMouse(true)
@@ -1139,4 +1160,6 @@ do
 			},
 		},
 	}
+	return options
+	end
 end

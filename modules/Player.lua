@@ -614,7 +614,7 @@ end
 Player.OnUpdate = OnUpdate
 
 local function OnHide()
-	if Latency then
+	if Latency and Latency:Is then
 		if Latency:IsEnabled() and Latency.lagbox then
 					Latency.lagbox:Hide()
 					Latency.lagtext:Hide()
