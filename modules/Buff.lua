@@ -248,7 +248,7 @@ do
 				name = L["Enable"],
 				desc = L["Enable"],
 				get = function()
-					return Quartz3:IsModuleEnabled(MODNAME)
+					return Quartz3:GetModuleEnabled(MODNAME)
 				end,
 				set = function(v)
 					Quartz3:SetModuleEnabled(MODNAME, v)
@@ -1332,7 +1332,7 @@ do
 		return direction
 	end
 	function Buff:ApplySettings()
-		if Quartz3:IsModuleActive('Buff') and db then
+		if Quartz3:GetModuleEnabled(MODNAME) and db then
 			local db = db.profile
 			local direction
 			if db.targetanchor ~= L["Free"] then

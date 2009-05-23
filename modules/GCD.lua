@@ -79,8 +79,7 @@ function GCD:OnInitialize()
 end
 
 function GCD:OnEnable()
-	self:RegisterEvent("ACTIONBAR_UPDATE_COOLDOWN")
-	self:RegisterEvent("SPELLS_CHANGED", "ApplySettings")
+	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	if not gcdbar then
 		gcdbar = CreateFrame('Frame', 'Quartz3GCDBar', UIParent)
 		gcdbar:SetFrameStrata('HIGH')
@@ -99,10 +98,10 @@ function GCD:OnDisable()
 	gcdbar:Hide()
 end
 
-function GCD:ACTIONBAR_UPDATE_COOLDOWN()
-	if spell1id then
-		local start, dur = GetSpellCooldown(spell1id, BOOKTYPE_SPELL)
-		if dur > 0 and dur <= 2 then
+function Interrupt:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, combatEvent, _, sourceName, _, _, _, destFlags, _, spell)
+	if combatEvent == 'SPELL_CAST_SUCCESS' and destFlags == 0x511 then
+		local start, dur = GetSpellCooldown(spell)
+		if dur > 0 and dur <= 1.5 then
 			usingspell = 1
 			starttime = start
 			duration = dur
@@ -112,21 +111,10 @@ function GCD:ACTIONBAR_UPDATE_COOLDOWN()
 			gcdbar:Hide()
 		end
 	end
-	if spell2id then
-		local start, dur = GetSpellCooldown(spell2id, BOOKTYPE_SPELL)
-		if dur > 0 and dur <= 2 then
-			usingspell = 2
-			starttime = start
-			duration = dur
-			gcdbar:Show()
-			return
-		elseif usingspell == 2 and dur == 0 then
-			gcdbar:Hide()
-		end
-	end
 end
+
 function GCD:ApplySettings()
-	if gcdbar and Quartz3:GetModuleEnabled(L["GCD"]) then
+	if gcdbar and Quartz3:GetModuleEnabled(MODNAME) then
 		local ldb = db.profile
 		gcdbar:ClearAllPoints()
 		gcdbar:SetHeight(ldb.gcdheight)
@@ -149,27 +137,6 @@ function GCD:ApplySettings()
 		gcdspark:SetBlendMode('ADD')
 		gcdspark:SetWidth(25)
 		gcdspark:SetHeight(ldb.gcdheight*2.5)
-		
-		if db.char.spell == '' then
-			if not warned then
-				self:Print(L["Spell_Warning"])
-				warned = true
-			end
-		else
-			spell1id = nil
-			spell2id = nil
-			for tab = 1, 4 do
-				local _, _, offset, numSpells = GetSpellTabInfo(tab)
-				for i = (1+offset), (offset+numSpells) do
-					local spell = GetSpellName(i, BOOKTYPE_SPELL)
-					if spell == db.char.spell then
-						spell1id = i
-					elseif spell == db.char.backupspell then
-						spell2id = i
-					end
-				end
-			end
-		end
 	end
 end
 

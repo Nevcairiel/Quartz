@@ -719,10 +719,10 @@ do
 				name = L["Enable"],
 				desc = L["Enable"],
 				get = function()
-					return Quartz:IsModuleActive('Focus')
+					return Quartz:GetModuleEnabled(MODNAME)
 				end,
 				set = function(v)
-					Quartz:ToggleModuleActive('Focus', v)
+					Quartz:SetModuleEnabled(MODNAME, v)
 				end,
 				order = 99,
 			},
