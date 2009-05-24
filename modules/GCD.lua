@@ -24,7 +24,6 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 local MODNAME = L["GCD"]
 local GCD = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
 local Player = Quartz3:GetModule(L["Player"])
-local Interrupt = Quartz3:GetModule(L["Interrupt"])
 
 local tonumber = _G.tonumber
 local unpack = _G.unpack
@@ -104,7 +103,7 @@ function GCD:OnDisable()
 	gcdbar:Hide()
 end
 
-function Interrupt:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, combatEvent, _, sourceName, _, _, _, destFlags, _, spell)
+function GCD:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, combatEvent, _, sourceName, _, _, _, destFlags, _, spell)
 	if combatEvent == 'SPELL_CAST_SUCCESS' and destFlags == 0x511 then
 		local start, dur = GetSpellCooldown(spell)
 		if dur > 0 and dur <= 1.5 then
