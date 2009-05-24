@@ -32,7 +32,7 @@ local GetTime = _G.GetTime
 local BOOKTYPE_SPELL = _G.BOOKTYPE_SPELL
 
 local gcdbar, gcdbar_width, gcdspark, db
-local starttime, duration, warned, spell1id, spell2id, usingspell
+local starttime, duration, warned
 
 local getOptions
 
@@ -67,7 +67,6 @@ end
 
 local function OnHide()
 	gcdbar:SetScript('OnUpdate', nil)
-	usingspell = nil
 end
 
 local function OnShow()
@@ -103,17 +102,14 @@ function GCD:OnDisable()
 	gcdbar:Hide()
 end
 
-function GCD:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, combatEvent, _, sourceName, _, _, _, destFlags, _, spell)
-	if combatEvent == 'SPELL_CAST_SUCCESS' and destFlags == 0x511 then
+function GCD:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, combatEvent, _, _, sourceFlags, _, _, _, _, spell)
+	if combatEvent == 'SPELL_CAST_SUCCESS' and sourceFlags == 0x511 then
 		local start, dur = GetSpellCooldown(spell)
 		if dur > 0 and dur <= 1.5 then
-			usingspell = 1
 			starttime = start
 			duration = dur
 			gcdbar:Show()
 			return
-		elseif usingspell == 1 and dur == 0 then
-			gcdbar:Hide()
 		end
 	end
 end
