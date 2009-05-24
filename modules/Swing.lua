@@ -235,29 +235,29 @@ function Swing:Shoot()
 end
 function Swing:ApplySettings()
 	if swingbar and Quartz3:GetModuleEnabled(MODNAME) then
-		local ldb = db.profile
 		swingbar:ClearAllPoints()
-		swingbar:SetHeight(ldb.swingheight)
+		swingbar:SetHeight(db.swingheight)
 		swingbar_width = Player.Bar:GetWidth() - 8
 		swingbar:SetWidth(swingbar_width)
 		swingbar:SetBackdrop({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16})
 		swingbar:SetBackdropColor(0,0,0)
-		swingbar:SetAlpha(ldb.swingalpha)
+		swingbar:SetAlpha(db.swingalpha)
 		swingbar:SetScale(Player.db.profile.scale)
-		if ldb.swingposition == L["Bottom"] then
-			swingbar:SetPoint("TOP", Player.Bar, "BOTTOM", 0, -1 * ldb.swinggap)
-		elseif ldb.swingposition == L["Top"] then
-			swingbar:SetPoint("BOTTOM", Player.Bar, "TOP", 0, ldb.swinggap)
+
+		if db.swingposition == L["Bottom"] then
+			swingbar:SetPoint("TOP", Player.Bar, "BOTTOM", 0, -1 * db.swinggap)
+		elseif db.swingposition == L["Top"] then
+			swingbar:SetPoint("BOTTOM", Player.Bar, "TOP", 0, db.swinggap)
 		else -- L["Free"]
-			swingbar:SetPoint('BOTTOMLEFT', UIParent, 'BOTTOMLEFT', ldb.x, ldb.y)
+			swingbar:SetPoint('BOTTOMLEFT', UIParent, 'BOTTOMLEFT', db.x, db.y)
 		end
 		
 		swingstatusbar:SetAllPoints(swingbar)
 		swingstatusbar:SetStatusBarTexture(media:Fetch('statusbar', Player.db.profile.texture))
-		swingstatusbar:SetStatusBarColor(unpack(ldb.barcolor))
+		swingstatusbar:SetStatusBarColor(unpack(db.barcolor))
 		swingstatusbar:SetMinMaxValues(0, 1)
 		
-		if ldb.durationtext then
+		if db.durationtext then
 			durationtext:Show()
 			durationtext:ClearAllPoints()
 			durationtext:SetPoint('BOTTOMLEFT', swingbar, 'BOTTOMLEFT')
@@ -272,7 +272,7 @@ function Swing:ApplySettings()
 		durationtext:SetNonSpaceWrap(false)
 		durationtext:SetWidth(swingbar_width)
 		
-		if ldb.remainingtext then
+		if db.remainingtext then
 			remainingtext:Show()
 			remainingtext:ClearAllPoints()
 			remainingtext:SetPoint('BOTTOMRIGHT', swingbar, 'BOTTOMRIGHT')
@@ -341,7 +341,7 @@ do
 				desc = L["Set the color of the swing timer bar"],
 				get = getcolor,
 				set = setcolor,
-				passValue = 'barcolor',
+				--passValue = 'barcolor',
 				order = 103,
 			},
 			swingheight = {
@@ -353,7 +353,7 @@ do
 				step = 1,
 				get = get,
 				set = set,
-				passValue = 'swingheight',
+				--passValue = 'swingheight',
 				order = 104,
 			},
 			swingalpha = {
@@ -366,17 +366,17 @@ do
 				isPercent = true,
 				get = get,
 				set = set,
-				passValue = 'swingalpha',
+				--passValue = 'swingalpha',
 				order = 105,
 			},
 			swingposition = {
-				type = 'text',
+				type = 'input',
 				name = L["Bar Position"],
 				desc = L["Set the position of the swing timer bar"],
 				get = get,
 				set = set,
-				passValue = 'swingposition',
-				validate = {L["Top"], L["Bottom"], L["Free"]},
+				--passValue = 'swingposition',
+				values = {L["Top"], L["Bottom"], L["Free"]},
 				order = 106,
 			},
 			lock = {
@@ -411,32 +411,32 @@ do
 				order = 107,
 			},
 			x = {
-				type = 'text',
+				type = 'input',
 				name = L["X"],
 				desc = L["Set an exact X value for this bar's position."],
 				get = get,
 				set = set,
-				passValue = 'x',
+				--passValue = 'x',
 				order = 108,
-				validate = function(v)
-					return tonumber(v) and true
-				end,
+--				validate = function(v)
+--					return tonumber(v) and true
+--				end,
 				hidden = function()
 					return db.profile.swingposition ~= L["Free"]
 				end,
 				usage = L["Number"],
 			},
 			y = {
-				type = 'text',
+				type = 'input',
 				name = L["Y"],
 				desc = L["Set an exact Y value for this bar's position."],
 				get = get,
 				set = set,
-				passValue = 'y',
+				--passValue = 'y',
 				order = 108,
-				validate = function(v)
-					return tonumber(v) and true
-				end,
+--				validate = function(v)
+--					return tonumber(v) and true
+--				end,
 				hidden = function()
 					return db.profile.swingposition ~= L["Free"]
 				end,
@@ -451,7 +451,7 @@ do
 				step = 1,
 				get = get,
 				set = set,
-				passValue = 'swinggap',
+				--passValue = 'swinggap',
 				order = 108,
 			},
 			durationtext = {
@@ -460,7 +460,7 @@ do
 				desc = L["Toggle display of text showing your total swing time"],
 				get = get,
 				set = set,
-				passValue = 'durationtext',
+				--passValue = 'durationtext',
 				order = 109,
 			},
 			remainingtext = {
@@ -469,7 +469,7 @@ do
 				desc = L["Toggle display of text showing the time remaining until you can swing again"],
 				get = get,
 				set = set,
-				passValue = 'remainingtext',
+				--passValue = 'remainingtext',
 				order = 110,
 			},
 		},

@@ -194,7 +194,7 @@ do
 				desc = L["Set the color of the GCD bar spark"],
 				get = getcolor,
 				set = setcolor,
-				passValue = 'sparkcolor',
+				--passValue = 'sparkcolor',
 				order = 103,
 			},
 			gcdheight = {
@@ -206,7 +206,7 @@ do
 				step = 1,
 				get = get,
 				set = set,
-				passValue = 'gcdheight',
+				--passValue = 'gcdheight',
 				order = 104,
 			},
 			gcdalpha = {
@@ -219,17 +219,17 @@ do
 				isPercent = true,
 				get = get,
 				set = set,
-				passValue = 'gcdalpha',
+				--passValue = 'gcdalpha',
 				order = 105,
 			},
 			gcdposition = {
-				type = 'text',
+				type = 'input',
 				name = L["Bar Position"],
 				desc = L["Set the position of the GCD bar"],
 				get = get,
 				set = set,
-				passValue = 'gcdposition',
-				validate = {L["Top"], L["Bottom"], L["Free"]},
+				--passValue = 'gcdposition',
+				values = {L["Top"], L["Bottom"], L["Free"]},
 				order = 106,
 			},
 			lock = {
@@ -262,14 +262,14 @@ do
 				order = 107,
 			},
 			x = {
-				type = 'text',
+				type = 'input',
 				name = L["X"],
 				desc = L["Set an exact X value for this bar's position."],
 				get = get,
 				set = set,
-				passValue = 'x',
+				--passValue = 'x',
 				order = 108,
-				validate = function(v)
+				values = function(v)
 					return tonumber(v) and true
 				end,
 				hidden = function()
@@ -278,14 +278,14 @@ do
 				usage = L["Number"],
 			},
 			y = {
-				type = 'text',
+				type = 'input',
 				name = L["Y"],
 				desc = L["Set an exact Y value for this bar's position."],
 				get = get,
 				set = set,
-				passValue = 'y',
+				--passValue = 'y',
 				order = 108,
-				validate = function(v)
+				values = function(v)
 					return tonumber(v) and true
 				end,
 				hidden = function()
@@ -302,7 +302,7 @@ do
 				step = 1,
 				get = get,
 				set = set,
-				passValue = 'gcdgap',
+				--passValue = 'gcdgap',
 				order = 109,
 			},
 			deplete = {
@@ -311,7 +311,7 @@ do
 				desc = L["Reverses the direction of the GCD spark, causing it to move right-to-left"],
 				get = get,
 				set = set,
-				passValue = 'deplete',
+				--passValue = 'deplete',
 				order = 110,
 			},
 		},

@@ -23,7 +23,6 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
 local MODNAME = L["Player"]
 local Player = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
-local Latency = Quartz3:GetModule(L["Latency"])
 
 local media = LibStub("LibSharedMedia-3.0")
 local lsmlist = _G.AceGUIWidgetLSMlists
@@ -189,7 +188,7 @@ do
 					set = set,
 					--passValue = 'x',
 					order = 200,
-					validate = function(v)
+					values = function(v)
 						return tonumber(v) and true
 					end,
 					--usage = L["Number"],
@@ -202,7 +201,7 @@ do
 					set = set,
 					--passValue = 'y',
 					order = 200,
-					validate = function(v)
+					values = function(v)
 								return tonumber(v) and true
 					end,
 					--usage = L["Number"],
@@ -617,6 +616,7 @@ end
 Player.OnUpdate = OnUpdate
 
 local function OnHide()
+	local Latency = Quartz3:GetModule(L["Latency"],true)
 	if Latency then
 		if Latency:IsEnabled() and Latency.lagbox then
 					Latency.lagbox:Hide()

@@ -156,7 +156,7 @@ do
 				desc = L["Set the color to turn the cast bar when the target is out of range"],
 				get = getcolor,
 				set = setcolor,
-				passValue = 'rangecolor',
+				--passValue = 'rangecolor',
 				order = 101,
 			},
 		},

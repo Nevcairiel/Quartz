@@ -38,58 +38,53 @@ local thistimers = {}
 
 local getOptions
 
-function Timer:OnInitialize()
-	self:SetEnabledState(Quartz3:GetModuleEnabled(MODNAME))
-	Quartz3:RegisterModuleOptions(MODNAME, getOptions, MODNAME)
-
-	Quartz3:RegisterChatCommand({'/qt', '/quartzt', '/quartztimer'}, function(msg)
-		if Quartz3:GetModuleEnabled(MODNAME) then
-			if msg:match('^kill') then
-				local name = msg:match('^kill (.+)$')
-				if name then
-					external[name] = del(external[name])
-					for k, v in ipairs(thistimers) do
-						if v == name then
-							table_remove(thistimers, k)
-							break
-						end
-					end
-					self:TriggerEvent("Quartz3Mirror_UpdateCustom")
-				else
-					return Quartz3:Print(L['Usage: /quartztimer timername 60 or /quartztimer kill timername'])
-				end
-			else
-				local duration = tonumber(msg:match('^(%d+)'))
-				local name
-				if duration then
-					name = msg:match('^%d+ (.+)$')
-				else
-					duration = tonumber(msg:match('(%d+)$'))
-					if not duration then
-						return Quartz3:Print(L['Usage: /quartztimer timername 60 or /quartztimer 60 timername'])
-					end
-					name = msg:match('^(.+) %d+$')
-				end
-				if not name then
-					return Quartz3:Print(L['Usage: /quartztimer timername 60 or /quartztimer kill timername'])
-				end
-				local currentTime = GetTime()
-				external[name].startTime = currentTime
-				external[name].endTime = currentTime + duration
+function Timer:ChatHandler(msg)
+	if self:IsEnabled() then
+		if msg:match('^kill') then
+			local name = msg:match('^kill (.+)$')
+			if name then
+				external[name] = del(external[name])
 				for k, v in ipairs(thistimers) do
 					if v == name then
 						table_remove(thistimers, k)
 						break
 					end
 				end
-				thistimers[#thistimers+1] = name
 				self:TriggerEvent("Quartz3Mirror_UpdateCustom")
+			else
+				return Quartz3:Print(L['Usage: /quartztimer timername 60 or /quartztimer kill timername'])
 			end
 		else
-			Quartz3:Print(L["Timers module currently disabled, re-enable it in the menu"])
+		local duration = tonumber(msg:match('^(%d+)'))
+		local name
+		if duration then
+			name = msg:match('^%d+ (.+)$')
+		else
+			duration = tonumber(msg:match('(%d+)$'))
+			if not duration then
+				return Quartz3:Print(L['Usage: /quartztimer timername 60 or /quartztimer 60 timername'])
+			end
+			name = msg:match('^(.+) %d+$')
 		end
-	end)
+		if not name then
+			return Quartz3:Print(L['Usage: /quartztimer timername 60 or /quartztimer kill timername'])
+		end
+
+		local currentTime = GetTime()
+		external[name].startTime = currentTime
+		external[name].endTime = currentTime + duration
+		for k, v in ipairs(thistimers) do
+			if v == name then
+				table_remove(thistimers, k)
+				break
+				end
+			end
+			thistimers[#thistimers+1] = name
+			self:TriggerEvent("Quartz3Mirror_UpdateCustom")
+		end
+	end
 end
+
 function Timer:OnDisable()
 	for k, v in pairs(thistimers) do
 		external[v] = del(external[v])
@@ -97,6 +92,17 @@ function Timer:OnDisable()
 	end
 	self:TriggerEvent("Quartz3Mirror_UpdateCustom")
 end
+
+function Timer:OnInitialize()
+	self:SetEnabledState(Quartz3:GetModuleEnabled(MODNAME))
+	Quartz3:RegisterModuleOptions(MODNAME, getOptions, MODNAME)
+
+	Quartz3:RegisterChatCommand('qt', self:ChatHandler(msg))
+	Quartz3:RegisterChatCommand('quartzt',  self:ChatHandler(msg))
+	Quartz3:RegisterChatCommand('quartztimer', self:ChatHandler(msg))
+end
+
+
 do
 	local newname, newlength
 
@@ -121,7 +127,7 @@ do
 				order = 99,
 			},
 			newtimername = {
-				type = 'text',
+				type = 'input',
 				name = L["New Timer Name"],
 				desc = L["Set a name for the new timer"],
 				get = function()
@@ -134,7 +140,7 @@ do
 				order = 100,
 			},
 			newtimerlength = {
-				type = 'text',
+				type = 'input',
 				name = L["New Timer Length"],
 				desc = L["Length of the new timer, in seconds"],
 				get = function()
@@ -143,7 +149,7 @@ do
 				set = function(v)
 					newlength = tonumber(v)
 				end,
-				validate = function(v)
+				values = function(v)
 					return tonumber(v)
 				end,
 				usage = L["<Time in seconds>"],
@@ -174,7 +180,7 @@ do
 				order = -2,
 			},
 			killtimer = {
-				type = 'text',
+				type = 'input',
 				name = L["Stop Timer"],
 				desc = L["Select a timer to stop"],
 				get = function()
@@ -192,7 +198,7 @@ do
 						Timer:TriggerEvent("QuartzMirror_UpdateCustom")
 					end
 				end,
-				validate = thistimers,
+				values = thistimers,
 				order = -1,
 			},
 		},

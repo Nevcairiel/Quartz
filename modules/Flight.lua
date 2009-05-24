@@ -79,7 +79,7 @@ do
 				desc = L["Set the color to turn the cast bar when taking a flight path"],
 				get = getcolor,
 				set = setcolor,
-				passValue = 'color',
+				--passValue = 'color',
 				order = 101,
 			},
 			deplete = {
@@ -88,7 +88,7 @@ do
 				desc = L["Deplete"],
 				get = get,
 				set = set,
-				passValue = 'deplete',
+				--passValue = 'deplete',
 				order = 102,
 			},
 		},
