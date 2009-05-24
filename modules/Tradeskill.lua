@@ -15,19 +15,29 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
+local _G = getfenv(0)
+local LibStub = _G.LibStub
 
-local Quartz = LibStub("AceAddon-3.0"):GetAddon("Quartz")
-local L = LibStub("AceLocale-3.0"):GetLocale("Quartz")
+local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
+local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
-local QuartzPlayer = Quartz:GetModule('Player')
-local QuartzTradeskill = Quartz:NewModule("Tradeskill", "AceHook-3.0", "AceEvent-3.0")
-local self = QuartzTradeskill
+local MODNAME = L["Tradeskill"]
+local Tradeskill = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
+local Player = Quartz3:GetModule(L["Player"])
+
+local GetTime = _G.GetTime
+local UnitCastingInfo = _G.UnitCastingInfo
+local tonumber = _G.tonumber
+local unpack = _G.unpack
+
+local db, getOptions
 
 local castBar, castBarText, castBarTimeText, castBarIcon, castBarSpark, castBarParent
 
 local repeattimes, castname, duration, totaltime, starttime, casting, bail
 local completedcasts = 0
 local restartdelay = 1
+
 local function timenum(num)
 	if num <= 10 then
 		return ('%.1f'):format(num)
@@ -37,6 +47,7 @@ local function timenum(num)
 		return ('%d:%02d'):format(num / 60, num % 60)
 	end
 end
+
 local function tradeskillOnUpdate()
 	local currentTime = GetTime()
 	if casting then
@@ -45,30 +56,30 @@ local function tradeskillOnUpdate()
 		
 		local perc = (currentTime - starttime) / duration
 		castBarSpark:ClearAllPoints()
-		castBarSpark:SetPoint('CENTER', castBar, 'LEFT', perc * QuartzPlayer.db.profile.w, 0)
+		castBarSpark:SetPoint('CENTER', castBar, 'LEFT', perc * Player.db.profile.w, 0)
 		
-		if QuartzPlayer.db.profile.hidecasttime then
+		if Player.db.profile.hidecasttime then
 			castBarTimeText:SetText(timenum(totaltime - elapsed))
 		else
 			castBarTimeText:SetText(("%s / %s"):format(timenum(totaltime - elapsed), timenum(totaltime)))
 		end
 	else
 		if (starttime + duration + restartdelay < currentTime) or (completedcasts >= repeattimes) or bail or completedcasts == 0 then
-			QuartzPlayer.fadeOut = true
-			QuartzPlayer.stopTime = currentTime
+			Player.fadeOut = true
+			Player.stopTime = currentTime
 			castBar:SetValue(duration * repeattimes)
 			castBarTimeText:SetText('')
 			castBarSpark:Hide()
-			castBarParent:SetScript('OnUpdate', QuartzPlayer.OnUpdate)
+			castBarParent:SetScript('OnUpdate', Player.OnUpdate)
 			castBar:SetMinMaxValues(0, 1)
 		else
 			local elapsed = duration * completedcasts
 			castBar:SetValue(elapsed)
 			
 			castBarSpark:ClearAllPoints()
-			castBarSpark:SetPoint('CENTER', castBar, 'LEFT', QuartzPlayer.db.profile.w, 0)
+			castBarSpark:SetPoint('CENTER', castBar, 'LEFT', Player.db.profile.w, 0)
 			
-			if QuartzPlayer.db.profile.hidecasttime then
+			if Player.db.profile.hidecasttime then
 				castBarTimeText:SetText(timenum(totaltime - elapsed))
 			else
 				castBarTimeText:SetText(("%s / %s"):format(timenum(totaltime - elapsed), timenum(totaltime)))
@@ -76,14 +87,16 @@ local function tradeskillOnUpdate()
 		end
 	end
 end
-function QuartzTradeskill:OnEnable()
-	self:Hook(QuartzPlayer, "UNIT_SPELLCAST_START")
+
+function Tradeskill:OnEnable()
+	self:Hook(Player, "UNIT_SPELLCAST_START")
 	self:RegisterEvent("UNIT_SPELLCAST_STOP")
 	self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 	self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
 	self:Hook("DoTradeSkill", true)
 end
-function QuartzTradeskill:UNIT_SPELLCAST_START(object, unit)
+
+function Tradeskill:UNIT_SPELLCAST_START(object, unit)
 	if unit ~= 'player' then
 		return self.hooks[object].UNIT_SPELLCAST_START(object, unit)
 	end
@@ -94,18 +107,18 @@ function QuartzTradeskill:UNIT_SPELLCAST_START(object, unit)
 		totaltime = duration * (repeattimes or 1)
 		starttime = GetTime()
 		casting = true
-		QuartzPlayer.fadeOut = nil
+		Player.fadeOut = nil
 		castname = spell
 		bail = nil
-		QuartzPlayer.endTime = nil
+		Player.endTime = nil
 		
-		castBar:SetStatusBarColor(unpack(Quartz.db.profile.castingcolor))
+		castBar:SetStatusBarColor(unpack(Quartz3.db.profile.castingcolor))
 		castBar:SetMinMaxValues(0, totaltime)
 		
 		castBar:SetValue(0)
 		castBarParent:Show()
 		castBarParent:SetScript('OnUpdate', tradeskillOnUpdate)
-		castBarParent:SetAlpha(QuartzPlayer.db.profile.alpha)
+		castBarParent:SetAlpha(Player.db.profile.alpha)
 		
 		local numleft = repeattimes - completedcasts
 		if numleft <= 1 then
@@ -120,13 +133,15 @@ function QuartzTradeskill:UNIT_SPELLCAST_START(object, unit)
 		return self.hooks[object].UNIT_SPELLCAST_START(object, unit)
 	end
 end
-function QuartzTradeskill:UNIT_SPELLCAST_STOP(event, unit)
+
+function Tradeskill:UNIT_SPELLCAST_STOP(event, unit)
 	if unit ~= 'player' then
 		return
 	end
 	casting = false
 end
-function QuartzTradeskill:UNIT_SPELLCAST_SUCCEEDED(event, unit, spell)
+
+function Tradeskill:UNIT_SPELLCAST_SUCCEEDED(event, unit, spell)
 	if unit ~= 'player' then
 		return
 	end
@@ -134,34 +149,39 @@ function QuartzTradeskill:UNIT_SPELLCAST_SUCCEEDED(event, unit, spell)
 		completedcasts = completedcasts + 1
 	end
 end
-function QuartzTradeskill:UNIT_SPELLCAST_INTERRUPTED(event, unit)
+
+function Tradeskill:UNIT_SPELLCAST_INTERRUPTED(event, unit)
 	if unit ~= 'player' then
 		return
 	end
 	bail = true
 end
-function QuartzTradeskill:DoTradeSkill(index, num)
+
+function Tradeskill:DoTradeSkill(index, num)
 	completedcasts = 0
 	repeattimes = tonumber(num) or 1
 	return self.hooks.DoTradeSkill(index, num)
 end
-function QuartzTradeskill:ApplySettings()
-	castBarParent = QuartzPlayer.castBarParent
-	castBar = QuartzPlayer.castBar
-	castBarText = QuartzPlayer.castBarText
-	castBarTimeText = QuartzPlayer.castBarTimeText
-	castBarIcon = QuartzPlayer.castBarIcon
-	castBarSpark = QuartzPlayer.castBarSpark
+
+function Tradeskill:ApplySettings()
+	castBarParent = Player.castBarParent
+	castBar = Player.castBar
+	castBarText = Player.castBarText
+	castBarTimeText = Player.castBarTimeText
+	castBarIcon = Player.castBarIcon
+	castBarSpark = Player.castBarSpark
 end
 do
 	local function set(field, value)
 		db.profile[field] = value
-		applySettings()
+		Tradeskill:ApplySettings()
 	end
 	local function get(field)
 		return db.profile[field]
 	end
-	Quartz.options.args.Tradeskill = {
+	local options
+	function getOptions()
+		options = options or {
 		type = 'group',
 		name = L["Tradeskill Merge"],
 		desc = L["Tradeskill Merge"],
@@ -172,12 +192,14 @@ do
 				name = L["Enable"],
 				desc = L["Enable"],
 				get = function()
-					return Quartz:IsModuleActive('Tradeskill')
+					return Quartz3:GetModuleEnabled(MODNAME)
 				end,
 				set = function(v)
-					Quartz:ToggleModuleActive('Tradeskill', v)
+					Quartz3:SetModuleEnabled(MODNAME, v)
 				end,
 			},
 		},
 	}
+	return options
+	end
 end

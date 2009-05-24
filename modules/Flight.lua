@@ -15,15 +15,20 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
+local _G = getfenv(0)
+local LibStub = _G.LibStub
+
 local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
 local MODNAME = L["Flight"]
 local Flight = Quartz3:NewModule(MODNAME, "AceHook-3.0", "AceEvent-3.0")
 local Player = Quartz3:GetModule(L["Player"])
-local self = Flight
 
-local db
+local GetTime = _G.GetTime
+local unpack = _G.unpack
+
+local db, getOptions
 
 local defaults = {
 	profile = {
@@ -32,8 +37,6 @@ local defaults = {
 		},
 	}
 
-local getOptions
-local options
 do
 	local function setcolor(field, ...)
 		db.profile[field] = {...}
@@ -50,6 +53,7 @@ do
 		return db.profile[field]
 	end
 
+	local options
 	function getOptions() 
 	options = options or {
 		type = 'group',

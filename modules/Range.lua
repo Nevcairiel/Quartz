@@ -15,17 +15,31 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
+local _G = getfenv(0)
+local LibStub = _G.LibStub
 
-local Quartz = LibStub("AceAddon-3.0"):GetAddon("Quartz")
-local L = LibStub("AceLocale-3.0"):GetLocale("Quartz")
+local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
+local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
-local QuartzPlayer = Quartz:GetModule("Player")
-local QuartzRange = Quartz:NewModule("Range", "AceEvent-3.0")
-local self = QuartzRange
+local MODNAME = L["Range"]
+local Range = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
+local Player = Quartz3:GetModule(L["Player"])
 
-local GetTime = GetTime
-local IsSpellInRange = IsSpellInRange
-local f, OnUpdate, db, spell, target, modified, r, g, b, castBar
+local GetTime = _G.GetTime
+local IsSpellInRange = _G.IsSpellInRange
+local UnitCastingInfo = _G.UnitCastingInfo
+local UnitChannelInfo = _G.UnitChannelInfo
+local UnitName = _G.UnitName
+local unpack = _G.unpack
+
+local f, OnUpdate, db, getOptions, spell, target, modified, r, g, b, castBar
+
+local defaults ={ 
+	profile = {
+		rangecolor = {1, 1, 1},
+	}
+}
+
 do
 	local refreshtime = 0.25
 	local sincelast = 0
@@ -33,7 +47,7 @@ do
 		sincelast = sincelast + elapsed
 		if sincelast >= refreshtime then
 			sincelast = 0
-			if not castBar:IsVisible() or QuartzPlayer.fadeOut then
+			if not castBar:IsVisible() or Player.fadeOut then
 				return f:SetScript('OnUpdate', nil)
 			end
 			if IsSpellInRange(spell, target) == 0 then
@@ -47,24 +61,27 @@ do
 		end
 	end
 end
-function QuartzRange:OnInitialize()
+
+function Range:OnInitialize()
+	self.db = Quartz3.db:RegisterNamespace(MODNAME, defaults)
+	db = self.db.profile
+	
+	self:SetEnabledState(Quartz3:GetModuleEnabled(MODNAME))
+	Quartz3:RegisterModuleOptions(MODNAME, getOptions, MODNAME)
+
 	f = CreateFrame('Frame', nil, UIParent)
-	db = Quartz:AcquireDBNamespace("Range")
-	Quartz:RegisterDefaults("Range", "profile", {
-		rangecolor = {1, 1, 1},
-	})
 end
-function QuartzRange:OnEnable()
+function Range:OnEnable()
 	self:RegisterEvent("UNIT_SPELLCAST_SENT")
 	self:RegisterEvent("UNIT_SPELLCAST_START")
 	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
 end
-function QuartzRange:UNIT_SPELLCAST_START(event, unit)
+function Range:UNIT_SPELLCAST_START(event, unit)
 	if unit ~= 'player' then
 		return
 	end
 	if not castBar then
-		castBar = QuartzPlayer.castBar
+		castBar = Player.castBar
 	end
 	if target then
 		spell = UnitCastingInfo(unit)
@@ -72,12 +89,12 @@ function QuartzRange:UNIT_SPELLCAST_START(event, unit)
 		f:SetScript('OnUpdate', OnUpdate)
 	end
 end
-function QuartzRange:UNIT_SPELLCAST_CHANNEL_START(event, unit)
+function Range:UNIT_SPELLCAST_CHANNEL_START(event, unit)
 	if unit ~= 'player' then
 		return
 	end
 	if not castBar then
-		castBar = QuartzPlayer.castBar
+		castBar = Player.castBar
 	end
 	if target then
 		spell = UnitChannelInfo(unit)
@@ -85,7 +102,8 @@ function QuartzRange:UNIT_SPELLCAST_CHANNEL_START(event, unit)
 		f:SetScript('OnUpdate', OnUpdate)
 	end
 end
-function QuartzRange:UNIT_SPELLCAST_SENT(event, unit, _, _, name)
+
+function Range:UNIT_SPELLCAST_SENT(event, unit, _, _, name)
 	if unit ~= 'player' then
 		return
 	end
@@ -103,15 +121,18 @@ function QuartzRange:UNIT_SPELLCAST_SENT(event, unit, _, _, name)
 		target = nil
 	end
 end
+
 do
 	local function setcolor(field, ...)
 		db.profile[field] = {...}
-		Quartz.ApplySettings()
+		Quartz3.ApplySettings()
 	end
 	local function getcolor(field)
 		return unpack(db.profile[field])
 	end
-	Quartz.options.args.Range = {
+	local options
+	function getOptions()
+		options = options or {
 		type = 'group',
 		name = L["Range"],
 		desc = L["Range"],
@@ -122,10 +143,10 @@ do
 				name = L["Enable"],
 				desc = L["Enable"],
 				get = function()
-					return Quartz:IsModuleActive('Range')
+					return Quartz3:GetModuleEnabled(MODNAME)
 				end,
 				set = function(v)
-					Quartz:ToggleModuleActive('Range', v)
+					Quartz3:SetModuleEnabled(MODNAME, v)
 				end,
 				order = 100,
 			},
@@ -140,4 +161,6 @@ do
 			},
 		},
 	}
+	return options
+	end
 end

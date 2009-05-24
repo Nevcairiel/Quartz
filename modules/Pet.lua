@@ -15,24 +15,65 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
+local _G = getfenv(0)
+local LibStub = _G.LibStub
 
-local Quartz = LibStub("AceAddon-3.0"):GetAddon("Quartz")
-local L = LibStub("AceLocale-3.0"):GetLocale("Quartz")
+local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
+local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
-local QuartzPet = Quartz:NewModule("Pet", "AceEvent-3.0")
-local self = QuartzPet
+local MODNAME = L["Pet"]
+local Pet = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
+local Player = Quartz3:GetModule(L["Player"])
 
 local media = LibStub("LibSharedMedia-3.0")
 
-local math_min = math.min
-local unpack = unpack
-local tonumber = tonumber
-local UnitCastingInfo = UnitCastingInfo
-local UnitChannelInfo = UnitChannelInfo
-local GetTime = GetTime
+local math_min = _G.math.min
+local unpack = _G.unpack
+local tonumber = _G.tonumber
+local UnitCastingInfo = _G.UnitCastingInfo
+local UnitChannelInfo = _G.UnitChannelInfo
+local GetTime = _G.GetTime
 
 local castBar, castBarText, castBarTimeText, castBarIcon, castBarSpark, castBarParent
 local startTime, endTime, delay, fadeOut, stopTime, casting, channeling, db
+
+local db, getOptions
+
+local defaults = {
+	profile = {
+		hideblizz = true,
+		
+		--x =  -- applied automatically in :ApplySettings()
+		y = 300,
+		h = 18,
+		w = 200,
+		scale = 1,
+		
+		texture = 'LiteStep',
+		hideicon = false,
+		
+		alpha = 1,
+		iconalpha = 0.9,
+		iconposition = L["Left"],
+		icongap = 4,
+		
+		hidenametext = false,
+		nametextposition = L["Left"],
+		timetextposition = L["Right"], -- L["Left"], L["Center"], L["Cast Start Side"], L["Cast End Side"]
+		font = 'Friz Quadrata TT',
+		fontsize = 14,
+		hidetimetext = false,
+		hidecasttime = false,
+		timefontsize = 12,
+		spellrank = false,
+		spellrankstyle = L["Roman"], --L["Full Text"], L["Number"], L["Roman Full Text"]
+		
+		nametextx = 3,
+		nametexty = 0,
+		timetextx = 3,
+		timetexty = 0,
+	}
+}
 
 local function OnUpdate()
 	local currentTime = GetTime()
@@ -158,44 +199,15 @@ do
 	end
 end
 
-function QuartzPet:OnInitialize()
-	db = Quartz:AcquireDBNamespace("Pet")
-	Quartz:RegisterDefaults("Pet", "profile", {
-		hideblizz = true,
-		
-		--x =  -- applied automatically in :ApplySettings()
-		y = 300,
-		h = 18,
-		w = 200,
-		scale = 1,
-		
-		texture = 'LiteStep',
-		hideicon = false,
-		
-		alpha = 1,
-		iconalpha = 0.9,
-		iconposition = L["Left"],
-		icongap = 4,
-		
-		hidenametext = false,
-		nametextposition = L["Left"],
-		timetextposition = L["Right"], -- L["Left"], L["Center"], L["Cast Start Side"], L["Cast End Side"]
-		font = 'Friz Quadrata TT',
-		fontsize = 14,
-		hidetimetext = false,
-		hidecasttime = false,
-		timefontsize = 12,
-		spellrank = false,
-		spellrankstyle = L["Roman"], --L["Full Text"], L["Number"], L["Roman Full Text"]
-		
-		nametextx = 3,
-		nametexty = 0,
-		timetextx = 3,
-		timetexty = 0,
-	})
+function Pet:OnInitialize()
+	self.db = Quartz3.db:RegisterNamespace(MODNAME, defaults)
+	db = self.db.profile
+	
+	self:SetEnabledState(Quartz3:GetModuleEnabled(MODNAME))
+	Quartz3:RegisterModuleOptions(MODNAME, getOptions, MODNAME)
 end
 
-function QuartzPet:OnEnable()
+function Pet:OnEnable()
 	self:RegisterEvent("UNIT_SPELLCAST_START")
 	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
 	self:RegisterEvent("UNIT_SPELLCAST_STOP")
@@ -211,7 +223,7 @@ function QuartzPet:OnEnable()
 		end
 	end)
 	if not castBarParent then
-		castBarParent = CreateFrame('Frame', 'QuartzPetBar', UIParent)
+		castBarParent = CreateFrame('Frame', 'Quartz3PetBar', UIParent)
 		castBarParent:SetFrameStrata('MEDIUM')
 		castBarParent:SetScript('OnShow', OnShow)
 		castBarParent:SetScript('OnHide', OnHide)
@@ -227,13 +239,13 @@ function QuartzPet:OnEnable()
 		
 		castBarParent:Hide()
 	end
-	Quartz.ApplySettings()
+	Quartz3.ApplySettings()
 end
 
-function QuartzPet:OnDisable()
+function Pet:OnDisable()
 	castBarParent:Hide()
 end
-function QuartzPet:UNIT_SPELLCAST_START(event, unit)
+function Pet:UNIT_SPELLCAST_START(event, unit)
 	if unit ~= 'pet' then
 		return
 	end
@@ -249,7 +261,7 @@ function QuartzPet:UNIT_SPELLCAST_START(event, unit)
 	channeling = nil
 	fadeOut = nil
 
-	castBar:SetStatusBarColor(unpack(Quartz.db.profile.castingcolor))
+	castBar:SetStatusBarColor(unpack(Quartz3.db.profile.castingcolor))
 	
 	castBar:SetValue(0)
 	castBarParent:Show()
@@ -258,7 +270,7 @@ function QuartzPet:UNIT_SPELLCAST_START(event, unit)
 	setnametext(displayName, rank)
 	
 	castBarSpark:Show()
-	if icon == "Interface\\Icons\\Temp" and Quartz.db.profile.hidesamwise then
+	if icon == "Interface\\Icons\\Temp" and Quartz3.db.profile.hidesamwise then
 		icon = nil
 	end
 	castBarIcon:SetTexture(icon)
@@ -273,7 +285,7 @@ function QuartzPet:UNIT_SPELLCAST_START(event, unit)
 	end
 end
 
-function QuartzPet:UNIT_SPELLCAST_CHANNEL_START(event, unit)
+function Pet:UNIT_SPELLCAST_CHANNEL_START(event, unit)
 	if unit ~= 'pet' then
 		return
 	end
@@ -289,7 +301,7 @@ function QuartzPet:UNIT_SPELLCAST_CHANNEL_START(event, unit)
 	channeling = true
 	fadeOut = nil
 
-	castBar:SetStatusBarColor(unpack(Quartz.db.profile.channelingcolor))
+	castBar:SetStatusBarColor(unpack(Quartz3.db.profile.channelingcolor))
 	
 	castBar:SetValue(1)
 	castBarParent:Show()
@@ -298,7 +310,7 @@ function QuartzPet:UNIT_SPELLCAST_CHANNEL_START(event, unit)
 	setnametext(spell, rank)
 	
 	castBarSpark:Show()
-	if icon == "Interface\\Icons\\Temp" and Quartz.db.profile.hidesamwise then
+	if icon == "Interface\\Icons\\Temp" and Quartz3.db.profile.hidesamwise then
 		icon = nil
 	end
 	castBarIcon:SetTexture(icon)
@@ -313,7 +325,7 @@ function QuartzPet:UNIT_SPELLCAST_CHANNEL_START(event, unit)
 	end
 end
 
-function QuartzPet:UNIT_SPELLCAST_STOP(event, unit)
+function Pet:UNIT_SPELLCAST_STOP(event, unit)
 	if unit ~= 'pet' then
 		return
 	end
@@ -323,13 +335,13 @@ function QuartzPet:UNIT_SPELLCAST_STOP(event, unit)
 		stopTime = GetTime()
 		
 		castBar:SetValue(1.0)
-		castBar:SetStatusBarColor(unpack(Quartz.db.profile.completecolor))
+		castBar:SetStatusBarColor(unpack(Quartz3.db.profile.completecolor))
 		
 		castBarTimeText:SetText("")
 	end
 end
 
-function QuartzPet:UNIT_SPELLCAST_CHANNEL_STOP(event, unit)
+function Pet:UNIT_SPELLCAST_CHANNEL_STOP(event, unit)
 	if unit ~= 'pet' then
 		return
 	end
@@ -339,13 +351,13 @@ function QuartzPet:UNIT_SPELLCAST_CHANNEL_STOP(event, unit)
 		stopTime = GetTime()
 		
 		castBar:SetValue(0)
-		castBar:SetStatusBarColor(unpack(Quartz.db.profile.completecolor))
+		castBar:SetStatusBarColor(unpack(Quartz3.db.profile.completecolor))
 		
 		castBarTimeText:SetText("")
 	end
 end
 
-function QuartzPet:UNIT_SPELLCAST_FAILED(event, unit)
+function Pet:UNIT_SPELLCAST_FAILED(event, unit)
 	if unit ~= 'pet' or channeling then
 		return
 	end
@@ -356,12 +368,12 @@ function QuartzPet:UNIT_SPELLCAST_FAILED(event, unit)
 		stopTime = GetTime()
 	end
 	castBar:SetValue(1.0)
-	castBar:SetStatusBarColor(unpack(Quartz.db.profile.failcolor))
+	castBar:SetStatusBarColor(unpack(Quartz3.db.profile.failcolor))
 	
 	castBarTimeText:SetText("")
 end
 
-function QuartzPet:UNIT_SPELLCAST_INTERRUPTED(event, unit)
+function Pet:UNIT_SPELLCAST_INTERRUPTED(event, unit)
 	if unit ~= 'pet' then
 		return
 	end
@@ -372,12 +384,12 @@ function QuartzPet:UNIT_SPELLCAST_INTERRUPTED(event, unit)
 		stopTime = GetTime()
 	end
 	castBar:SetValue(1.0)
-	castBar:SetStatusBarColor(unpack(Quartz.db.profile.failcolor))
+	castBar:SetStatusBarColor(unpack(Quartz3.db.profile.failcolor))
 	
 	castBarTimeText:SetText("")
 end
 
-function QuartzPet:UNIT_SPELLCAST_DELAYED(event, unit)
+function Pet:UNIT_SPELLCAST_DELAYED(event, unit)
 	if unit ~= 'pet' then
 		return
 	end
@@ -393,7 +405,7 @@ function QuartzPet:UNIT_SPELLCAST_DELAYED(event, unit)
 	delay = (delay or 0) + (startTime - (oldStart or startTime))
 end
 
-function QuartzPet:UNIT_SPELLCAST_CHANNEL_UPDATE(event, unit)
+function Pet:UNIT_SPELLCAST_CHANNEL_UPDATE(event, unit)
 	if unit ~= 'pet' then
 		return
 	end
@@ -412,13 +424,11 @@ do
 	local backdrop = { insets = {} }
 	local backdrop_insets = backdrop.insets
 	
-	function QuartzPet:ApplySettings()
+	function Pet:ApplySettings()
 		if not castBarParent then
 			return
 		end
-		local db = db.profile
-		local qdb = Quartz.db.profile
-		local qpdb = Quartz:AcquireDBNamespace("Player").profile
+		local qdb = Quartz3.db.profile
 		castBarParent:ClearAllPoints()
 		if not db.x then
 			db.x = (UIParent:GetWidth() / 2 - (db.w * db.scale)) / db.scale - 5
@@ -432,7 +442,7 @@ do
 		backdrop.bgFile = "Interface\\Tooltips\\UI-Tooltip-Background"
 		backdrop.tile = true
 		backdrop.tileSize = 16
-		backdrop.edgeFile = media:Fetch('border', qpdb.border)
+		backdrop.edgeFile = media:Fetch('border', Player.db.profile.border)
 		backdrop.edgeSize = 16
 		backdrop_insets.left = 4
 		backdrop_insets.right = 4
@@ -543,7 +553,7 @@ do
 		castBarSpark:SetHeight(db.h*2.2)
 		
 		if db.hideblizz then
-			PetCastingBarFrame.RegisterEvent = nothing
+			PetCastingBarFrame.RegisterEvent = function() end
 			PetCastingBarFrame:UnregisterAllEvents()
 			PetCastingBarFrame:Hide()
 		else
@@ -561,10 +571,11 @@ do
 		end
 	end
 end
+
 do
 	local function set(field, value)
 		db.profile[field] = value
-		Quartz.ApplySettings()
+		Quartz3.ApplySettings()
 	end
 	local function get(field)
 		return db.profile[field]
@@ -590,7 +601,10 @@ do
 	local function hidenametextoptions()
 		return db.profile.hidenametext
 	end
-	Quartz.options.args.Pet = {
+
+	local options
+	function getOptions()
+		options = options or {
 		type = 'group',
 		name = L["Pet"],
 		desc = L["Pet"],
@@ -601,10 +615,10 @@ do
 				name = L["Enable"],
 				desc = L["Enable"],
 				get = function()
-					return Quartz:IsModuleActive('Pet')
+					return Quartz3:GetModuleActive(MODNAME)
 				end,
 				set = function(v)
-					Quartz:ToggleModuleActive('Pet', v)
+					Quartz3:SetModuleActive(MODNAME, v)
 				end,
 				order = 99,
 			},
@@ -959,7 +973,7 @@ do
 					else -- L["Vertical"]
 						db.profile.y = (UIParent:GetHeight() / 2 - (db.profile.h * scale) / 2) / scale
 					end
-					Quartz.ApplySettings()
+					Quartz3.ApplySettings()
 				end,
 				validate = {L["Horizontal"], L["Vertical"]},
 				order = 503,
@@ -970,13 +984,15 @@ do
 				desc = L["Select a bar from which to copy settings"],
 				get = false,
 				set = function(v)
-					local from = Quartz:AcquireDBNamespace(v)
-					Quartz:CopySettings(from.profile, db.profile)
-					Quartz.ApplySettings()
+					local from = Quartz3:GetModule(v)
+					Quartz3:CopySettings(from.profile, db.profile)
+					Quartz3.ApplySettings()
 				end,
 				validate = {L["Player"], L["Target"], L["Focus"]},
 				order = 504
 			},
 		},
 	}
+	return options
+	end
 end

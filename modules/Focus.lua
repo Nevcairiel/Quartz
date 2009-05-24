@@ -15,24 +15,71 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
+local _G = getfenv(0)
+local LibStub = _G.LibStub
+
 local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
 local MODNAME = L["Focus"]
 local Focus = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
-local self = Focus
+local Player = Quartz3:GetModule(L["Player"])
 
 local media = LibStub("LibSharedMedia-3.0")
 
-local math_min = math.min
-local unpack = unpack
-local tonumber = tonumber
-local UnitCastingInfo = UnitCastingInfo
-local UnitChannelInfo = UnitChannelInfo
-local GetTime = GetTime
+local GetTime = _G.GetTime
+local UnitCastingInfo = _G.UnitCastingInfo
+local UnitChannelInfo = _G.UnitChannelInfo
+local UnitExists = _G.UnitExists
+local UnitIsEnemy = _G.UnitIsEnemy
+local UnitIsFriend = _G.UnitIsFriend
+local UnitIsUnit = _G.UnitIsUnit
+local tonumber = _G.tonumber
+local unpack = _G.unpack
+local math_min = _G.math.min
 
 local castBar, castBarText, castBarTimeText, castBarIcon, castBarSpark, castBarParent
 local startTime, endTime, delay, fadeOut, stopTime, casting, channeling, db
+
+local db, getOptions
+
+local defaults = {
+	profile = {
+		--x =  -- applied automatically in :ApplySettings()
+		y = 250,
+		h = 18,
+		w = 200,
+		scale = 1,
+		
+		texture = 'LiteStep',
+		hideicon = false,
+		
+		alpha = 1,
+		iconalpha = 0.9,
+		iconposition = L["Left"],
+		icongap = 4,
+		
+		hidenametext = false,
+		nametextposition = L["Left"],
+		timetextposition = L["Right"], -- L["Left"], L["Center"], L["Cast Start Side"], L["Cast End Side"]
+		font = 'Friz Quadrata TT',
+		fontsize = 14,
+		hidetimetext = false,
+		hidecasttime = false,
+		timefontsize = 12,
+		spellrank = false,
+		spellrankstyle = L["Roman"], --L["Full Text"], L["Number"], L["Roman Full Text"]
+		
+		nametextx = 3,
+		nametexty = 0,
+		timetextx = 3,
+		timetexty = 0,
+		
+		showfriendly = true,
+		showhostile = true,
+		showtarget = true,
+	}
+}
 
 local function OnUpdate()
 	local currentTime = GetTime()
@@ -158,46 +205,16 @@ do
 	end
 end
 
-function QuartzFocus:OnInitialize()
-	db = Quartz:AcquireDBNamespace("Focus")
-	Quartz:RegisterDefaults("Focus", "profile", {
-		--x =  -- applied automatically in :ApplySettings()
-		y = 250,
-		h = 18,
-		w = 200,
-		scale = 1,
-		
-		texture = 'LiteStep',
-		hideicon = false,
-		
-		alpha = 1,
-		iconalpha = 0.9,
-		iconposition = L["Left"],
-		icongap = 4,
-		
-		hidenametext = false,
-		nametextposition = L["Left"],
-		timetextposition = L["Right"], -- L["Left"], L["Center"], L["Cast Start Side"], L["Cast End Side"]
-		font = 'Friz Quadrata TT',
-		fontsize = 14,
-		hidetimetext = false,
-		hidecasttime = false,
-		timefontsize = 12,
-		spellrank = false,
-		spellrankstyle = L["Roman"], --L["Full Text"], L["Number"], L["Roman Full Text"]
-		
-		nametextx = 3,
-		nametexty = 0,
-		timetextx = 3,
-		timetexty = 0,
-		
-		showfriendly = true,
-		showhostile = true,
-		showtarget = true,
-	})
+function Focus:OnInitialize()
+	self.db = Quartz3.db:RegisterNamespace(MODNAME, defaults)
+	db = self.db.profile
+	
+	self:SetEnabledState(Quartz3:GetModuleEnabled(MODNAME))
+	Quartz3:RegisterModuleOptions(MODNAME, getOptions, MODNAME)
+
 end
 
-function QuartzFocus:OnEnable()
+function Focus:OnEnable()
 	self:RegisterEvent("UNIT_SPELLCAST_START")
 	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
 	self:RegisterEvent("UNIT_SPELLCAST_STOP")
@@ -216,7 +233,7 @@ function QuartzFocus:OnEnable()
 		end
 	end)
 	if not castBarParent then
-		castBarParent = CreateFrame('Frame', 'QuartzFocusBar', UIParent)
+		castBarParent = CreateFrame('Frame', 'Quartz3FocusBar', UIParent)
 		castBarParent:SetFrameStrata('MEDIUM')
 		castBarParent:SetScript('OnShow', OnShow)
 		castBarParent:SetScript('OnHide', OnHide)
@@ -232,13 +249,14 @@ function QuartzFocus:OnEnable()
 		
 		castBarParent:Hide()
 	end
-	Quartz.ApplySettings()
+	Focus.Bar = castBarParent
+	Quartz3.ApplySettings()
 end
 
-function QuartzFocus:OnDisable()
+function Focus:OnDisable()
 	castBarParent:Hide()
 end
-function QuartzFocus:UNIT_SPELLCAST_START(event, unit)
+function Focus:UNIT_SPELLCAST_START(event, unit)
 	if unit ~= 'focus' then
 		return
 	end
@@ -269,7 +287,7 @@ function QuartzFocus:UNIT_SPELLCAST_START(event, unit)
 	channeling = nil
 	fadeOut = nil
 
-	castBar:SetStatusBarColor(unpack(Quartz.db.profile.castingcolor))
+	castBar:SetStatusBarColor(unpack(Quartz3.db.profile.castingcolor))
 	
 	castBar:SetValue(0)
 	castBarParent:Show()
@@ -278,7 +296,7 @@ function QuartzFocus:UNIT_SPELLCAST_START(event, unit)
 	setnametext(displayName, rank)
 	
 	castBarSpark:Show()
-	if icon == "Interface\\Icons\\Temp" and Quartz.db.profile.hidesamwise then
+	if icon == "Interface\\Icons\\Temp" and Quartz3.db.profile.hidesamwise then
 		icon = nil
 	end
 	castBarIcon:SetTexture(icon)
@@ -293,7 +311,7 @@ function QuartzFocus:UNIT_SPELLCAST_START(event, unit)
 	end
 end
 
-function QuartzFocus:UNIT_SPELLCAST_CHANNEL_START(event, unit)
+function Focus:UNIT_SPELLCAST_CHANNEL_START(event, unit)
 	if unit ~= 'focus' then
 		return
 	end
@@ -324,7 +342,7 @@ function QuartzFocus:UNIT_SPELLCAST_CHANNEL_START(event, unit)
 	channeling = true
 	fadeOut = nil
 
-	castBar:SetStatusBarColor(unpack(Quartz.db.profile.channelingcolor))
+	castBar:SetStatusBarColor(unpack(Quartz3.db.profile.channelingcolor))
 	
 	castBar:SetValue(1)
 	castBarParent:Show()
@@ -333,7 +351,7 @@ function QuartzFocus:UNIT_SPELLCAST_CHANNEL_START(event, unit)
 	setnametext(spell, rank)
 	
 	castBarSpark:Show()
-	if icon == "Interface\\Icons\\Temp" and Quartz.db.profile.hidesamwise then
+	if icon == "Interface\\Icons\\Temp" and Quartz3.db.profile.hidesamwise then
 		icon = nil
 	end
 	castBarIcon:SetTexture(icon)
@@ -348,7 +366,7 @@ function QuartzFocus:UNIT_SPELLCAST_CHANNEL_START(event, unit)
 	end
 end
 
-function QuartzFocus:UNIT_SPELLCAST_STOP(event, unit)
+function Focus:UNIT_SPELLCAST_STOP(event, unit)
 	if unit ~= 'focus' then
 		return
 	end
@@ -358,13 +376,13 @@ function QuartzFocus:UNIT_SPELLCAST_STOP(event, unit)
 		stopTime = GetTime()
 		
 		castBar:SetValue(1.0)
-		castBar:SetStatusBarColor(unpack(Quartz.db.profile.completecolor))
+		castBar:SetStatusBarColor(unpack(Quartz3.db.profile.completecolor))
 		
 		castBarTimeText:SetText("")
 	end
 end
 
-function QuartzFocus:UNIT_SPELLCAST_CHANNEL_STOP(event, unit)
+function Focus:UNIT_SPELLCAST_CHANNEL_STOP(event, unit)
 	if unit ~= 'focus' then
 		return
 	end
@@ -374,13 +392,13 @@ function QuartzFocus:UNIT_SPELLCAST_CHANNEL_STOP(event, unit)
 		stopTime = GetTime()
 		
 		castBar:SetValue(0)
-		castBar:SetStatusBarColor(unpack(Quartz.db.profile.completecolor))
+		castBar:SetStatusBarColor(unpack(Quartz3.db.profile.completecolor))
 		
 		castBarTimeText:SetText("")
 	end
 end
 
-function QuartzFocus:UNIT_SPELLCAST_FAILED(event, unit)
+function Focus:UNIT_SPELLCAST_FAILED(event, unit)
 	if unit ~= 'focus' or channeling then
 		return
 	end
@@ -391,12 +409,12 @@ function QuartzFocus:UNIT_SPELLCAST_FAILED(event, unit)
 		stopTime = GetTime()
 	end
 	castBar:SetValue(1.0)
-	castBar:SetStatusBarColor(unpack(Quartz.db.profile.failcolor))
+	castBar:SetStatusBarColor(unpack(Quartz3.db.profile.failcolor))
 	
 	castBarTimeText:SetText("")
 end
 
-function QuartzFocus:UNIT_SPELLCAST_INTERRUPTED(event, unit)
+function Focus:UNIT_SPELLCAST_INTERRUPTED(event, unit)
 	if unit ~= 'focus' then
 		return
 	end
@@ -407,12 +425,12 @@ function QuartzFocus:UNIT_SPELLCAST_INTERRUPTED(event, unit)
 		stopTime = GetTime()
 	end
 	castBar:SetValue(1.0)
-	castBar:SetStatusBarColor(unpack(Quartz.db.profile.failcolor))
+	castBar:SetStatusBarColor(unpack(Quartz3.db.profile.failcolor))
 	
 	castBarTimeText:SetText("")
 end
 
-function QuartzFocus:UNIT_SPELLCAST_DELAYED(event, unit)
+function Focus:UNIT_SPELLCAST_DELAYED(event, unit)
 	if unit ~= 'focus' then
 		return
 	end
@@ -443,7 +461,7 @@ function QuartzFocus:UNIT_SPELLCAST_DELAYED(event, unit)
 	delay = (delay or 0) + (startTime - (oldStart or startTime))
 end
 
-function QuartzFocus:UNIT_SPELLCAST_CHANNEL_UPDATE(event, unit)
+function Focus:UNIT_SPELLCAST_CHANNEL_UPDATE(event, unit)
 	if unit ~= 'focus' then
 		return
 	end
@@ -458,7 +476,7 @@ function QuartzFocus:UNIT_SPELLCAST_CHANNEL_UPDATE(event, unit)
 	
 	delay = (delay or 0) + ((oldStart or startTime) - startTime)
 end
-function QuartzFocus:PLAYER_FOCUS_CHANGED()
+function Focus:PLAYER_FOCUS_CHANGED()
 	if not UnitExists('focus') then
 		return
 	end
@@ -487,7 +505,7 @@ function QuartzFocus:PLAYER_FOCUS_CHANGED()
 		channeling = nil
 		fadeOut = nil
 		
-		castBar:SetStatusBarColor(unpack(Quartz.db.profile.castingcolor))
+		castBar:SetStatusBarColor(unpack(Quartz3.db.profile.castingcolor))
 		
 		castBar:SetValue(0)
 		castBarParent:Show()
@@ -496,7 +514,7 @@ function QuartzFocus:PLAYER_FOCUS_CHANGED()
 		setnametext(displayName, rank)
 		
 		castBarSpark:Show()
-		if icon == "Interface\\Icons\\Temp" and Quartz.db.profile.hidesamwise then
+		if icon == "Interface\\Icons\\Temp" and Quartz3.db.profile.hidesamwise then
 			icon = nil
 		end
 		castBarIcon:SetTexture(icon)
@@ -519,14 +537,14 @@ function QuartzFocus:PLAYER_FOCUS_CHANGED()
 			channeling = true
 			fadeOut = nil
 			
-			castBar:SetStatusBarColor(unpack(Quartz.db.profile.channelingcolor))
+			castBar:SetStatusBarColor(unpack(Quartz3.db.profile.channelingcolor))
 			
 			castBar:SetValue(1)
 			castBarParent:Show()
 			castBarParent:SetAlpha(db.profile.alpha)
 			
 			setnametext(spell, rank)
-			if icon == "Interface\\Icons\\Temp" and Quartz.db.profile.hidesamwise then
+			if icon == "Interface\\Icons\\Temp" and Quartz3.db.profile.hidesamwise then
 				icon = nil
 			end
 			castBarIcon:SetTexture(icon)
@@ -548,13 +566,11 @@ do
 	local backdrop = { insets = {} }
 	local backdrop_insets = backdrop.insets
 	
-	function QuartzFocus:ApplySettings()
+	function Focus:ApplySettings()
 		if not castBarParent then
 			return
 		end
-		local db = db.profile
-		local qdb = Quartz.db.profile
-		local qpdb = Quartz:AcquireDBNamespace("Player").profile
+
 		castBarParent:ClearAllPoints()
 		if not db.x then
 			db.x = (UIParent:GetWidth() / 2 - (db.w * db.scale)) / db.scale - 5
@@ -568,7 +584,7 @@ do
 		backdrop.bgFile = "Interface\\Tooltips\\UI-Tooltip-Background"
 		backdrop.tile = true
 		backdrop.tileSize = 16
-		backdrop.edgeFile = media:Fetch('border', qpdb.border)
+		backdrop.edgeFile = media:Fetch('border', Player.db.profile.border)
 		backdrop.edgeSize = 16
 		backdrop_insets.left = 4
 		backdrop_insets.right = 4
@@ -576,10 +592,10 @@ do
 		backdrop_insets.bottom = 4
 		
 		castBarParent:SetBackdrop(backdrop)
-		local r,g,b = unpack(qdb.bordercolor)
-		castBarParent:SetBackdropBorderColor(r,g,b, qdb.borderalpha)
-		r,g,b = unpack(qdb.backgroundcolor)
-		castBarParent:SetBackdropColor(r,g,b, qdb.backgroundalpha)
+		local r,g,b = unpack(Quartz3.db.profile.bordercolor)
+		castBarParent:SetBackdropBorderColor(r,g,b, Quartz3.db.profile.borderalpha)
+		r,g,b = unpack(Quartz3.db.profile.backgroundcolor)
+		castBarParent:SetBackdropColor(r,g,b, Quartz3.db.profile.backgroundalpha)
 		
 		castBar:ClearAllPoints()
 		castBar:SetPoint('CENTER',castBarParent,'CENTER')
@@ -609,7 +625,7 @@ do
 		castBarTimeText:SetFont(media:Fetch('font', db.font), db.timefontsize)
 		castBarTimeText:SetShadowColor( 0, 0, 0, 1)
 		castBarTimeText:SetShadowOffset( 0.8, -0.8 )
-		castBarTimeText:SetTextColor(unpack(qdb.timetextcolor))
+		castBarTimeText:SetTextColor(unpack(Quartz3.db.profile.timetextcolor))
 		castBarTimeText:SetNonSpaceWrap(false)
 		castBarTimeText:SetHeight(db.h)
 		
@@ -652,7 +668,7 @@ do
 		castBarText:SetFont(media:Fetch('font', db.font), db.fontsize)
 		castBarText:SetShadowColor( 0, 0, 0, 1)
 		castBarText:SetShadowOffset( 0.8, -0.8 )
-		castBarText:SetTextColor(unpack(qdb.spelltextcolor))
+		castBarText:SetTextColor(unpack(Quartz3.db.profile.spelltextcolor))
 		castBarText:SetNonSpaceWrap(false)
 		castBarText:SetHeight(db.h)
 		
@@ -673,7 +689,7 @@ do
 		end
 		
 		castBarSpark:SetTexture("Interface\\CastingBar\\UI-CastingBar-Spark")
-		castBarSpark:SetVertexColor(unpack(qdb.sparkcolor))
+		castBarSpark:SetVertexColor(unpack(Quartz3.db.profile.sparkcolor))
 		castBarSpark:SetBlendMode('ADD')
 		castBarSpark:SetWidth(20)
 		castBarSpark:SetHeight(db.h*2.2)
@@ -682,7 +698,7 @@ end
 do
 	local function set(field, value)
 		db.profile[field] = value
-		Quartz.ApplySettings()
+		Quartz3.ApplySettings()
 	end
 	local function get(field)
 		return db.profile[field]
@@ -708,7 +724,10 @@ do
 	local function hidenametextoptions()
 		return db.profile.hidenametext
 	end
-	Quartz.options.args.Focus = {
+
+	local options
+	function getOptions()
+		options = options or {
 		type = 'group',
 		name = L["Focus"],
 		desc = L["Focus"],
@@ -719,10 +738,10 @@ do
 				name = L["Enable"],
 				desc = L["Enable"],
 				get = function()
-					return Quartz:GetModuleEnabled(MODNAME)
+					return Quartz3:GetModuleEnabled(MODNAME)
 				end,
 				set = function(v)
-					Quartz:SetModuleEnabled(MODNAME, v)
+					Quartz3:SetModuleEnabled(MODNAME, v)
 				end,
 				order = 99,
 			},
@@ -1095,7 +1114,7 @@ do
 					else -- L["Vertical"]
 						db.profile.y = (UIParent:GetHeight() / 2 - (db.profile.h * scale) / 2) / scale
 					end
-					Quartz.ApplySettings()
+					Quartz3.ApplySettings()
 				end,
 				validate = {L["Horizontal"], L["Vertical"]},
 				order = 503,
@@ -1106,13 +1125,15 @@ do
 				desc = L["Select a bar from which to copy settings"],
 				get = false,
 				set = function(v)
-					local from = Quartz:AcquireDBNamespace(v)
-					Quartz:CopySettings(from.profile, db.profile)
-					Quartz.ApplySettings()
+					local from = Quartz3:GetModule(v)
+					Quartz3:CopySettings(from.db.profile, db.profile)
+					Quartz3.ApplySettings()
 				end,
 				validate = {L["Player"], L["Target"], L["Pet"]},
 				order = 504
 			},
 		},
 	}
+	return options
+	end
 end

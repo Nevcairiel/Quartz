@@ -15,27 +15,35 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
-
-local Quartz = LibStub("AceAddon-3.0"):GetAddon("Quartz")
-local L = LibStub("AceLocale-3.0"):GetLocale("Quartz")
-
-local QuartzMirror = Quartz:GetModule("Mirror")
-local QuartzTimer = Quartz:NewModule("Timer", "AceEvent-3.0")
-local self = QuartzTimer
-
-local new, del = Quartz.new, Quartz.del
-
-local GetTime = GetTime
-local table_remove = table.remove
-
 local _G = getfenv(0)
+local LibStub = _G.LibStub
 
-local external = QuartzMirror.ExternalTimers
+local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
+local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
+
+local MODNAME = L["Timer"]
+local Timer = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
+local Mirror = Quartz3:GetModule(L["Mirror"])
+
+local new, del = Quartz3.new, Quartz3.del
+
+local GetTime = _G.GetTime
+local ipairs = _G.ipairs
+local pairs = _G.pairs
+local tonumber = _G.tonumber
+local table_remove = _G.table.remove
+
+local external = Mirror.ExternalTimers
 local thistimers = {}
 
-function QuartzTimer:OnInitialize()
-	Quartz:RegisterChatCommand({'/qt', '/quartzt', '/quartztimer'}, function(msg)
-		if Quartz:IsModuleActive(self) then
+local getOptions
+
+function Timer:OnInitialize()
+	self:SetEnabledState(Quartz3:GetModuleEnabled(MODNAME))
+	Quartz3:RegisterModuleOptions(MODNAME, getOptions, MODNAME)
+
+	Quartz3:RegisterChatCommand({'/qt', '/quartzt', '/quartztimer'}, function(msg)
+		if Quartz3:GetModuleEnabled(MODNAME) then
 			if msg:match('^kill') then
 				local name = msg:match('^kill (.+)$')
 				if name then
@@ -46,9 +54,9 @@ function QuartzTimer:OnInitialize()
 							break
 						end
 					end
-					self:TriggerEvent("QuartzMirror_UpdateCustom")
+					self:TriggerEvent("Quartz3Mirror_UpdateCustom")
 				else
-					return Quartz:Print(L['Usage: /quartztimer timername 60 or /quartztimer kill timername'])
+					return Quartz3:Print(L['Usage: /quartztimer timername 60 or /quartztimer kill timername'])
 				end
 			else
 				local duration = tonumber(msg:match('^(%d+)'))
@@ -58,12 +66,12 @@ function QuartzTimer:OnInitialize()
 				else
 					duration = tonumber(msg:match('(%d+)$'))
 					if not duration then
-						return Quartz:Print(L['Usage: /quartztimer timername 60 or /quartztimer 60 timername'])
+						return Quartz3:Print(L['Usage: /quartztimer timername 60 or /quartztimer 60 timername'])
 					end
 					name = msg:match('^(.+) %d+$')
 				end
 				if not name then
-					return Quartz:Print(L['Usage: /quartztimer timername 60 or /quartztimer kill timername'])
+					return Quartz3:Print(L['Usage: /quartztimer timername 60 or /quartztimer kill timername'])
 				end
 				local currentTime = GetTime()
 				external[name].startTime = currentTime
@@ -75,23 +83,26 @@ function QuartzTimer:OnInitialize()
 					end
 				end
 				thistimers[#thistimers+1] = name
-				self:TriggerEvent("QuartzMirror_UpdateCustom")
+				self:TriggerEvent("Quartz3Mirror_UpdateCustom")
 			end
 		else
-			Quartz:Print(L["Timers module currently disabled, re-enable it in the menu"])
+			Quartz3:Print(L["Timers module currently disabled, re-enable it in the menu"])
 		end
 	end)
 end
-function QuartzTimer:OnDisable()
+function Timer:OnDisable()
 	for k, v in pairs(thistimers) do
 		external[v] = del(external[v])
 		thistimers[k] = nil
 	end
-	self:TriggerEvent("QuartzMirror_UpdateCustom")
+	self:TriggerEvent("Quartz3Mirror_UpdateCustom")
 end
 do
 	local newname, newlength
-	Quartz.options.args.Timer = {
+
+	local options
+	function getOptions()
+		options = options or {
 		type = 'group',
 		name = L["Timer"],
 		desc = L["Timer"],
@@ -102,10 +113,10 @@ do
 				name = L["Enable"],
 				desc = L["Enable"],
 				get = function()
-					return Quartz:IsModuleActive('Timer')
+					return Quartz3:GetModuleEnabled(MODNAME)
 				end,
 				set = function(v)
-					Quartz:ToggleModuleActive('Timer', v)
+					Quartz3:SetModuleEnabled(MODNAME, v)
 				end,
 				order = 99,
 			},
@@ -153,7 +164,7 @@ do
 						end
 					end
 					thistimers[#thistimers+1] = newname
-					self:TriggerEvent("QuartzMirror_UpdateCustom")
+					Timer:TriggerEvent("QuartzMirror_UpdateCustom")
 					newname = nil
 					newlength = nil
 				end,
@@ -178,7 +189,7 @@ do
 								break
 							end
 						end
-						self:TriggerEvent("QuartzMirror_UpdateCustom")
+						Timer:TriggerEvent("QuartzMirror_UpdateCustom")
 					end
 				end,
 				validate = thistimers,
@@ -186,4 +197,6 @@ do
 			},
 		},
 	}
+	return options
+	end
 end

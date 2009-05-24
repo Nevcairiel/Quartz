@@ -15,6 +15,9 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
+local _G = getfenv(0)
+local LibStub = _G.LibStub
+
 local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
@@ -23,7 +26,7 @@ local Player = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
 local Latency = Quartz3:GetModule(L["Latency"])
 
 local media = LibStub("LibSharedMedia-3.0")
-local lsmlist = AceGUIWidgetLSMlists
+local lsmlist = _G.AceGUIWidgetLSMlists
 
 local math_min = _G.math.min
 local unpack = _G.unpack
@@ -36,8 +39,8 @@ local castTimeFormatString
 
 local castBar, castBarText, castBarTimeText, castBarIcon, castBarSpark, castBarParent
 local locked = true
-local db
-local getOptions
+
+local db, getOptions
 
 local defaults = {
 	profile = {
@@ -614,7 +617,7 @@ end
 Player.OnUpdate = OnUpdate
 
 local function OnHide()
-	if Latency and Latency:Is then
+	if Latency then
 		if Latency:IsEnabled() and Latency.lagbox then
 					Latency.lagbox:Hide()
 					Latency.lagtext:Hide()

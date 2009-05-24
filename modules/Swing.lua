@@ -15,15 +15,36 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
+local _G = getfenv(0)
+local LibStub = _G.LibStub
 
-local Quartz = LibStub("AceAddon-3.0"):GetAddon("Quartz")
-local L = LibStub("AceLocale-3.0"):GetLocale("Quartz")
+local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
+local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
-local QuartzPlayer = Quartz:GetModule("Player")
-local QuartzSwing = Quartz:NewModule("Swing", "AceEvent-3.0")
-local self = QuartzSwing
+local MODNAME = L["Swing"]
+local Swing = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
+local Player = Quartz3:GetModule(L["Player"])
 
 local media = LibStub("LibSharedMedia-3.0")
+
+local playerclass
+local bit_bor = _G.bit.bor
+local bit_band = _G.bit.band
+local math_abs = _G.math.abs
+local GetSpellInfo = _G.GetSpellInfo
+local GetTime = _G.GetTime
+local UnitAttackSpeed = _G.UnitAttackSpeed
+local UnitClass = _G.UnitClass
+local UnitDamage = _G.UnitDamage
+local UnitRangedDamage = _G.UnitRangedDamage
+local unpack = _G.unpack
+local tonumber = _G.tonumber
+
+local BOOKTYPE_SPELL = _G.BOOKTYPE_SPELL
+local COMBATLOG_OBJECT_AFFILIATION_MINE = _G.COMBATLOG_OBJECT_AFFILIATION_MINE
+local COMBATLOG_OBJECT_CONTROL_PLAYER = _G.COMBATLOG_OBJECT_CONTROL_PLAYER
+local COMBATLOG_OBJECT_REACTION_FRIENDLY = _G.COMBATLOG_OBJECT_REACTION_FRIENDLY
+local COMBATLOG_OBJECT_TYPE_PLAYER = _G.COMBATLOG_OBJECT_TYPE_PLAYER
 
 local autoshotname = GetSpellInfo(75)
 local resetspells = {
@@ -39,17 +60,27 @@ local resetautoshotspells = {
 	[GetSpellInfo(19434)] = true, -- Aimed Shot
 }
 
-local _, playerclass = UnitClass('player')
-local unpack = unpack
-local math_abs = math.abs
-
-local GetTime = GetTime
-
 local swingbar, swingbar_width, swingstatusbar, remainingtext, durationtext, db
 local swingmode -- nil is none, 0 is meleeing, 1 is autoshooting
 local starttime, duration
 
-local BOOKTYPE_SPELL = BOOKTYPE_SPELL
+local db, getOptions
+
+local defaults = {
+	profile = {
+		barcolor = {1, 1, 1},
+		swingalpha = 1,
+		swingheight = 4,
+		swingposition = L["Top"],
+		swinggap = -4,
+		
+		durationtext = true,
+		remainingtext = true,
+		
+		x = 300,
+		y = 300,
+	}
+}
 
 local function OnUpdate()
 	if starttime then
@@ -63,30 +94,26 @@ local function OnUpdate()
 		end
 	end
 end
+
 local function OnHide()
 	swingbar:SetScript('OnUpdate', nil)
 end
+
 local function OnShow()
 	swingbar:SetScript('OnUpdate', OnUpdate)
 end
 
-function QuartzSwing:OnInitialize()
-	db = Quartz:AcquireDBNamespace("Swing")
-	Quartz:RegisterDefaults("Swing", "profile", {
-		barcolor = {1, 1, 1},
-		swingalpha = 1,
-		swingheight = 4,
-		swingposition = L["Top"],
-		swinggap = -4,
-		
-		durationtext = true,
-		remainingtext = true,
-		
-		x = 300,
-		y = 300,
-	})
+function Swing:OnInitialize()
+	self.db = Quartz3.db:RegisterNamespace(MODNAME, defaults)
+	db = self.db.profile
+	
+	self:SetEnabledState(Quartz3:GetModuleEnabled(MODNAME))
+	Quartz3:RegisterModuleOptions(MODNAME, getOptions, MODNAME)
+
 end
-function QuartzSwing:OnEnable()
+function Swing:OnEnable()
+	local _, c = UnitClass('player')
+	playerclass = playerclass or c
 	-- fired when autoattack is enabled/disabled.
 	self:RegisterEvent("PLAYER_ENTER_COMBAT")
 	self:RegisterEvent("PLAYER_LEAVE_COMBAT")
@@ -100,7 +127,7 @@ function QuartzSwing:OnEnable()
 	
 	self:RegisterEvent("UNIT_ATTACK")
 	if not swingbar then
-		swingbar = CreateFrame('Frame', 'QuartzSwingBar', UIParent)
+		swingbar = CreateFrame('Frame', 'Quartz3SwingBar', UIParent)
 		swingbar:SetFrameStrata('HIGH')
 		swingbar:SetScript('OnShow', OnShow)
 		swingbar:SetScript('OnHide', OnHide)
@@ -114,33 +141,38 @@ function QuartzSwing:OnEnable()
 		remainingtext = swingstatusbar:CreateFontString(nil, 'OVERLAY')
 		swingbar:Hide()
 	end
-	Quartz.ApplySettings()
+	Quartz3.ApplySettings()
 end
-function QuartzSwing:OnDisable()
+
+function Swing:OnDisable()
 	swingbar:Hide()
 end
-function QuartzSwing:PLAYER_ENTER_COMBAT()
+
+function Swing:PLAYER_ENTER_COMBAT()
 	local _,_,offhandlow, offhandhigh = UnitDamage('player')
 	if math_abs(offhandlow - offhandhigh) <= 0.1 or playerclass == "DRUID" then
 		swingmode = 0 -- shouldn't be dual-wielding
 	end
 end
-function QuartzSwing:PLAYER_LEAVE_COMBAT()
+
+function Swing:PLAYER_LEAVE_COMBAT()
 	if not swingmode or swingmode == 0 then
 		swingmode = nil
 	end
 end
-function QuartzSwing:START_AUTOREPEAT_SPELL()
+
+function Swing:START_AUTOREPEAT_SPELL()
 	swingmode = 1
 end
-function QuartzSwing:STOP_AUTOREPEAT_SPELL()
+
+function Swing:STOP_AUTOREPEAT_SPELL()
 	if not swingmode or swingmode == 1 then
 		swingmode = nil
 	end
 end
 
 -- blizzard screws that global up, double usage in CombatLog.lua and GlobalStrings.lua, so we create it ourselves
-local COMBATLOG_FILTER_ME = bit.bor(
+local COMBATLOG_FILTER_ME = bit_bor(
 				COMBATLOG_OBJECT_AFFILIATION_MINE or 0x00000001,
 				COMBATLOG_OBJECT_REACTION_FRIENDLY or 0x00000010,
 				COMBATLOG_OBJECT_CONTROL_PLAYER or 0x00000100,
@@ -149,10 +181,10 @@ local COMBATLOG_FILTER_ME = bit.bor(
 
 do
 	local swordspecproc = false
-	function QuartzSwing:COMBAT_LOG_EVENT_UNFILTERED(timestamp, event, srcGUID, srcName, srcFlags, dstName, dstGUID, dstFlags, ...)
-		if (event == "SPELL_EXTRA_ATTACKS") and (select(2, ...) == "Sword Specialization") and (bit.band(srcFlags, COMBATLOG_FILTER_ME) == COMBATLOG_FILTER_ME) then
+	function Swing:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, combatevent, srcGUID, srcName, srcFlags, dstName, dstGUID, dstFlags, spellID, spellName)
+		if (combatevent == "SPELL_EXTRA_ATTACKS") and spellName == "Sword Specialization" and (bit_band(srcFlags, COMBATLOG_FILTER_ME) == COMBATLOG_FILTER_ME) then
 			swordspecproc = true
-		elseif (event == "SWING_DAMAGE" or event == "SWING_MISSED") and (bit.band(srcFlags, COMBATLOG_FILTER_ME) == COMBATLOG_FILTER_ME) and swingmode == 0 then
+		elseif (combatevent == "SWING_DAMAGE" or combatevent == "SWING_MISSED") and (bit_band(srcFlags, COMBATLOG_FILTER_ME) == COMBATLOG_FILTER_ME) and swingmode == 0 then
 			if (swordspecproc) then
 				swordspecproc = false
 			else
@@ -162,7 +194,7 @@ do
 	end
 end
 
-function QuartzSwing:UNIT_SPELLCAST_SUCCEEDED(event, unit, spell)
+function Swing:UNIT_SPELLCAST_SUCCEEDED(event, unit, spell)
 	if swingmode == 0 then
 		if resetspells[spell] then
 			self:MeleeSwing()
@@ -177,7 +209,7 @@ function QuartzSwing:UNIT_SPELLCAST_SUCCEEDED(event, unit, spell)
 		self:Shoot()
 	end
 end
-function QuartzSwing:UNIT_ATTACK(event, unit)
+function Swing:UNIT_ATTACK(event, unit)
 	if unit == 'player' then
 		if not swingmode then
 			return
@@ -189,39 +221,39 @@ function QuartzSwing:UNIT_ATTACK(event, unit)
 		durationtext:SetText(('%.1f'):format(duration))
 	end
 end
-function QuartzSwing:MeleeSwing()
+function Swing:MeleeSwing()
 	duration = UnitAttackSpeed('player')
 	durationtext:SetText(('%.1f'):format(duration))
 	starttime = GetTime()
 	swingbar:Show()
 end
-function QuartzSwing:Shoot()
+function Swing:Shoot()
 	duration = UnitRangedDamage('player')
 	durationtext:SetText(('%.1f'):format(duration))
 	starttime = GetTime()
 	swingbar:Show()
 end
-function QuartzSwing:ApplySettings()
-	if swingbar and Quartz:IsModuleActive('Swing') then
+function Swing:ApplySettings()
+	if swingbar and Quartz3:GetModuleEnabled(MODNAME) then
 		local ldb = db.profile
 		swingbar:ClearAllPoints()
 		swingbar:SetHeight(ldb.swingheight)
-		swingbar_width = QuartzCastBar:GetWidth() - 8
+		swingbar_width = Player.Bar:GetWidth() - 8
 		swingbar:SetWidth(swingbar_width)
 		swingbar:SetBackdrop({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16})
 		swingbar:SetBackdropColor(0,0,0)
 		swingbar:SetAlpha(ldb.swingalpha)
-		swingbar:SetScale(QuartzPlayer.db.profile.scale)
+		swingbar:SetScale(Player.db.profile.scale)
 		if ldb.swingposition == L["Bottom"] then
-			swingbar:SetPoint("TOP", QuartzCastBar, "BOTTOM", 0, -1 * ldb.swinggap)
+			swingbar:SetPoint("TOP", Player.Bar, "BOTTOM", 0, -1 * ldb.swinggap)
 		elseif ldb.swingposition == L["Top"] then
-			swingbar:SetPoint("BOTTOM", QuartzCastBar, "TOP", 0, ldb.swinggap)
+			swingbar:SetPoint("BOTTOM", Player.Bar, "TOP", 0, ldb.swinggap)
 		else -- L["Free"]
 			swingbar:SetPoint('BOTTOMLEFT', UIParent, 'BOTTOMLEFT', ldb.x, ldb.y)
 		end
 		
 		swingstatusbar:SetAllPoints(swingbar)
-		swingstatusbar:SetStatusBarTexture(media:Fetch('statusbar', Quartz:GetModule('Player').db.profile.texture))
+		swingstatusbar:SetStatusBarTexture(media:Fetch('statusbar', Player.db.profile.texture))
 		swingstatusbar:SetStatusBarColor(unpack(ldb.barcolor))
 		swingstatusbar:SetMinMaxValues(0, 1)
 		
@@ -233,7 +265,7 @@ function QuartzSwing:ApplySettings()
 		else
 			durationtext:Hide()
 		end
-		durationtext:SetFont(media:Fetch('font', QuartzPlayer.db.profile.font), 9)
+		durationtext:SetFont(media:Fetch('font', Player.db.profile.font), 9)
 		durationtext:SetShadowColor( 0, 0, 0, 1)
 		durationtext:SetShadowOffset( 0.8, -0.8 )
 		durationtext:SetTextColor(1,1,1)
@@ -248,7 +280,7 @@ function QuartzSwing:ApplySettings()
 		else
 			remainingtext:Hide()
 		end
-		remainingtext:SetFont(media:Fetch('font', QuartzPlayer.db.profile.font), 9)
+		remainingtext:SetFont(media:Fetch('font', Player.db.profile.font), 9)
 		remainingtext:SetShadowColor( 0, 0, 0, 1)
 		remainingtext:SetShadowOffset( 0.8, -0.8 )
 		remainingtext:SetTextColor(1,1,1)
@@ -256,18 +288,19 @@ function QuartzSwing:ApplySettings()
 		remainingtext:SetWidth(swingbar_width)
 	end
 end
+
 do
 	local locked = true
 	local function set(field, value)
 		db.profile[field] = value
-		Quartz.ApplySettings()
+		Quartz3.ApplySettings()
 	end
 	local function get(field)
 		return db.profile[field]
 	end
 	local function setcolor(field, ...)
 		db.profile[field] = {...}
-		Quartz.ApplySettings()
+		Quartz3.ApplySettings()
 	end
 	local function getcolor(field)
 		return unpack(db.profile[field])
@@ -282,7 +315,9 @@ do
 		db.profile.y = swingbar:GetBottom()
 		swingbar:StopMovingOrSizing()
 	end
-	Quartz.options.args.Swing = {
+	local options
+	function getOptions()
+		options = options or {
 		type = 'group',
 		name = L["Swing"],
 		desc = L["Swing"],
@@ -293,10 +328,10 @@ do
 				name = L["Enable"],
 				desc = L["Enable"],
 				get = function()
-					return Quartz:IsModuleActive('Swing')
+					return Quartz3:GetModuleEnabled(MODNAME)
 				end,
 				set = function(v)
-					Quartz:ToggleModuleActive('Swing', v)
+					Quartz3:SetModuleEnabled(MODNAME, v)
 				end,
 				order = 100,
 			},
@@ -439,4 +474,6 @@ do
 			},
 		},
 	}
+	return options
+	end
 end

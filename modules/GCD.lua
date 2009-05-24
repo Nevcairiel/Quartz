@@ -15,14 +15,20 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
+local _G = getfenv(0)
+local LibStub = _G.LibStub
+
 local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
 local MODNAME = L["GCD"]
 local GCD = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
 local Player = Quartz3:GetModule(L["Player"])
+local Interrupt = Quartz3:GetModule(L["Interrupt"])
 
+local tonumber = _G.tonumber
 local unpack = _G.unpack
+local GetSpellCooldown = _G.GetSpellCooldown
 local GetTime = _G.GetTime
 local BOOKTYPE_SPELL = _G.BOOKTYPE_SPELL
 
@@ -156,24 +162,6 @@ do
 	local function getcolor(field)
 		return unpack(db.profile[field])
 	end
-	local function setspell(field, value)
-		for tab = 1, 4 do
-			local _, _, offset, numSpells = GetSpellTabInfo(tab)
-			for i = (1+offset), (offset+numSpells) do
-				local spell = GetSpellName(i, BOOKTYPE_SPELL)
-				if spell:lower() == value:lower() then
-					db.char[field] = spell
-					return
-				end
-			end
-		end
-		Quartz3:Print(L["Invalid Spell"])
-		db.char[field] = ''
-		Quartz3.ApplySettings()
-	end
-	local function getspell(field)
-		return db.char[field]
-	end
 	local function nothing()
 	end
 	local function dragstart()
@@ -204,26 +192,6 @@ do
 					Quartz3:SetModuleEnabled(MODNAME, v)
 				end,
 				order = 100,
-			},
-			spell = {
-				type = 'text',
-				name = L["%s Spell"]:format(L["Primary"]),
-				desc = L["%s spell to check for the Global Cooldown"]:format(L["Primary"]),
-				get = getspell,
-				set = setspell,
-				passValue = 'spell',
-				usage = L["<Spell Name>"],
-				order = 101,
-			},
-			backupspell = {
-				type = 'text',
-				name = L["%s Spell"]:format(L["Backup"]),
-				desc = L["%s spell to check for the Global Cooldown"]:format(L["Backup"]),
-				get = getspell,
-				set = setspell,
-				passValue = 'backupspell',
-				usage = L["<Spell Name>"],
-				order = 102,
 			},
 			gcdcolor = {
 				type = 'color',
