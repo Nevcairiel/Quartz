@@ -61,6 +61,17 @@ end
 
 function Quartz3:ApplySettings()
 	db = self.db.profile
+
+	for k,v in self:IterateModules() do
+		if self:GetModuleEnabled(k) and not v:IsEnabled() then
+			self:EnableModule(k)
+		elseif not self:GetModuleEnabled(k) and v:IsEnabled() then
+			self:DisableModule(k)
+		end
+		if type(v.ApplySettings) == "function" then
+			v:ApplySettings()
+		end
+	end
 end
 
 function Quartz3:GetModuleEnabled(module)
