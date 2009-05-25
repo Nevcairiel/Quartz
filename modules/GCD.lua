@@ -83,7 +83,7 @@ function GCD:OnInitialize()
 end
 
 function GCD:OnEnable()
-	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+	self:RegisterEvent("UNIT_SPELLCAST_START")
 	if not gcdbar then
 		gcdbar = CreateFrame('Frame', 'Quartz3GCDBar', UIParent)
 		gcdbar:SetFrameStrata('HIGH')
@@ -102,10 +102,10 @@ function GCD:OnDisable()
 	gcdbar:Hide()
 end
 
-function GCD:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, combatEvent, _, _, sourceFlags, _, _, _, _, spell)
-	if combatEvent == 'SPELL_CAST_SUCCESS' and sourceFlags == 0x511 then
+function GCD:UNIT_SPELLCAST_START(event, unit, spell)
+	if unit == "player" then
 		local start, dur = GetSpellCooldown(spell)
-		if dur > 0 and dur <= 1.5 then
+		if dur and dur > 0 and dur <= 1.5 then
 			starttime = start
 			duration = dur
 			gcdbar:Show()
