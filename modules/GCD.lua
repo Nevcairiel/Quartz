@@ -83,7 +83,8 @@ function GCD:OnInitialize()
 end
 
 function GCD:OnEnable()
-	self:RegisterEvent("UNIT_SPELLCAST_START")
+	self:RegisterEvent("UNIT_SPELLCAST_START","CheckGCD")
+	self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED","CheckGCD")
 	if not gcdbar then
 		gcdbar = CreateFrame('Frame', 'Quartz3GCDBar', UIParent)
 		gcdbar:SetFrameStrata('HIGH')
@@ -102,7 +103,7 @@ function GCD:OnDisable()
 	gcdbar:Hide()
 end
 
-function GCD:UNIT_SPELLCAST_START(event, unit, spell)
+function GCD:CheckGCD(event, unit, spell)
 	if unit == "player" then
 		local start, dur = GetSpellCooldown(spell)
 		if dur and dur > 0 and dur <= 1.5 then
