@@ -26,6 +26,7 @@ local Pet = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
 local Player = Quartz3:GetModule(L["Player"])
 
 local media = LibStub("LibSharedMedia-3.0")
+local lsmlist = _G.AceGUIWidgetLSMlists
 
 local math_min = _G.math.min
 local unpack = _G.unpack
@@ -685,9 +686,11 @@ do
 				--passValue = 'w',
 			},
 			x = {
-				type = 'input',
+				type = 'range',
 				name = L["X"],
 				desc = L["Set an exact X value for this bar's position."],
+				min = 0,
+				max = 2560,
 				get = get,
 				set = set,
 				--passValue = 'x',
@@ -698,9 +701,11 @@ do
 				usage = L["Number"],
 			},
 			y = {
-				type = 'input',
+				type = 'range',
 				name = L["Y"],
 				desc = L["Set an exact Y value for this bar's position."],
+				min = 0,
+				max = 1600,
 				get = get,
 				set = set,
 				--passValue = 'y',
@@ -763,14 +768,14 @@ do
 				--passValue = 'iconalpha',
 			},
 			iconposition = {
-				type = 'input',
+				type = 'select',
 				name = L["Icon Position"],
 				desc = L["Set where the Spell Cast icon appears"],
 				get = get,
 				set = set,
 				disabled = hideiconoptions,
 				--passValue = 'iconposition',
-				values = {L["Left"], L["Right"]},
+				values = {["left"] = L["Left"], ["right"] = L["Right"]},
 				order = 301,
 			},
 			icongap = {
@@ -787,20 +792,22 @@ do
 				--passValue = 'icongap',
 			},
 			texture = {
-				type = 'input',
+				type = 'select',
+				dialogControl = "LSM30_Statusbar",
 				name = L["Texture"],
 				desc = L["Set the Cast Bar Texture"],
-				values = media:List('statusbar'),
+				values = lsmlist.statusbar,
 				order = 302,
 				get = get,
 				set = set,
 				--passValue = 'texture',
 			},
 			font = {
-				type = 'input',
+				type = 'select',
+				dialogControl = "LSM30_Font",
 				name = L["Font"],
 				desc = L["Set the font used in the Name and Time texts"],
-				values = media:List('font'),
+				values = lsmlist.font,
 				order = 400,
 				get = get,
 				set = set,
@@ -816,13 +823,13 @@ do
 				order = 401,
 			},
 			nametextposition = {
-				type = 'input',
+				type = 'select',
 				name = L["Name Text Position"],
 				desc = L["Set the alignment of the spell name text"],
 				get = get,
 				set = set,
 				--passValue = 'nametextposition',
-				values = {L["Left"], L["Right"], L["Center"]},
+				values = {["left"] = L["Left"], ["right"] = L["Right"], ["center"] = L["Center"]},
 				disabled = hidenametextoptions,
 				order = 402,
 			},
@@ -876,7 +883,7 @@ do
 				order = 404,
 			},
 			spellrankstyle = {
-				type = 'input',
+				type = 'select',
 				name = L["Spell Rank Style"],
 				desc = L["Set the display style of the spell rank"],
 				get = get,
@@ -885,7 +892,7 @@ do
 					return db.profile.hidenametext or not db.profile.spellrank
 				end,
 				--passValue = 'spellrankstyle',
-				values = {L["Number"], L["Roman"], L["Full Text"], L["Roman Full Text"]},
+				values = {["number"] = L["Number"], ["roman"] = L["Roman"], ["full"] = L["Full Text"], ["romanfull"] = L["Roman Full Text"]},
 				order = 405,
 			},
 			hidetimetext = {
@@ -921,13 +928,13 @@ do
 				--passValue = 'timefontsize',
 			},
 			timetextposition = {
-				type = 'input',
+				type = 'select',
 				name = L["Time Text Position"],
 				desc = L["Set the alignment of the time text"],
 				get = get,
 				set = set,
 				--passValue = 'timetextposition',
-				values = {L["Left"], L["Right"], L["Center"], L["Cast Start Side"], L["Cast End Side"]},
+				values = {["left"] = L["Left"], ["right"] = L["Right"], ["center"] = L["Center"], ["caststart"] = L["Cast Start Side"], ["castend"] = L["Cast End Side"]},
 				disabled = hidetimetextoptions,
 				order = 414,
 			},
@@ -962,7 +969,7 @@ do
 				order = 501,
 			},
 			snaptocenter = {
-				type = 'input',
+				type = 'execute',
 				name = L["Snap to Center"],
 				desc = L["Move the CastBar to center of the screen along the specified axis"],
 				get = false,

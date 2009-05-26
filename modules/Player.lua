@@ -181,9 +181,11 @@ do
 					--passValue = 'w',
 				},
 				x = {
-					type = 'input',
+					type = 'range',
 					name = L["X"],
 					desc = L["Set an exact X value for this bar's position."],
+					min = -2560,
+					max = 2560,
 					get = get,
 					set = set,
 					--passValue = 'x',
@@ -194,9 +196,11 @@ do
 					--usage = L["Number"],
 				},
 				y = {
-					type = 'input',
+					type = 'range',
 					name = L["Y"],
 					desc = L["Set an exact Y value for this bar's position."],
+					min = -1600,
+					max = 1600,
 					get = get,
 					set = set,
 					--passValue = 'y',
@@ -262,7 +266,7 @@ do
 					set = set,
 					disabled = hideiconoptions,
 					--passValue = 'iconposition',
-					values = {L["Left"], L["Right"]},
+					values = {["left"] = L["Left"], ["right"] = L["Right"]},
 					order = 301,
 				},
 				icongap = {
@@ -311,14 +315,14 @@ do
 				},
 				nametextposition = {
 					type = 'select',
-						name = L["Name Text Position"],
-						desc = L["Set the alignment of the spell name text"],
-						get = get,
-						set = set,
-						--passValue = 'nametextposition',
-						values = {L["Left"], L["Right"], L["Center"]},
-						disabled = hidenametextoptions,
-						order = 402,
+					name = L["Name Text Position"],
+					desc = L["Set the alignment of the spell name text"],
+					get = get,
+					set = set,
+					--passValue = 'nametextposition',
+					values = {["left"] = L["Left"], ["right"] = L["Right"], ["center"] = L["Center"]},
+					disabled = hidenametextoptions,
+					order = 402,
 				},
 				nametextx = {
 						type = 'range',
@@ -388,7 +392,7 @@ do
 							return db.hidenametext or not db.spellrank
 						end,
 						--passValue = 'spellrankstyle',
-						values = {L["Number"], L["Roman"], L["Full Text"], L["Roman Full Text"]},
+						values = {["number"] = L["Number"], ["roman"] = L["Roman"], ["full"] = L["Full Text"], ["romanfull"] = L["Roman Full Text"]},
 						order = 406,
 				},
 				hidetimetext = {
@@ -443,7 +447,7 @@ do
 						get = get,
 						set = set,
 						--passValue = 'timetextposition',
-						values = {L["Left"], L["Right"], L["Center"], L["Cast Start Side"], L["Cast End Side"]},
+						values = {["left"] = L["Left"], ["right"] = L["Right"], ["center"] = L["Center"], ["caststart"] = L["Cast Start Side"], ["castend"] = L["Cast End Side"]},
 						disabled = hidetimetextoptions,
 						order = 415,
 				},
@@ -498,7 +502,7 @@ do
 							end
 							Player.ApplySettings()
 						end,
-						values = {L["Horizontal"], L["Vertical"]},
+						values = {["horizontal"] = L["Horizontal"], ["vertical"] = L["Vertical"]},
 						order = 503,
 				},
 			copysettings = {
@@ -511,7 +515,7 @@ do
 						Quartz3:CopySettings(from.db.profile, Player.db.profile)
 						Player.ApplySettings()
 				end,
-				values = {L["Target"], L["Focus"], L["Pet"]},
+				values = {["target"] = L["Target"], ["focus"] = L["Focus"], ["pet"] = L["Pet"]},
 				order = 504
 			},
 		}

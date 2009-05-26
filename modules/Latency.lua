@@ -26,6 +26,7 @@ local Latency = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
 local Player = Quartz3:GetModule(L["Player"])
 
 local media = LibStub("LibSharedMedia-3.0")
+local lsmlist = _G.AceGUIWidgetLSMlists
 
 local unpack = _G.unpack
 local GetTime = _G.GetTime
@@ -410,10 +411,11 @@ do
 				order = 114,
 			},
 			lagfont = {
-				type = 'input',
+				type = 'select',
+				dialogControl = "LSM30_Font",
 				name = L["Font"],
 				desc = L["Set the font used for the latency text"],
-				values = media:List('font'),
+				values = lsmlist.font,
 				get = get,
 				set = set,
 				--passValue = 'lagfont',
@@ -445,10 +447,10 @@ do
 				order = 117,
 			},
 			lagtextalignment = {
-				type = 'input',
+				type = 'select',
 				name = L["Text Alignment"],
 				desc = L["Set the position of the latency text"],
-				values = {L["Center"], L["Left"], L["Right"], L["Outside"]},
+				values = {["center"] = L["Center"], ["left"] = L["Left"], ["right"] = L["Right"], ["outside"] = L["Outside"]},
 				get = get,
 				set = set,
 				--passValue = 'lagtextalignment',
@@ -456,10 +458,10 @@ do
 				order = 118,
 			},
 			lagtextposition = {
-				type = 'input',
+				type = 'select',
 				name = L["Text Position"],
 				desc = L["Set the vertical position of the latency text"],
-				values = {L["Above"], L["Top"], L["Bottom"], L["Below"]},
+				values = {["above"] = L["Above"], ["top"] = L["Top"], ["bottom"] = L["Bottom"], ["below"] = L["Below"]},
 				get = get,
 				set = set,
 				--passValue = 'lagtextposition',

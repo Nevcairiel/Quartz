@@ -370,13 +370,13 @@ do
 				order = 105,
 			},
 			swingposition = {
-				type = 'input',
+				type = 'select',
 				name = L["Bar Position"],
 				desc = L["Set the position of the swing timer bar"],
 				get = get,
 				set = set,
 				--passValue = 'swingposition',
-				values = {L["Top"], L["Bottom"], L["Free"]},
+				values = {["top"] = L["Top"], ["bottom"] = L["Bottom"], ["free"] = L["Free"]},
 				order = 106,
 			},
 			lock = {
@@ -411,11 +411,13 @@ do
 				order = 107,
 			},
 			x = {
-				type = 'input',
+				type = 'range',
 				name = L["X"],
 				desc = L["Set an exact X value for this bar's position."],
 				get = get,
 				set = set,
+				min = -2560,
+				max = 2560,
 				--passValue = 'x',
 				order = 108,
 --				validate = function(v)
@@ -427,9 +429,11 @@ do
 				usage = L["Number"],
 			},
 			y = {
-				type = 'input',
+				type = 'range',
 				name = L["Y"],
 				desc = L["Set an exact Y value for this bar's position."],
+				min = -2560,
+				max = 2560,
 				get = get,
 				set = set,
 				--passValue = 'y',
