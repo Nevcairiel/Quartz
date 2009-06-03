@@ -28,6 +28,7 @@ local Focus = Quartz3:GetModule(L["Focus"])
 local Target = Quartz3:GetModule(L["Target"])
 
 local media = LibStub("LibSharedMedia-3.0")
+local lsmlist = _G.AceGUIWidgetLSMlists
 
 local new, del = Quartz3.new, Quartz3.del
 

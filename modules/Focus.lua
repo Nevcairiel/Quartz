@@ -26,6 +26,7 @@ local Focus = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
 local Player = Quartz3:GetModule(L["Player"])
 
 local media = LibStub("LibSharedMedia-3.0")
+local lsmlist = _G.AceGUIWidgetLSMlists
 
 local GetTime = _G.GetTime
 local UnitCastingInfo = _G.UnitCastingInfo
