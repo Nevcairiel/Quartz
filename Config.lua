@@ -1,5 +1,6 @@
 --[[
 	Copyright (C) 2006-2007 Nymbia
+	Copyright (C) 2010 Hendrik "Nevcairiel" Leppkes < h.leppkes@gmail.com >
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -19,7 +20,7 @@ local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 local media = LibStub("LibSharedMedia-3.0")
 
-local getOpt, setOpt
+local getOpt, setOpt, getColor, setColor
 do
 	function getOpt(info)
 		local key = info[#info] 
@@ -30,6 +31,14 @@ do
 		local key = info[#info]
 		Quartz3.db.profile[key] = value
 	end
+	
+	function getColor(info)
+		return unpack(getOpt(info))
+	end
+	
+	function setColor(info, r, g, b, a)
+		setOpt(info, {r, g, b, a})
+	end
 end
 
 local options, moduleOptions = nil, {}
@@ -38,137 +47,113 @@ local function getOptions()
 		 options = {
 			type = "group",
 			args = {
-				hidesamwise = {
-					type = 'toggle',
-					name = L["Hide Samwise Icon"],
-					desc = L["Hide the icon for spells with no icon"],
-					get = get,
-					set = set,
-					--passValue = 'hidesamwise',
-					order = 101,
-				},
-				colors = {
-					type = 'group',
-					name = L["Colors"],
-					desc = L["Colors"],
-					order = 450,
+				general = {
+					type = "group",
+					inline = true,
+					name = "",
 					args = {
-						spelltextcolor = {
-							type = 'color',
-							name = L["Spell Text"],
-							desc = L["Set the color of the %s"]:format(L["Spell Text"]),
-							order = 98,
-							get = getcolor,
-							set = setcolor,
-							--passValue = 'spelltextcolor',
-						},
-						timetextcolor = {
-							type = 'color',
-							name = L["Time Text"],
-							desc = L["Set the color of the %s"]:format(L["Time Text"]),
-							order = 98,
-							get = getcolor,
-							set = setcolor,
-							--passValue = 'timetextcolor',
-						},
-						header = {
-							type = 'header',
-							order = 99,
-						},
-						castingcolor = {
-							type = 'color',
-							name = L["Casting"],
-							desc = L["Set the color of the cast bar when %s"]:format(L["Casting"]),
-							get = getcolor,
-							set = setcolor,
-							--passValue = 'castingcolor',
-						},
-						channelingcolor = {
-							type = 'color',
-							name = L["Channeling"],
-							desc = L["Set the color of the cast bar when %s"]:format(L["Channeling"]),
-							get = getcolor,
-							set = setcolor,
-							--passValue = 'channelingcolor',
-						},
-						completecolor = {
-							type = 'color',
-							name = L["Complete"],
-							desc = L["Set the color of the cast bar when %s"]:format(L["Complete"]),
-							get = getcolor,
-							set = setcolor,
-							--passValue = 'completecolor',
-						},
-						failcolor = {
-							type = 'color',
-							name = L["Failed"],
-							desc = L["Set the color of the cast bar when %s"]:format(L["Failed"]),
-							get = getcolor,
-							set = setcolor,
-							--passValue = 'failcolor',
-						},
-						sparkcolor = {
-							type = 'color',
-							name = L["Spark Color"],
-							desc = L["Set the color of the casting bar spark"],
-							get = getcolor,
-							set = setcolor,
-							hasAlpha = true,
-							--passValue = 'sparkcolor',
-						},
-						backgroundcolor = {
-							type = 'color',
-							name = L["Background"],
-							desc = L["Set the color of the casting bar background"],
-							get = getcolor,
-							set = setcolor,
-							--passValue = 'backgroundcolor',
+						hidesamwise = {
+							type = "toggle",
+							name = L["Hide Samwise Icon"],
+							desc = L["Hide the icon for spells with no icon"],
 							order = 101,
+							get = getOpt,
+							set = setOpt,
 						},
-						backgroundalpha = {
-							type = 'range',
-							name = L["Background Alpha"],
-							desc = L["Set the alpha of the casting bar background"],
-							isPercent = true,
-							min = 0,
-							max = 1,
-							step = 0.025,
-							get = get,
-							set = set,
-							--passValue = 'backgroundalpha',
-							order = 102,
-						},
-						bordercolor = {
-							type = 'color',
-							name = L["Border"],
-							desc = L["Set the color of the casting bar border"],
-							get = getcolor,
-							set = setcolor,
-							--passValue = 'bordercolor',
-							order = 103,
-						},
-						borderalpha = {
-							type = 'range',
-							name = L["Border Alpha"],
-							desc = L["Set the alpha of the casting bar border"],
-							isPercent = true,
-							min = 0,
-							max = 1,
-							step = 0.025,
-							get = get,
-							set = set,
-							--passValue = 'borderalpha',
-							order = 104,
+						colors = {
+							type = "group",
+							name = L["Colors"],
+							desc = L["Colors"],
+							guiInline = true,
+							order = 450,
+							get = getColor,
+							set = setColor,
+							args = {
+								spelltextcolor = {
+									type = "color",
+									name = L["Spell Text"],
+									desc = L["Set the color of the %s"]:format(L["Spell Text"]),
+									order = 98,
+								},
+								timetextcolor = {
+									type = "color",
+									name = L["Time Text"],
+									desc = L["Set the color of the %s"]:format(L["Time Text"]),
+									order = 98,
+								},
+								header = {
+									type = "header",
+									name = "",
+									order = 99,
+								},
+								castingcolor = {
+									type = "color",
+									name = L["Casting"],
+									desc = L["Set the color of the cast bar when %s"]:format(L["Casting"]),
+								},
+								channelingcolor = {
+									type = "color",
+									name = L["Channeling"],
+									desc = L["Set the color of the cast bar when %s"]:format(L["Channeling"]),
+								},
+								completecolor = {
+									type = "color",
+									name = L["Complete"],
+									desc = L["Set the color of the cast bar when %s"]:format(L["Complete"]),
+								},
+								failcolor = {
+									type = "color",
+									name = L["Failed"],
+									desc = L["Set the color of the cast bar when %s"]:format(L["Failed"]),
+								},
+								sparkcolor = {
+									type = "color",
+									name = L["Spark Color"],
+									desc = L["Set the color of the casting bar spark"],
+									hasAlpha = true,
+								},
+								nl1 = {
+									type = "description",
+									name = "",
+									order = 101,
+								},
+								backgroundcolor = {
+									type = "color",
+									name = L["Background"],
+									desc = L["Set the color of the casting bar background"],
+									order = 102,
+								},
+								backgroundalpha = {
+									type = "range",
+									name = L["Background Alpha"],
+									desc = L["Set the alpha of the casting bar background"],
+									isPercent = true,
+									min = 0, max = 1, bigStep = 0.025,
+									get = getOpt,
+									set = setOpt,
+									order = 103,
+								},
+								bordercolor = {
+									type = "color",
+									name = L["Border"],
+									desc = L["Set the color of the casting bar border"],
+									order = 104,
+								},
+								borderalpha = {
+									type = "range",
+									name = L["Border Alpha"],
+									desc = L["Set the alpha of the casting bar border"],
+									isPercent = true,
+									min = 0, max = 1, bigStep = 0.025,
+									get = getOpt,
+									set = setOpt,
+									order = 105,
+								},
+							},
 						},
 					},
 				},
-				modules = {
-					type = "group",
-					name = L["Modules"],
-					desc = L["Modules"],
-					args = {},
-				},
-			},	
+			},
 		}
 		for k,v in pairs(moduleOptions) do
 			options.args[k] = (type(v) == "function") and v() or v

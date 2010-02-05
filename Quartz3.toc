@@ -1,10 +1,9 @@
 ## Title: Quartz3
-## Interface: 30100
+## Interface: 30300
 ## Notes: Modular casting bar.
-## Author: Nymbia
-## X-eMail: nymbia@gmail.com
+## Author: Nymbia, Nevcairiel
 ## X-License: GPL v2
-## OptionalDeps: Ace3, LibSharedMedia-3.0, AceGUI-3.0-SharedMediaWidgets, FlightMap, InFlight, FuBar_ToFu
+## OptionalDeps: Ace3, LibSharedMedia-3.0, AceGUI-3.0-SharedMediaWidgets, SharedMedia, FlightMap, InFlight, FuBar_ToFu
 ## SavedVariables: Quartz3DB
 
 ## X-Credits: Ammo (some code based on PitBull_CastBar), kergoth (Tradeskill Merge module idea), Roartindon (Lag Embed mode for Latency module)
@@ -36,5 +35,17 @@ locale.xml
 Quartz.lua
 Config.lua
 
-modules.xml
-
+modules\Player.lua
+#modules\Target.lua
+#modules\Focus.lua
+#modules\Pet.lua
+#modules\Latency.lua
+#modules\Tradeskill.lua
+#modules\GCD.lua
+#modules\Buff.lua
+#modules\Mirror.lua
+#modules\Timer.lua
+#modules\Swing.lua
+#modules\Interrupt.lua
+#modules\Range.lua
+#modules\Flight.lua

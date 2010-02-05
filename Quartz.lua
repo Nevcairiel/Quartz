@@ -1,5 +1,6 @@
 --[[
 	Copyright (C) 2006-2007 Nymbia
+	Copyright (C) 2010 Hendrik "Nevcairiel" Leppkes < h.leppkes@gmail.com >
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -22,24 +23,24 @@ local db
 
 local defaults = {
 	profile = {
-		modules = {},
+		modules = { ["*"] = true },
 		hidesamwise = true,
-		sparkcolor = {1,1,1,0.5},
+		sparkcolor = {1, 1, 1, 0.5},
 		spelltextcolor = {1, 1, 1},
 		timetextcolor = {1, 1, 1},
-		castingcolor = {1.0,0.49, 0},
-		channelingcolor = {0.32,0.3, 1},
+		castingcolor = {1.0, 0.49, 0},
+		channelingcolor = {0.32, 0.3, 1},
 		completecolor = {0.12, 0.86, 0.15},
 		failcolor = {1.0, 0.09, 0},
 		backgroundcolor = {0, 0, 0},
-		bordercolor = {0,0,0},
+		bordercolor = {0, 0, 0},
 		backgroundalpha = 1,
 		borderalpha = 1,
-		},
-	}
+	},
+}
 
 function Quartz3:OnInitialize()
-	self.db = LibStub("AceDB-3.0"):New("Quartz3DB", defaults, "Default")
+	self.db = LibStub("AceDB-3.0"):New("Quartz3DB", defaults, true)
 	db = self.db.profile
 
 	self:SetupOptions()
@@ -48,8 +49,8 @@ function Quartz3:OnInitialize()
 	self.db.RegisterCallback(self, "OnProfileCopied", "ApplySettings")
 	self.db.RegisterCallback(self, "OnProfileReset", "ApplySettings")
 
-        media.RegisterCallback(self, "LibSharedMedia_Registered", "ApplySettings")
-        media.RegisterCallback(self, "LibSharedMedia_SetGlobal", "ApplySettings")
+	media.RegisterCallback(self, "LibSharedMedia_Registered", "ApplySettings")
+	media.RegisterCallback(self, "LibSharedMedia_SetGlobal", "ApplySettings")
 
 	media:Register("statusbar", "Frost", "Interface\\AddOns\\Quartz3\\textures\\Frost")
 	media:Register("statusbar", "Healbot", "Interface\\AddOns\\Quartz3\\textures\\Healbot")
