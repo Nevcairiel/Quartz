@@ -227,7 +227,7 @@ function Mirror:OnInitialize()
 	db = self.db.profile
 	
 	self:SetEnabledState(Quartz3:GetModuleEnabled(MODNAME))
-	Quartz3:RegisterModuleOptions(MODNAME, getOptions, MODNAME)
+	Quartz3:RegisterModuleOptions(MODNAME, getOptions, L["Mirror"])
 
 end
 
@@ -237,7 +237,7 @@ function Mirror:OnEnable()
 	self:RegisterEvent("MIRROR_TIMER_STOP", "UpdateBars")
 	self:RegisterEvent("PLAYER_UNGHOST", "UpdateBars")
 	self:RegisterEvent("PLAYER_ALIVE", "UpdateBars")
-	self:RegisterEvent("Quartz3Mirror_UpdateCustom", "UpdateBars")
+	self:RegisterMessage("Quartz3Mirror_UpdateCustom", "UpdateBars")
 	self:RegisterEvent("CHAT_MSG_BG_SYSTEM_NEUTRAL")
 	self:SecureHook("StaticPopup_Show", "UpdateBars")
 	media.RegisterCallback(self, "LibSharedMedia_SetGlobal", function(mtype, override)

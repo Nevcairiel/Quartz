@@ -1252,7 +1252,7 @@ do
 		return direction
 	end
 	function Buff:ApplySettings()
-		if Quartz3:GetModuleEnabled(MODNAME) then
+		if self:IsEnabled() then
 			db = self.db.profile
 			local direction
 			if db.targetanchor ~= "free" then

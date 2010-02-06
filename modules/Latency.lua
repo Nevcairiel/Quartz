@@ -269,7 +269,7 @@ function Latency:UNIT_SPELLCAST_INTERRUPTED(event, unit)
 end
 
 function Latency:ApplySettings()
-	if lagbox and Quartz3:GetModuleEnabled(MODNAME) then
+	if lagbox and self:IsEnabled() then
 		castBar = Player.castBar
 		
 		db = self.db.profile
