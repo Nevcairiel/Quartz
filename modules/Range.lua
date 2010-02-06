@@ -21,9 +21,9 @@ local LibStub = _G.LibStub
 local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
-local MODNAME = L["Range"]
+local MODNAME = "Range"
 local Range = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
-local Player = Quartz3:GetModule(L["Player"])
+local Player = Quartz3:GetModule("Player")
 
 local GetTime = _G.GetTime
 local IsSpellInRange = _G.IsSpellInRange
@@ -48,12 +48,12 @@ do
 		if sincelast >= refreshtime then
 			sincelast = 0
 			if not castBar:IsVisible() or Player.fadeOut then
-				return f:SetScript('OnUpdate', nil)
+				return f:SetScript("OnUpdate", nil)
 			end
 			if IsSpellInRange(spell, target) == 0 then
 				r, g, b = castBar:GetStatusBarColor()
 				modified = true
-				castBar:SetStatusBarColor(unpack(db.profile.rangecolor))
+				castBar:SetStatusBarColor(unpack(db.rangecolor))
 			elseif modified then
 				castBar:SetStatusBarColor(r,g,b)
 				modified, r, g, b = nil, nil, nil, nil
@@ -67,17 +67,25 @@ function Range:OnInitialize()
 	db = self.db.profile
 	
 	self:SetEnabledState(Quartz3:GetModuleEnabled(MODNAME))
-	Quartz3:RegisterModuleOptions(MODNAME, getOptions, MODNAME)
+	Quartz3:RegisterModuleOptions(MODNAME, getOptions, L["Range"])
 
-	f = CreateFrame('Frame', nil, UIParent)
+	f = CreateFrame("Frame", nil, UIParent)
 end
+
 function Range:OnEnable()
 	self:RegisterEvent("UNIT_SPELLCAST_SENT")
 	self:RegisterEvent("UNIT_SPELLCAST_START")
 	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
 end
+
+function Range:ApplySettings()
+	if self:IsEnabled() then
+		db = self.db.profile
+	end
+end
+
 function Range:UNIT_SPELLCAST_START(event, unit)
-	if unit ~= 'player' then
+	if unit ~= "player" then
 		return
 	end
 	if not castBar then
@@ -86,11 +94,12 @@ function Range:UNIT_SPELLCAST_START(event, unit)
 	if target then
 		spell = UnitCastingInfo(unit)
 		modified, r, g, b = nil, nil, nil, nil
-		f:SetScript('OnUpdate', OnUpdate)
+		f:SetScript("OnUpdate", OnUpdate)
 	end
 end
+
 function Range:UNIT_SPELLCAST_CHANNEL_START(event, unit)
-	if unit ~= 'player' then
+	if unit ~= "player" then
 		return
 	end
 	if not castBar then
@@ -99,21 +108,21 @@ function Range:UNIT_SPELLCAST_CHANNEL_START(event, unit)
 	if target then
 		spell = UnitChannelInfo(unit)
 		modified, r, g, b = nil, nil, nil, nil
-		f:SetScript('OnUpdate', OnUpdate)
+		f:SetScript("OnUpdate", OnUpdate)
 	end
 end
 
 function Range:UNIT_SPELLCAST_SENT(event, unit, _, _, name)
-	if unit ~= 'player' then
+	if unit ~= "player" then
 		return
 	end
 	if name then
-		if name == UnitName('player') then
-			target = 'player'
-		elseif name == UnitName('target') then
-			target = 'target'
-		elseif name == UnitName('focus') then
-			target = 'focus'
+		if name == UnitName("player") then
+			target = "player"
+		elseif name == UnitName("target") then
+			target = "target"
+		elseif name == UnitName("focus") then
+			target = "focus"
 		else
 			target = nil
 		end
@@ -123,23 +132,16 @@ function Range:UNIT_SPELLCAST_SENT(event, unit, _, _, name)
 end
 
 do
-	local function setcolor(field, ...)
-		db.profile[field] = {...}
-		Quartz3.ApplySettings()
-	end
-	local function getcolor(field)
-		return unpack(db.profile[field])
-	end
 	local options
 	function getOptions()
 		options = options or {
-		type = 'group',
+		type = "group",
 		name = L["Range"],
 		desc = L["Range"],
 		order = 600,
 		args = {
 			toggle = {
-				type = 'toggle',
+				type = "toggle",
 				name = L["Enable"],
 				desc = L["Enable"],
 				get = function()
@@ -151,12 +153,11 @@ do
 				order = 100,
 			},
 			rangecolor = {
-				type = 'color',
+				type = "color",
 				name = L["Out of Range Color"],
 				desc = L["Set the color to turn the cast bar when the target is out of range"],
-				get = getcolor,
-				set = setcolor,
-				--passValue = 'rangecolor',
+				get = function() return unpack(db.rangecolor) end,
+				set = function(info, ...) db.rangecolor = {...} end,
 				order = 101,
 			},
 		},
