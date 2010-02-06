@@ -689,7 +689,7 @@ function Player:OnDisable()
 end
 
 function Player:UNIT_SPELLCAST_SENT(event, unit, spell, rank, target)
-	if unit ~= "player" then
+	if unit ~= "player" and unit ~= "vehicle" then
 		return
 	end
 	if target then
@@ -700,7 +700,7 @@ function Player:UNIT_SPELLCAST_SENT(event, unit, spell, rank, target)
 end
 
 function Player:UNIT_SPELLCAST_START(event, unit)
-	if unit ~= "player" then
+	if unit ~= "player" and unit ~= "vehicle" then
 		return
 	end
 	local spell, rank, displayName, icon, startTime, endTime = UnitCastingInfo(unit)
@@ -775,7 +775,7 @@ local function getChannelingTicks(spell)
 end
 
 function Player:UNIT_SPELLCAST_CHANNEL_START(event, unit)
-	if unit ~= "player" then
+	if unit ~= "player" and unit ~= "vehicle" then
 		return
 	end
 	local spell, rank, displayName, icon, startTime, endTime = UnitChannelInfo(unit)
@@ -818,7 +818,7 @@ function Player:UNIT_SPELLCAST_CHANNEL_START(event, unit)
 end
 
 function Player:UNIT_SPELLCAST_STOP(event, unit)
-	if unit ~= "player" then
+	if unit ~= "player" and unit ~= "vehicle" then
 		return
 	end
 	if self.casting then
@@ -836,7 +836,7 @@ function Player:UNIT_SPELLCAST_STOP(event, unit)
 end
 
 function Player:UNIT_SPELLCAST_CHANNEL_STOP(event, unit)
-	if unit ~= "player" then
+	if unit ~= "player" and unit ~= "vehicle" then
 		return
 	end
 	if self.channeling then
@@ -853,7 +853,7 @@ function Player:UNIT_SPELLCAST_CHANNEL_STOP(event, unit)
 end
 
 function Player:UNIT_SPELLCAST_FAILED(event, unit)
-	if unit ~= "player" or self.channeling or self.casting then 
+	if (unit ~= "player" and unit ~= "vehicle") or self.channeling or self.casting then 
 		return
 	end
 	self.targetName = nil
@@ -871,7 +871,7 @@ function Player:UNIT_SPELLCAST_FAILED(event, unit)
 end
 
 function Player:UNIT_SPELLCAST_INTERRUPTED(event, unit)
-	if unit ~= "player" then
+	if unit ~= "player" and unit ~= "vehicle" then
 		return
 	end
 	self.targetName = nil
@@ -889,7 +889,7 @@ function Player:UNIT_SPELLCAST_INTERRUPTED(event, unit)
 end
 
 function Player:UNIT_SPELLCAST_DELAYED(event, unit)
-	if unit ~= "player" then
+	if unit ~= "player" and unit ~= "vehicle" then
 		return
 	end
 	local oldStart = self.startTime
@@ -906,7 +906,7 @@ function Player:UNIT_SPELLCAST_DELAYED(event, unit)
 end
 
 function Player:UNIT_SPELLCAST_CHANNEL_UPDATE(event, unit)
-	if unit ~= "player" then
+	if unit ~= "player" and unit ~= "vehicle" then
 		return
 	end
 	local oldStart = self.startTime

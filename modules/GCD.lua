@@ -100,6 +100,7 @@ function GCD:OnEnable()
 	end
 	self:ApplySettings()
 end
+
 function GCD:OnDisable()
 	gcdbar:Hide()
 end
@@ -111,7 +112,6 @@ function GCD:CheckGCD(event, unit, spell)
 			starttime = start
 			duration = dur
 			gcdbar:Show()
-			return
 		end
 	end
 end
