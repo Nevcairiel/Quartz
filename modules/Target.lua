@@ -600,6 +600,20 @@ do
 		return options
 	end
 end
+
+local function setCastNotInterruptable(notInterruptible)
+	if notInterruptible then
+		castBarParent:SetBackdrop(noInterruptBackdrop)
+		castBarParent:SetBackdropBorderColor(noInterruptBorderColor.r, noInterruptBorderColor.g, noInterruptBorderColor.b, noInterruptBorderAlpha)
+	else
+		castBarParent:SetBackdrop(interruptBackdrop)
+		castBarParent:SetBackdropBorderColor(interruptBorderColor.r, interruptBorderColor.g, interruptBorderColor.b, interruptBorderAlpha)
+	end
+	lastNotInterruptible = notInterruptible
+	local r,g,b = unpack(Quartz3.db.profile.backgroundcolor)
+	castBarParent:SetBackdropColor(r, g, b, Quartz3.db.profile.backgroundalpha)
+end
+
 function Target:OnInitialize()
 	self.db = Quartz3.db:RegisterNamespace(MODNAME, defaults)
 	db = self.db.profile
@@ -618,6 +632,8 @@ function Target:OnEnable()
 	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
 	self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
 	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_INTERRUPTED", "UNIT_SPELLCAST_INTERRUPTED")
+	self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTIBLE")
+	self:RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE")
 	self:RegisterEvent("PLAYER_TARGET_CHANGED")
 	media.RegisterCallback(self, "LibSharedMedia_SetGlobal", function(mtype, override)
 		if mtype == "statusbar" then
@@ -699,17 +715,7 @@ function Target:UNIT_SPELLCAST_START(event, unit)
 		castBarTimeText:SetPoint("RIGHT", castBar, "RIGHT", -1 * db.timetextx, db.timetexty)
 		castBarTimeText:SetJustifyH("RIGHT")
 	end
-	
-	if notInterruptible then
-		castBarParent:SetBackdrop(noInterruptBackdrop)
-		castBarParent:SetBackdropBorderColor(noInterruptBorderColor.r, noInterruptBorderColor.g, noInterruptBorderColor.b, noInterruptBorderAlpha)
-	else
-		castBarParent:SetBackdrop(interruptBackdrop)
-		castBarParent:SetBackdropBorderColor(interruptBorderColor.r, interruptBorderColor.g, interruptBorderColor.b, interruptBorderAlpha)
-	end
-	lastNotInterruptible = notInterruptible
-	local r,g,b = unpack(Quartz3.db.profile.backgroundcolor)
-	castBarParent:SetBackdropColor(r, g, b, Quartz3.db.profile.backgroundalpha)
+	setCastNotInterruptable(notInterruptible)
 end
 
 function Target:UNIT_SPELLCAST_CHANNEL_START(event, unit)
@@ -761,16 +767,7 @@ function Target:UNIT_SPELLCAST_CHANNEL_START(event, unit)
 		castBarTimeText:SetJustifyH("LEFT")
 	end
 	
-	if notInterruptible then
-		castBarParent:SetBackdrop(noInterruptBackdrop)
-		castBarParent:SetBackdropBorderColor(noInterruptBorderColor.r, noInterruptBorderColor.g, noInterruptBorderColor.b, noInterruptBorderAlpha)
-	else
-		castBarParent:SetBackdrop(interruptBackdrop)
-		castBarParent:SetBackdropBorderColor(interruptBorderColor.r, interruptBorderColor.g, interruptBorderColor.b, interruptBorderAlpha)
-	end
-	lastNotInterruptible = notInterruptible
-	local r,g,b = unpack(Quartz3.db.profile.backgroundcolor)
-	castBarParent:SetBackdropColor(r, g, b, Quartz3.db.profile.backgroundalpha)
+	setCastNotInterruptable(notInterruptible)
 end
 
 function Target:UNIT_SPELLCAST_STOP(event, unit)
@@ -929,16 +926,7 @@ function Target:PLAYER_TARGET_CHANGED()
 			castBarTimeText:SetJustifyH("RIGHT")
 		end
 		
-		if notInterruptible then
-			castBarParent:SetBackdrop(noInterruptBackdrop)
-			castBarParent:SetBackdropBorderColor(noInterruptBorderColor.r, noInterruptBorderColor.g, noInterruptBorderColor.b, noInterruptBorderAlpha)
-		else
-			castBarParent:SetBackdrop(interruptBackdrop)
-			castBarParent:SetBackdropBorderColor(interruptBorderColor.r, interruptBorderColor.g, interruptBorderColor.b, interruptBorderAlpha)
-		end
-		lastNotInterruptible = notInterruptible
-		local r,g,b = unpack(Quartz3.db.profile.backgroundcolor)
-		castBarParent:SetBackdropColor(r, g, b, Quartz3.db.profile.backgroundalpha)
+		setCastNotInterruptable(notInterruptible)
 	else
 		spell, rank, displayName, icon, startTime, endTime, isTradeSkill, notInterruptible = UnitChannelInfo("target")
 		if spell then
@@ -970,20 +958,25 @@ function Target:PLAYER_TARGET_CHANGED()
 				castBarTimeText:SetJustifyH("LEFT")
 			end
 			
-			if notInterruptible then
-				castBarParent:SetBackdrop(noInterruptBackdrop)
-				castBarParent:SetBackdropBorderColor(noInterruptBorderColor.r, noInterruptBorderColor.g, noInterruptBorderColor.b, noInterruptBorderAlpha)
-			else
-				castBarParent:SetBackdrop(interruptBackdrop)
-				castBarParent:SetBackdropBorderColor(interruptBorderColor.r, interruptBorderColor.g, interruptBorderColor.b, interruptBorderAlpha)
-			end
-			lastNotInterruptible = notInterruptible
-			local r,g,b = unpack(Quartz3.db.profile.backgroundcolor)
-			castBarParent:SetBackdropColor(r, g, b, Quartz3.db.profile.backgroundalpha)
+			setCastNotInterruptable(notInterruptible)
 		else
 			castBarParent:Hide()
 		end
 	end
+end
+
+function Target:UNIT_SPELLCAST_INTERRUPTIBLE(event, unit)
+	if unit ~= "target" then
+		return
+	end
+	setCastNotInterruptable(false)
+end
+
+function Target:UNIT_SPELLCAST_NOT_INTERRUPTIBLE(event, unit)
+	if unit ~= "target" then
+		return
+	end
+	setCastNotInterruptable(true)
 end
 
 do

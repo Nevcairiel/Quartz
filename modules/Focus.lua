@@ -205,6 +205,19 @@ do
 	end
 end
 
+local function setCastNotInterruptable(notInterruptible)
+	if notInterruptible then
+		castBarParent:SetBackdrop(noInterruptBackdrop)
+		castBarParent:SetBackdropBorderColor(noInterruptBorderColor.r, noInterruptBorderColor.g, noInterruptBorderColor.b, noInterruptBorderAlpha)
+	else
+		castBarParent:SetBackdrop(interruptBackdrop)
+		castBarParent:SetBackdropBorderColor(interruptBorderColor.r, interruptBorderColor.g, interruptBorderColor.b, interruptBorderAlpha)
+	end
+	lastNotInterruptible = notInterruptible
+	local r,g,b = unpack(Quartz3.db.profile.backgroundcolor)
+	castBarParent:SetBackdropColor(r, g, b, Quartz3.db.profile.backgroundalpha)
+end
+
 function Focus:OnInitialize()
 	self.db = Quartz3.db:RegisterNamespace(MODNAME, defaults)
 	db = self.db.profile
@@ -311,16 +324,7 @@ function Focus:UNIT_SPELLCAST_START(event, unit)
 		castBarTimeText:SetJustifyH("RIGHT")
 	end
 	
-	if notInterruptible then
-		castBarParent:SetBackdrop(noInterruptBackdrop)
-		castBarParent:SetBackdropBorderColor(noInterruptBorderColor.r, noInterruptBorderColor.g, noInterruptBorderColor.b, noInterruptBorderAlpha)
-	else
-		castBarParent:SetBackdrop(interruptBackdrop)
-		castBarParent:SetBackdropBorderColor(interruptBorderColor.r, interruptBorderColor.g, interruptBorderColor.b, interruptBorderAlpha)
-	end
-	lastNotInterruptible = notInterruptible
-	local r,g,b = unpack(Quartz3.db.profile.backgroundcolor)
-	castBarParent:SetBackdropColor(r, g, b, Quartz3.db.profile.backgroundalpha)
+	setCastNotInterruptable(notInterruptible)
 end
 
 function Focus:UNIT_SPELLCAST_CHANNEL_START(event, unit)
@@ -377,16 +381,7 @@ function Focus:UNIT_SPELLCAST_CHANNEL_START(event, unit)
 		castBarTimeText:SetJustifyH("LEFT")
 	end
 
-	if notInterruptible then
-		castBarParent:SetBackdrop(noInterruptBackdrop)
-		castBarParent:SetBackdropBorderColor(noInterruptBorderColor.r, noInterruptBorderColor.g, noInterruptBorderColor.b, noInterruptBorderAlpha)
-	else
-		castBarParent:SetBackdrop(interruptBackdrop)
-		castBarParent:SetBackdropBorderColor(interruptBorderColor.r, interruptBorderColor.g, interruptBorderColor.b, interruptBorderAlpha)
-	end
-	lastNotInterruptible = notInterruptible
-	local r,g,b = unpack(Quartz3.db.profile.backgroundcolor)
-	castBarParent:SetBackdropColor(r, g, b, Quartz3.db.profile.backgroundalpha)
+	setCastNotInterruptable(notInterruptible)
 end
 
 function Focus:UNIT_SPELLCAST_STOP(event, unit)
@@ -556,16 +551,7 @@ function Focus:PLAYER_FOCUS_CHANGED()
 			castBarTimeText:SetJustifyH("RIGHT")
 		end
 		
-		if notInterruptible then
-			castBarParent:SetBackdrop(noInterruptBackdrop)
-			castBarParent:SetBackdropBorderColor(noInterruptBorderColor.r, noInterruptBorderColor.g, noInterruptBorderColor.b, noInterruptBorderAlpha)
-		else
-			castBarParent:SetBackdrop(interruptBackdrop)
-			castBarParent:SetBackdropBorderColor(interruptBorderColor.r, interruptBorderColor.g, interruptBorderColor.b, interruptBorderAlpha)
-		end
-		lastNotInterruptible = notInterruptible
-		local r,g,b = unpack(Quartz3.db.profile.backgroundcolor)
-		castBarParent:SetBackdropColor(r, g, b, Quartz3.db.profile.backgroundalpha)
+		setCastNotInterruptable(notInterruptible)
 	else
 		spell, rank, displayName, icon, startTime, endTime, isTradeSkill, notInterruptible = UnitChannelInfo("focus")
 		if spell then
@@ -597,21 +583,27 @@ function Focus:PLAYER_FOCUS_CHANGED()
 				castBarTimeText:SetJustifyH("LEFT")
 			end
 			
-			if notInterruptible then
-				castBarParent:SetBackdrop(noInterruptBackdrop)
-				castBarParent:SetBackdropBorderColor(noInterruptBorderColor.r, noInterruptBorderColor.g, noInterruptBorderColor.b, noInterruptBorderAlpha)
-			else
-				castBarParent:SetBackdrop(interruptBackdrop)
-				castBarParent:SetBackdropBorderColor(interruptBorderColor.r, interruptBorderColor.g, interruptBorderColor.b, interruptBorderAlpha)
-			end
-			lastNotInterruptible = notInterruptible
-			local r,g,b = unpack(Quartz3.db.profile.backgroundcolor)
-			castBarParent:SetBackdropColor(r, g, b, Quartz3.db.profile.backgroundalpha)
+			setCastNotInterruptable(notInterruptible)
 		else
 			castBarParent:Hide()
 		end
 	end
 end
+
+function Focus:UNIT_SPELLCAST_INTERRUPTIBLE(event, unit)
+	if unit ~= "focus" then
+		return
+	end
+	setCastNotInterruptable(false)
+end
+
+function Focus:UNIT_SPELLCAST_NOT_INTERRUPTIBLE(event, unit)
+	if unit ~= "focus" then
+		return
+	end
+	setCastNotInterruptable(true)
+end
+
 do
 	function Focus:ApplySettings()
 		if not castBarParent then
