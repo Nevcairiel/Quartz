@@ -30,6 +30,7 @@ do
 	function setOpt(info, value)
 		local key = info[#info]
 		Quartz3.db.profile[key] = value
+		Quartz3:ApplySettings()
 	end
 	
 	function getColor(info)
@@ -178,5 +179,5 @@ end
 
 function Quartz3:RegisterModuleOptions(name, optTable, displayName)
 	moduleOptions[name] = optTable
-	self.optFrames[name] = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Quartz3", displayName, "Quartz3", name)
+	self.optFrames[name] = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Quartz3", displayName or name, "Quartz3", name)
 end
