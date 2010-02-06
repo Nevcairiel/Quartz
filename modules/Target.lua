@@ -41,6 +41,13 @@ local GetTime = _G.GetTime
 
 local castBar, castBarText, castBarTimeText, castBarIcon, castBarSpark, castBarParent
 local startTime, endTime, delay, fadeOut, stopTime, casting, channeling
+local startTime, endTime, delay, fadeOut, stopTime, casting, channeling, lastNotInterruptible
+
+local interruptBackdrop = { insets = {} }
+local noInterruptBackdrop = { insets = {} }
+local interruptBorderColor = {}
+local noInterruptBorderColor = {}
+local interruptBorderAlpha, noInterruptBorderAlpha
 
 local db, getOptions
 
@@ -79,6 +86,10 @@ local defaults = {
 		
 		showfriendly = true,
 		showhostile = true,
+		
+		noInterruptBorder = "Tooltip enlarged",
+		noInterruptBorderColor = {0.71, 0.73, 0.71}, -- Default color chosen by playing around with settings, rounded to 2 significant digits
+		noInterruptBorderAlpha = 1,
 	}
 }
 
@@ -224,6 +235,14 @@ do
 	
 	local function getOpt(info)
 		return db[info[#info]]
+	end
+
+	local function setColor(info, ...)
+		setOpt(info, {...})
+	end
+
+	local function getColor(info)
+		return unpack(getOpt(info))
 	end
 
 	local options
@@ -508,6 +527,38 @@ do
 						values = lsmlist.border,
 						order = 452,
 					},
+					noInterruptGroup = {
+						name = L["No interrupt cast bars"],
+						dialogInline = true,
+						type = "group",
+						order = 455,
+						args = {
+							noInterruptBorder = {
+								type = "select",
+								name = L["Border"],
+								desc = L["Set the border style for no interrupt casting bars"],
+								dialogControl = "LSM30_Border",
+								values = lsmlist.border,
+								order = 1,
+							},
+							noInterruptBorderColor = {
+								type = "color",
+								name = L["Border Color"],
+								desc = L["Set the color of the no interrupt casting bar border"],
+								get = getColor,
+								set = setColor,
+								order = 2,
+							},
+							noInterruptBorderAlpha = {
+								type = "range",
+								name = L["Border Alpha"],
+								desc = L["Set the alpha of the no interrupt casting bar border"],
+								isPercent = true,
+								min = 0, max = 1, bigStep = 0.025,
+								order = 3,
+							},
+						},
+					},
 					toolheader = {
 						type = "header",
 						name = L["Tools"],
@@ -592,6 +643,7 @@ function Target:OnEnable()
 		
 		castBarParent:Hide()
 	end
+	lastNotInterruptible = false
 	Target:ApplySettings()
 end
 
@@ -613,8 +665,8 @@ function Target:UNIT_SPELLCAST_START(event, unit)
 			return
 		end
 	end
-	local spell, rank, displayName, icon
-	spell, rank, displayName, icon, startTime, endTime = UnitCastingInfo(unit)
+	local spell, rank, displayName, icon, isTradeSkill, castID, notInterruptible
+	spell, rank, displayName, icon, startTime, endTime, isTradeSkill, castID, notInterruptible = UnitCastingInfo(unit)
 	if not startTime then
 		return castBarParent:Hide()
 	end
@@ -647,6 +699,17 @@ function Target:UNIT_SPELLCAST_START(event, unit)
 		castBarTimeText:SetPoint("RIGHT", castBar, "RIGHT", -1 * db.timetextx, db.timetexty)
 		castBarTimeText:SetJustifyH("RIGHT")
 	end
+	
+	if notInterruptible then
+		castBarParent:SetBackdrop(noInterruptBackdrop)
+		castBarParent:SetBackdropBorderColor(noInterruptBorderColor.r, noInterruptBorderColor.g, noInterruptBorderColor.b, noInterruptBorderAlpha)
+	else
+		castBarParent:SetBackdrop(interruptBackdrop)
+		castBarParent:SetBackdropBorderColor(interruptBorderColor.r, interruptBorderColor.g, interruptBorderColor.b, interruptBorderAlpha)
+	end
+	lastNotInterruptible = notInterruptible
+	local r,g,b = unpack(Quartz3.db.profile.backgroundcolor)
+	castBarParent:SetBackdropColor(r, g, b, Quartz3.db.profile.backgroundalpha)
 end
 
 function Target:UNIT_SPELLCAST_CHANNEL_START(event, unit)
@@ -663,8 +726,8 @@ function Target:UNIT_SPELLCAST_CHANNEL_START(event, unit)
 			return
 		end
 	end
-	local spell, rank, displayName, icon
-	spell, rank, displayName, icon, startTime, endTime = UnitChannelInfo(unit)
+	local spell, rank, displayName, icon, isTradeSkill, notInterruptible
+	spell, rank, displayName, icon, startTime, endTime, isTradeSkill, notInterruptible = UnitChannelInfo(unit)
 	if not startTime then
 		return castBarParent:Hide()
 	end
@@ -697,6 +760,17 @@ function Target:UNIT_SPELLCAST_CHANNEL_START(event, unit)
 		castBarTimeText:SetPoint("LEFT", castBar, "LEFT", db.timetextx, db.timetexty)
 		castBarTimeText:SetJustifyH("LEFT")
 	end
+	
+	if notInterruptible then
+		castBarParent:SetBackdrop(noInterruptBackdrop)
+		castBarParent:SetBackdropBorderColor(noInterruptBorderColor.r, noInterruptBorderColor.g, noInterruptBorderColor.b, noInterruptBorderAlpha)
+	else
+		castBarParent:SetBackdrop(interruptBackdrop)
+		castBarParent:SetBackdropBorderColor(interruptBorderColor.r, interruptBorderColor.g, interruptBorderColor.b, interruptBorderAlpha)
+	end
+	lastNotInterruptible = notInterruptible
+	local r,g,b = unpack(Quartz3.db.profile.backgroundcolor)
+	castBarParent:SetBackdropColor(r, g, b, Quartz3.db.profile.backgroundalpha)
 end
 
 function Target:UNIT_SPELLCAST_STOP(event, unit)
@@ -822,8 +896,8 @@ function Target:PLAYER_TARGET_CHANGED()
 			return
 		end
 	end
-	local spell, rank, displayName, icon
-	spell, rank, displayName, icon, startTime, endTime = UnitCastingInfo("target")
+	local spell, rank, displayName, icon, isTradeSkill, castID, notInterruptible
+	spell, rank, displayName, icon, startTime, endTime, isTradeSkill, castID, notInterruptible = UnitCastingInfo("target")
 	if spell then
 		startTime = startTime / 1000
 		endTime = endTime / 1000
@@ -854,8 +928,19 @@ function Target:PLAYER_TARGET_CHANGED()
 			castBarTimeText:SetPoint("RIGHT", castBar, "RIGHT", -1 * db.timetextx, db.timetexty)
 			castBarTimeText:SetJustifyH("RIGHT")
 		end
+		
+		if notInterruptible then
+			castBarParent:SetBackdrop(noInterruptBackdrop)
+			castBarParent:SetBackdropBorderColor(noInterruptBorderColor.r, noInterruptBorderColor.g, noInterruptBorderColor.b, noInterruptBorderAlpha)
+		else
+			castBarParent:SetBackdrop(interruptBackdrop)
+			castBarParent:SetBackdropBorderColor(interruptBorderColor.r, interruptBorderColor.g, interruptBorderColor.b, interruptBorderAlpha)
+		end
+		lastNotInterruptible = notInterruptible
+		local r,g,b = unpack(Quartz3.db.profile.backgroundcolor)
+		castBarParent:SetBackdropColor(r, g, b, Quartz3.db.profile.backgroundalpha)
 	else
-		spell, rank, displayName, icon, startTime, endTime = UnitChannelInfo("target")
+		spell, rank, displayName, icon, startTime, endTime, isTradeSkill, notInterruptible = UnitChannelInfo("target")
 		if spell then
 			startTime = startTime / 1000
 			endTime = endTime / 1000
@@ -884,6 +969,17 @@ function Target:PLAYER_TARGET_CHANGED()
 				castBarTimeText:SetPoint("LEFT", castBar, "LEFT", db.timetextx, db.timetexty)
 				castBarTimeText:SetJustifyH("LEFT")
 			end
+			
+			if notInterruptible then
+				castBarParent:SetBackdrop(noInterruptBackdrop)
+				castBarParent:SetBackdropBorderColor(noInterruptBorderColor.r, noInterruptBorderColor.g, noInterruptBorderColor.b, noInterruptBorderAlpha)
+			else
+				castBarParent:SetBackdrop(interruptBackdrop)
+				castBarParent:SetBackdropBorderColor(interruptBorderColor.r, interruptBorderColor.g, interruptBorderColor.b, interruptBorderAlpha)
+			end
+			lastNotInterruptible = notInterruptible
+			local r,g,b = unpack(Quartz3.db.profile.backgroundcolor)
+			castBarParent:SetBackdropColor(r, g, b, Quartz3.db.profile.backgroundalpha)
 		else
 			castBarParent:Hide()
 		end
@@ -891,9 +987,6 @@ function Target:PLAYER_TARGET_CHANGED()
 end
 
 do
-	local backdrop = { insets = {} }
-	local backdrop_insets = backdrop.insets
-	
 	function Target:ApplySettings()
 		if not castBarParent then
 			return
@@ -911,19 +1004,44 @@ do
 		castBarParent:SetAlpha(db.alpha)
 		castBarParent:SetScale(db.scale)
 		
-		backdrop.bgFile = "Interface\\Tooltips\\UI-Tooltip-Background"
-		backdrop.tile = true
-		backdrop.tileSize = 16
-		backdrop.edgeFile = media:Fetch("border", db.border)
-		backdrop.edgeSize = 16
-		backdrop_insets.left = 4
-		backdrop_insets.right = 4
-		backdrop_insets.top = 4
-		backdrop_insets.bottom = 4
-		
-		castBarParent:SetBackdrop(backdrop)
+		interruptBackdrop.bgFile = "Interface\\Tooltips\\UI-Tooltip-Background"
+		interruptBackdrop.tile = true
+		interruptBackdrop.tileSize = 16
+		interruptBackdrop.edgeSize = 16
+		interruptBackdrop.insets.left = 4
+		interruptBackdrop.insets.right = 4
+		interruptBackdrop.insets.top = 4
+		interruptBackdrop.insets.bottom = 4
+		interruptBackdrop.edgeFile = media:Fetch("border", db.border)
+		noInterruptBackdrop.bgFile = "Interface\\Tooltips\\UI-Tooltip-Background"
+		noInterruptBackdrop.tile = true
+		noInterruptBackdrop.tileSize = 16
+		noInterruptBackdrop.edgeSize = 16
+		noInterruptBackdrop.insets.left = 4
+		noInterruptBackdrop.insets.right = 4
+		noInterruptBackdrop.insets.top = 4
+		noInterruptBackdrop.insets.bottom = 4
+		noInterruptBackdrop.edgeFile = media:Fetch("border", db.noInterruptBorder)
+		-- Alas, filling one, copying it to the other and then only changing the edgeFile doesn't work: it doesn't create a deep copy
+
 		local r,g,b = unpack(qdb.bordercolor)
-		castBarParent:SetBackdropBorderColor(r,g,b, qdb.borderalpha)
+		interruptBorderColor.r = r
+		interruptBorderColor.g = g
+		interruptBorderColor.b = b
+		interruptBorderAlpha = qdb.borderalpha
+		r,g,b = unpack(db.noInterruptBorderColor)
+		noInterruptBorderColor.r = r
+		noInterruptBorderColor.g = g
+		noInterruptBorderColor.b = b
+		noInterruptBorderAlpha = db.noInterruptBorderAlpha
+
+		if lastNotInterruptible then
+			castBarParent:SetBackdrop(noInterruptBackdrop)
+			castBarParent:SetBackdropBorderColor(noInterruptBorderColor.r,noInterruptBorderColor.g,noInterruptBorderColor.b, noInterruptBorderAlpha)
+		else
+			castBarParent:SetBackdrop(interruptBackdrop)
+			castBarParent:SetBackdropBorderColor(interruptBorderColor.r,interruptBorderColor.g,interruptBorderColor.b, interruptBorderAlpha)
+		end
 		r,g,b = unpack(qdb.backgroundcolor)
 		castBarParent:SetBackdropColor(r,g,b, qdb.backgroundalpha)
 		

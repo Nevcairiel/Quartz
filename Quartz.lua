@@ -45,6 +45,7 @@ media:Register("statusbar", "LiteStep", "Interface\\AddOns\\Quartz3\\textures\\L
 media:Register("statusbar", "Rocks", "Interface\\AddOns\\Quartz3\\textures\\Rocks")
 media:Register("statusbar", "Runes", "Interface\\AddOns\\Quartz3\\textures\\Runes")
 media:Register("statusbar", "Xeon", "Interface\\AddOns\\Quartz3\\textures\\Xeon")
+media:Register("border", "Tooltip enlarged", "Interface\\AddOns\\Quartz3\\textures\\Tooltip-BigBorder")
 
 function Quartz3:OnInitialize()
 	self.db = LibStub("AceDB-3.0"):New("Quartz3DB", defaults, true)

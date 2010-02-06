@@ -108,7 +108,6 @@ local function setBarTicks(ticknum)
 		end
 	end
 end
-Player.setBarTicks = setBarTicks
 
 do 
 	local function dragstart()
