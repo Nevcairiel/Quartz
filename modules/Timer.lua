@@ -124,7 +124,7 @@ do
 						get = function()
 							return Quartz3:GetModuleEnabled(MODNAME)
 						end,
-						set = function(v)
+						set = function(info, v)
 							Quartz3:SetModuleEnabled(MODNAME, v)
 						end,
 						order = 99,

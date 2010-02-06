@@ -45,7 +45,7 @@ modules\GCD.lua
 modules\Buff.lua
 modules\Mirror.lua
 modules\Timer.lua
-#modules\Swing.lua
+modules\Swing.lua
 #modules\Interrupt.lua
 #modules\Range.lua
 #modules\Flight.lua

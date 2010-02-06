@@ -260,11 +260,11 @@ do
 		return db[info.arg or ("target"..info[#info])]
 	end
 
-	function getColor(info)
+	local function getColor(info)
 		return unpack(getOpt(info))
 	end
 
-	function setColor(info, r, g, b, a)
+	local function setColor(info, r, g, b, a)
 		setOpt(info, {r, g, b, a})
 	end
 

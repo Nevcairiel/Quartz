@@ -335,11 +335,11 @@ do
 		return db[info[#info]]
 	end
 
-	function getColor(info)
+	local function getColor(info)
 		return unpack(getOpt(info))
 	end
 
-	function setColor(info, r, g, b, a)
+	local function setColor(info, r, g, b, a)
 		setOpt(info, {r, g, b, a})
 	end
 
@@ -360,7 +360,7 @@ do
 						get = function()
 							return Quartz3:GetModuleEnabled(MODNAME)
 						end,
-						set = function(v)
+						set = function(info, v)
 							Quartz3:SetModuleEnabled(MODNAME, v)
 						end,
 						order = 100,
@@ -394,7 +394,7 @@ do
 						name = L["Bar Color"],
 						desc = L["Set the color of the %s"]:format(L["Latency Bar"]),
 						get = getColor,
-						set = setSolor,
+						set = setColor,
 						order = 111,
 					},
 					header = {
