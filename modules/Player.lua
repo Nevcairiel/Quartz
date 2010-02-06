@@ -22,7 +22,7 @@ local LibStub = _G.LibStub
 local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
-local MODNAME = L["Player"]
+local MODNAME = "Player"
 local Player = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
 
 local media = LibStub("LibSharedMedia-3.0")
@@ -121,7 +121,7 @@ do
 		if not options then
 			 options = {
 				type = "group",
-				name = MODNAME,
+				name = L["Player"],
 				get = getOpt,
 				set = setOpt,
 				args = {
@@ -130,7 +130,7 @@ do
 						name = L["Lock"],
 						desc = L["Toggle Cast Bar lock"],
 						get = function(info)
-								return locked
+							return locked
 						end,
 						set = function(info, v)
 							if v then
@@ -586,7 +586,7 @@ function Player:OnInitialize()
 	db = self.db.profile
 
 	self:SetEnabledState(Quartz3:GetModuleEnabled(MODNAME))
-	Quartz3:RegisterModuleOptions(MODNAME, getOptions)
+	Quartz3:RegisterModuleOptions(MODNAME, getOptions, L["Player"])
 
 	castBarParent = CreateFrame("Frame", "Quartz3CastBar", UIParent)
 	castBarParent:SetFrameStrata("MEDIUM")

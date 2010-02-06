@@ -36,7 +36,7 @@ Quartz.lua
 Config.lua
 
 modules\Player.lua
-#modules\Target.lua
+modules\Target.lua
 #modules\Focus.lua
 #modules\Pet.lua
 #modules\Latency.lua
