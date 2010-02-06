@@ -30,7 +30,7 @@ libs\AceGUI-3.0-SharedMediaWidgets\widget.xml
 libs\LibSharedMedia-3.0\lib.xml
 #@end-no-lib-strip@
 
-locale.xml
+locale\locale.xml
 
 Quartz.lua
 Config.lua
