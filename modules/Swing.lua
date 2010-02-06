@@ -188,20 +188,21 @@ local COMBATLOG_FILTER_ME = bit_bor(
 	COMBATLOG_OBJECT_REACTION_FRIENDLY or 0x00000010,
 	COMBATLOG_OBJECT_CONTROL_PLAYER or 0x00000100,
 	COMBATLOG_OBJECT_TYPE_PLAYER or 0x00000400
-	)
+)
 
 do
 	local swordspecproc = false
 	function Swing:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, combatevent, srcGUID, srcName, srcFlags, dstName, dstGUID, dstFlags, spellID, spellName)
-		if (combatevent == "SPELL_EXTRA_ATTACKS") and spellName == swordprocname and (bit_band(srcFlags, COMBATLOG_FILTER_ME) == COMBATLOG_FILTER_ME) then
+		if swingmode ~= 0 then return end
+		if combatevent == "SPELL_EXTRA_ATTACKS" and spellName == swordprocname and (bit_band(srcFlags, COMBATLOG_FILTER_ME) == COMBATLOG_FILTER_ME) then
 			swordspecproc = true
-		elseif (combatevent == "SWING_DAMAGE" or combatevent == "SWING_MISSED") and (bit_band(srcFlags, COMBATLOG_FILTER_ME) == COMBATLOG_FILTER_ME) and swingmode == 0 then
-			if (swordspecproc) then
+		elseif (combatevent == "SWING_DAMAGE" or combatevent == "SWING_MISSED") and (bit_band(srcFlags, COMBATLOG_FILTER_ME) == COMBATLOG_FILTER_ME) then
+			if swordspecproc then
 				swordspecproc = false
 			else
 				self:MeleeSwing()
 			end
-		elseif (combatevent == "SWING_MISSED") and  (bit_band(dstFlags, COMBATLOG_FILTER_ME) == COMBATLOG_FILTER_ME) and swingmode == 0  and spellID == "PARRY" then
+		elseif (combatevent == "SWING_MISSED") and (bit_band(dstFlags, COMBATLOG_FILTER_ME) == COMBATLOG_FILTER_ME) and spellID == "PARRY" and duration then
 			duration = duration * 0.6
 		end
 	end

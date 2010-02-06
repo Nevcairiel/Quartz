@@ -1,4 +1,4 @@
-## Title: Quartz3
+## Title: Quartz
 ## Interface: 30300
 ## Notes: Modular casting bar.
 ## Author: Nymbia, Nevcairiel

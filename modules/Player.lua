@@ -741,36 +741,29 @@ function Player:UNIT_SPELLCAST_START(event, unit)
 	end
 end
 
-local channelData, channelingTicks = {
+local channelingTicks = {
 	-- warlock
-	[1120] = 5, -- drain soul
-	[689] = 5, -- drain life
-	[5138] = 5, -- drain mana
-	[5740] = 4, -- rain of fire
+	[GetSpellInfo(1120)] = 5, -- drain soul
+	[GetSpellInfo(689)] = 5, -- drain life
+	[GetSpellInfo(5138)] = 5, -- drain mana
+	[GetSpellInfo(5740)] = 4, -- rain of fire
 	-- druid
-	[740] = 4, -- Tranquility
-	[16914] = 10, -- Hurricane
+	[GetSpellInfo(740)] = 4, -- Tranquility
+	[GetSpellInfo(16914)] = 10, -- Hurricane
 	-- priest
-	[15407] = 3, -- mind flay
-	[48045] = 5, -- mind sear
-	[47540] = 2, -- penance
+	[GetSpellInfo(15407)] = 3, -- mind flay
+	[GetSpellInfo(48045)] = 5, -- mind sear
+	[GetSpellInfo(47540)] = 2, -- penance
 	-- mage
-	[5143] = 5, -- arcane missiles
-	[10] = 5, -- blizzard
+	[GetSpellInfo(5143)] = 5, -- arcane missiles
+	[GetSpellInfo(10)] = 5, -- blizzard
 }
 
 local function getChannelingTicks(spell)
 	if not db.showticks then
 		return 0
 	end
-
-	if not channelingTicks then
-		channelingTicks = {}
-		for k,v in pairs(channelData) do
-			channelingTicks[(GetSpellInfo(k))] = v
-		end
-	end
-
+	
 	return channelingTicks[spell] or 0
 end
 
@@ -788,7 +781,7 @@ function Player:UNIT_SPELLCAST_CHANNEL_START(event, unit)
 	self.casting = nil
 	self.channeling = true
 	--FixMe: How do we work this out?
-	self.channelingTicks = getChannelingTicks( spell )
+	self.channelingTicks = getChannelingTicks(spell)
 	self.fadeOut = nil
 	
 	setBarTicks(self.channelingTicks)
