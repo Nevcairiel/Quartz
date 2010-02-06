@@ -540,7 +540,7 @@ do
 								Quartz3:CopySettings(from.db.profile, Target.db.profile)
 								Target:ApplySettings()
 						end,
-						values = {["player"] = L["Player"], ["focus"] = L["Focus"], ["pet"] = L["Pet"]},
+						values = {["Player"] = L["Player"], ["Focus"] = L["Focus"], ["Pet"] = L["Pet"]},
 						order = 504
 					},
 				},

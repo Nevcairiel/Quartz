@@ -21,9 +21,8 @@ local LibStub = _G.LibStub
 local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
-local MODNAME = L["Focus"]
+local MODNAME = "Focus"
 local Focus = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
-local Player = Quartz3:GetModule(L["Player"])
 
 local media = LibStub("LibSharedMedia-3.0")
 local lsmlist = _G.AceGUIWidgetLSMlists
@@ -200,7 +199,7 @@ function Focus:OnInitialize()
 	db = self.db.profile
 	
 	self:SetEnabledState(Quartz3:GetModuleEnabled(MODNAME))
-	Quartz3:RegisterModuleOptions(MODNAME, getOptions, MODNAME)
+	Quartz3:RegisterModuleOptions(MODNAME, getOptions, L["Focus"])
 
 end
 
@@ -708,12 +707,12 @@ do
 	local function hidenametextoptions()
 		return db.hidenametext
 	end
-	
+
 	local function setOpt(info, value)
 		db[info[#info]] = value
 		Focus:ApplySettings()
 	end
-	
+
 	local function getOpt(info)
 		return db[info[#info]]
 	end
@@ -1043,7 +1042,7 @@ do
 								Quartz3:CopySettings(from.db.profile, Focus.db.profile)
 								Focus:ApplySettings()
 						end,
-						values = {["target"] = L["Target"], ["player"] = L["Player"], ["pet"] = L["Pet"]},
+						values = {["Target"] = L["Target"], ["Player"] = L["Player"], ["Pet"] = L["Pet"]},
 						order = 504
 					},
 				},

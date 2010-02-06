@@ -21,9 +21,8 @@ local LibStub = _G.LibStub
 local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
-local MODNAME = L["Pet"]
+local MODNAME = "Pet"
 local Pet = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
-local Player = Quartz3:GetModule(L["Player"])
 
 local media = LibStub("LibSharedMedia-3.0")
 local lsmlist = _G.AceGUIWidgetLSMlists
@@ -36,7 +35,7 @@ local UnitChannelInfo = _G.UnitChannelInfo
 local GetTime = _G.GetTime
 
 local castBar, castBarText, castBarTimeText, castBarIcon, castBarSpark, castBarParent
-local startTime, endTime, delay, fadeOut, stopTime, casting, channeling, db
+local startTime, endTime, delay, fadeOut, stopTime, casting, channeling
 
 local db, getOptions
 
@@ -50,25 +49,26 @@ local defaults = {
 		w = 200,
 		scale = 1,
 		
-		texture = 'LiteStep',
+		texture = "LiteStep",
 		hideicon = false,
 		
 		alpha = 1,
 		iconalpha = 0.9,
-		iconposition = L["Left"],
+		iconposition = "left",
 		icongap = 4,
 		
 		hidenametext = false,
-		nametextposition = L["Left"],
-		timetextposition = L["Right"], -- L["Left"], L["Center"], L["Cast Start Side"], L["Cast End Side"]
-		font = 'Friz Quadrata TT',
+		nametextposition = "left",
+		timetextposition = "right", -- L["Left"], L["Center"], L["Cast Start Side"], L["Cast End Side"]
+		font = "Friz Quadrata TT",
 		fontsize = 14,
 		hidetimetext = false,
 		hidecasttime = false,
 		timefontsize = 12,
 		spellrank = false,
-		spellrankstyle = L["Roman"], --L["Full Text"], L["Number"], L["Roman Full Text"]
+		spellrankstyle = "roman", --L["Full Text"], L["Number"], L["Roman Full Text"]
 		
+		border = "Blizzard Tooltip",
 		nametextx = 3,
 		nametexty = 0,
 		timetextx = 3,
@@ -89,19 +89,19 @@ local function OnUpdate()
 		local perc = (showTime-startTime) / (endTime - startTime)
 		castBar:SetValue(perc)
 		castBarSpark:ClearAllPoints()
-		castBarSpark:SetPoint('CENTER', castBar, 'LEFT', perc * db.profile.w, 0)
+		castBarSpark:SetPoint("CENTER", castBar, "LEFT", perc * db.w, 0)
 		
 		if delay and delay ~= 0 then
-			if db.profile.hidecasttime then
-				castBarTimeText:SetText(("|cffff0000+%.1f|cffffffff %.1f"):format(delay, endTime - showTime))
+			if db.hidecasttime then
+				castBarTimeText:SetFormattedText("|cffff0000+%.1f|cffffffff %.1f", delay, endTime - showTime)
 			else
-				castBarTimeText:SetText(("|cffff0000+%.1f|cffffffff %.1f / %.1f"):format(delay, endTime - showTime, endTime - startTime))
+				castBarTimeText:SetFormattedText("|cffff0000+%.1f|cffffffff %.1f / %.1f", delay, endTime - showTime, endTime - startTime)
 			end
 		else
-			if db.profile.hidecasttime then
-				castBarTimeText:SetText(("%.1f"):format(endTime - showTime))
+			if db.hidecasttime then
+				castBarTimeText:SetFormattedText("%.1f", endTime - showTime)
 			else
-				castBarTimeText:SetText(("%.1f / %.1f"):format(endTime - showTime, endTime - startTime))
+				castBarTimeText:SetFormattedText("%.1f / %.1f", endTime - showTime, endTime - startTime)
 			end
 		end
 	elseif channeling then
@@ -113,20 +113,20 @@ local function OnUpdate()
 		local remainingTime = endTime - currentTime
 		local perc = remainingTime / (endTime - startTime)
 		castBar:SetValue(perc)
-		castBarTimeText:SetText(("%.1f"):format(remainingTime))
+		castBarTimeText:SetFormattedText("%.1f", remainingTime)
 		castBarSpark:ClearAllPoints()
-		castBarSpark:SetPoint('CENTER', castBar, 'LEFT', perc * db.profile.w, 0)
+		castBarSpark:SetPoint("CENTER", castBar, "LEFT", perc * db.w, 0)
 		if delay and delay ~= 0 then
-			if db.profile.hidecasttime then
-				castBarTimeText:SetText(("|cffFF0000-%.1f|cffffffff %.1f"):format(delay, remainingTime))
+			if db.hidecasttime then
+				castBarTimeText:SetFormattedText("|cffFF0000-%.1f|cffffffff %.1f", delay, remainingTime)
 			else
-				castBarTimeText:SetText(("|cffFF0000-%.1f|cffffffff %.1f / %.1f"):format(delay, remainingTime, endTime - startTime))
+				castBarTimeText:SetFormattedText("|cffFF0000-%.1f|cffffffff %.1f / %.1f", delay, remainingTime, endTime - startTime)
 			end
 		else
-			if db.profile.hidecasttime then
-				castBarTimeText:SetText(("%.1f"):format(remainingTime))
+			if db.hidecasttime then
+				castBarTimeText:SetFormattedText("%.1f", remainingTime)
 			else
-				castBarTimeText:SetText(("%.1f / %.1f"):format(remainingTime, endTime - startTime))
+				castBarTimeText:SetFormattedText("%.1f / %.1f", remainingTime, endTime - startTime)
 			end				
 		end
 	elseif fadeOut then
@@ -144,7 +144,7 @@ local function OnUpdate()
 			stopTime = nil
 			castBarParent:Hide()
 		else
-			castBarParent:SetAlpha(alpha*db.profile.alpha)
+			castBarParent:SetAlpha(alpha*db.alpha)
 		end
 	else
 		castBarParent:Hide()
@@ -152,51 +152,39 @@ local function OnUpdate()
 end
 
 local function OnHide()
-	castBarParent:SetScript('OnUpdate', nil)
+	castBarParent:SetScript("OnUpdate", nil)
 end
 local function OnShow()
-	castBarParent:SetScript('OnUpdate', OnUpdate)
+	castBarParent:SetScript("OnUpdate", OnUpdate)
 end
 
 local setnametext
 do
-	local numerals = { -- 25's enough for now, I think?
-		'I', 'II', 'III', 'IV', 'V',
-		'VI', 'VII', 'VIII', 'IX', 'X',
-		'XI', 'XII', 'XIII', 'XIV', 'XV',
-		'XVI', 'XVII', 'XVIII', 'XIX', 'XX',
-		'XXI', 'XXII', 'XXIII', 'XXIV', 'XXV',
+	local numerals = { -- 25"s enough for now, I think?
+		"I", "II", "III", "IV", "V",
+		"VI", "VII", "VIII", "IX", "X",
+		"XI", "XII", "XIII", "XIV", "XV",
+		"XVI", "XVII", "XVIII", "XIX", "XX",
+		"XXI", "XXII", "XXIII", "XXIV", "XXV",
 	}
 	function setnametext(name, rank)
-		if db.profile.spellrank and rank then
-			local rankstyle = db.profile.spellrankstyle
-			if rankstyle == L["Number"] then
-				local num = tonumber(rank:match(L["Rank (%d+)"]))
-				if num and num > 0 then
-					castBarText:SetText(("%s %d"):format(name, num))
-				else
-					castBarText:SetText(name)
-				end
-			elseif rankstyle == L["Full Text"] then
-				castBarText:SetText(("%s (%s)"):format(name, rank))
-			elseif rankstyle == L["Roman"] then
-				local num = tonumber(rank:match(L["Rank (%d+)"]))
-				if num and num > 0 then
-					castBarText:SetText(("%s %s"):format(name, numerals[num]))
-				else
-					castBarText:SetText(name)
-				end
-			else -- L["Roman Full Text"]
-				local num = tonumber(rank:match(L["Rank (%d+)"]))
-				if num and num > 0 then
-					castBarText:SetText(("%s (%s)"):format(name, L["Rank %s"]:format(numerals[num])))
-				else
-					castBarText:SetText(("%s (%s)"):format(name, rank))
+		local text = name
+		if db.spellrank and rank then
+			local num = tonumber(rank:match(L["Rank (%d+)"]))
+			if num and num > 0 then
+				local rankstyle = db.spellrankstyle
+				if rankstyle == "number" then
+					text = ("%s %d"):format(name, num)
+				elseif rankstyle == "full" then
+					text = ("%s (%s)"):format(name, rank)
+				elseif rankstyle == "roman" then
+					text = ("%s %s"):format(name, numerals[num])
+				else -- full roman
+					text = ("%s (%s)"):format(name, L["Rank %s"]:format(numerals[num]))
 				end
 			end
-		else
-			castBarText:SetText(name)
 		end
+		castBarText:SetText(text)
 	end
 end
 
@@ -205,7 +193,7 @@ function Pet:OnInitialize()
 	db = self.db.profile
 	
 	self:SetEnabledState(Quartz3:GetModuleEnabled(MODNAME))
-	Quartz3:RegisterModuleOptions(MODNAME, getOptions, MODNAME)
+	Quartz3:RegisterModuleOptions(MODNAME, getOptions, L["Pet"])
 end
 
 function Pet:OnEnable()
@@ -224,30 +212,30 @@ function Pet:OnEnable()
 		end
 	end)
 	if not castBarParent then
-		castBarParent = CreateFrame('Frame', 'Quartz3PetBar', UIParent)
-		castBarParent:SetFrameStrata('MEDIUM')
-		castBarParent:SetScript('OnShow', OnShow)
-		castBarParent:SetScript('OnHide', OnHide)
+		castBarParent = CreateFrame("Frame", "Quartz3PetBar", UIParent)
+		castBarParent:SetFrameStrata("MEDIUM")
+		castBarParent:SetScript("OnShow", OnShow)
+		castBarParent:SetScript("OnHide", OnHide)
 		castBarParent:SetMovable(true)
-		castBarParent:RegisterForDrag('LeftButton')
+		castBarParent:RegisterForDrag("LeftButton")
 		castBarParent:SetClampedToScreen(true)
 		
 		castBar = CreateFrame("StatusBar", nil, castBarParent)
-		castBarText = castBar:CreateFontString(nil, 'OVERLAY')
-		castBarTimeText = castBar:CreateFontString(nil, 'OVERLAY')
-		castBarIcon = castBar:CreateTexture(nil, 'DIALOG')
-		castBarSpark = castBar:CreateTexture(nil, 'OVERLAY')
+		castBarText = castBar:CreateFontString(nil, "OVERLAY")
+		castBarTimeText = castBar:CreateFontString(nil, "OVERLAY")
+		castBarIcon = castBar:CreateTexture(nil, "DIALOG")
+		castBarSpark = castBar:CreateTexture(nil, "OVERLAY")
 		
 		castBarParent:Hide()
 	end
-	Quartz3.ApplySettings()
+	self:ApplySettings()
 end
 
 function Pet:OnDisable()
 	castBarParent:Hide()
 end
 function Pet:UNIT_SPELLCAST_START(event, unit)
-	if unit ~= 'pet' then
+	if unit ~= "pet" then
 		return
 	end
 	local spell, rank, displayName, icon
@@ -266,7 +254,7 @@ function Pet:UNIT_SPELLCAST_START(event, unit)
 	
 	castBar:SetValue(0)
 	castBarParent:Show()
-	castBarParent:SetAlpha(db.profile.alpha)
+	castBarParent:SetAlpha(db.alpha)
 	
 	setnametext(displayName, rank)
 	
@@ -276,18 +264,18 @@ function Pet:UNIT_SPELLCAST_START(event, unit)
 	end
 	castBarIcon:SetTexture(icon)
 	
-	local position = db.profile.timetextposition
-	if position == L["Cast Start Side"] then
-		castBarTimeText:SetPoint('LEFT', castBar, 'LEFT', db.profile.timetextx, db.profile.timetexty)
+	local position = db.timetextposition
+	if position == "caststart" then
+		castBarTimeText:SetPoint("LEFT", castBar, "LEFT", db.timetextx, db.timetexty)
 		castBarTimeText:SetJustifyH("LEFT")
-	elseif position == L["Cast End Side"] then
-		castBarTimeText:SetPoint('RIGHT', castBar, 'RIGHT', -1 * db.profile.timetextx, db.profile.timetexty)
+	elseif position == "castend" then
+		castBarTimeText:SetPoint("RIGHT", castBar, "RIGHT", -1 * db.timetextx, db.timetexty)
 		castBarTimeText:SetJustifyH("RIGHT")
 	end
 end
 
 function Pet:UNIT_SPELLCAST_CHANNEL_START(event, unit)
-	if unit ~= 'pet' then
+	if unit ~= "pet" then
 		return
 	end
 	local spell, rank, displayName, icon
@@ -306,7 +294,7 @@ function Pet:UNIT_SPELLCAST_CHANNEL_START(event, unit)
 	
 	castBar:SetValue(1)
 	castBarParent:Show()
-	castBarParent:SetAlpha(db.profile.alpha)
+	castBarParent:SetAlpha(db.alpha)
 
 	setnametext(spell, rank)
 	
@@ -316,18 +304,18 @@ function Pet:UNIT_SPELLCAST_CHANNEL_START(event, unit)
 	end
 	castBarIcon:SetTexture(icon)
 	
-	local position = db.profile.timetextposition
-	if position == L["Cast Start Side"] then
-		castBarTimeText:SetPoint('RIGHT', castBar, 'RIGHT', -1 * db.profile.timetextx, db.profile.timetexty)
+	local position = db.timetextposition
+	if position == "caststart" then
+		castBarTimeText:SetPoint("RIGHT", castBar, "RIGHT", -1 * db.timetextx, db.timetexty)
 		castBarTimeText:SetJustifyH("RIGHT")
-	elseif position == L["Cast End Side"] then
-		castBarTimeText:SetPoint('LEFT', castBar, 'LEFT', db.profile.timetextx, db.profile.timetexty)
+	elseif position == "castend" then
+		castBarTimeText:SetPoint("LEFT", castBar, "LEFT", db.timetextx, db.timetexty)
 		castBarTimeText:SetJustifyH("LEFT")
 	end
 end
 
 function Pet:UNIT_SPELLCAST_STOP(event, unit)
-	if unit ~= 'pet' then
+	if unit ~= "pet" then
 		return
 	end
 	if casting then
@@ -343,7 +331,7 @@ function Pet:UNIT_SPELLCAST_STOP(event, unit)
 end
 
 function Pet:UNIT_SPELLCAST_CHANNEL_STOP(event, unit)
-	if unit ~= 'pet' then
+	if unit ~= "pet" then
 		return
 	end
 	if channeling then
@@ -359,7 +347,7 @@ function Pet:UNIT_SPELLCAST_CHANNEL_STOP(event, unit)
 end
 
 function Pet:UNIT_SPELLCAST_FAILED(event, unit)
-	if unit ~= 'pet' or channeling then
+	if unit ~= "pet" or channeling then
 		return
 	end
 	casting = nil
@@ -375,7 +363,7 @@ function Pet:UNIT_SPELLCAST_FAILED(event, unit)
 end
 
 function Pet:UNIT_SPELLCAST_INTERRUPTED(event, unit)
-	if unit ~= 'pet' then
+	if unit ~= "pet" then
 		return
 	end
 	casting = nil
@@ -391,7 +379,7 @@ function Pet:UNIT_SPELLCAST_INTERRUPTED(event, unit)
 end
 
 function Pet:UNIT_SPELLCAST_DELAYED(event, unit)
-	if unit ~= 'pet' then
+	if unit ~= "pet" then
 		return
 	end
 	local oldStart = startTime
@@ -407,7 +395,7 @@ function Pet:UNIT_SPELLCAST_DELAYED(event, unit)
 end
 
 function Pet:UNIT_SPELLCAST_CHANNEL_UPDATE(event, unit)
-	if unit ~= 'pet' then
+	if unit ~= "pet" then
 		return
 	end
 	local oldStart = startTime
@@ -429,12 +417,13 @@ do
 		if not castBarParent then
 			return
 		end
+		db = self.db.profile
 		local qdb = Quartz3.db.profile
 		castBarParent:ClearAllPoints()
 		if not db.x then
 			db.x = (UIParent:GetWidth() / 2 - (db.w * db.scale)) / db.scale - 5
 		end
-		castBarParent:SetPoint('BOTTOMLEFT', UIParent, 'BOTTOMLEFT', db.x, db.y)
+		castBarParent:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", db.x, db.y)
 		castBarParent:SetWidth(db.w+9)
 		castBarParent:SetHeight(db.h+10)
 		castBarParent:SetAlpha(db.alpha)
@@ -443,7 +432,7 @@ do
 		backdrop.bgFile = "Interface\\Tooltips\\UI-Tooltip-Background"
 		backdrop.tile = true
 		backdrop.tileSize = 16
-		backdrop.edgeFile = media:Fetch('border', Player.db.profile.border)
+		backdrop.edgeFile = media:Fetch("border", db.border)
 		backdrop.edgeSize = 16
 		backdrop_insets.left = 4
 		backdrop_insets.right = 4
@@ -457,10 +446,10 @@ do
 		castBarParent:SetBackdropColor(r,g,b, qdb.backgroundalpha)
 		
 		castBar:ClearAllPoints()
-		castBar:SetPoint('CENTER',castBarParent,'CENTER')
+		castBar:SetPoint("CENTER",castBarParent,"CENTER")
 		castBar:SetWidth(db.w)
 		castBar:SetHeight(db.h)
-		castBar:SetStatusBarTexture(media:Fetch('statusbar', db.texture))
+		castBar:SetStatusBarTexture(media:Fetch("statusbar", db.texture))
 		castBar:SetMinMaxValues(0,1)
 		
 		if db.hidetimetext then
@@ -470,18 +459,18 @@ do
 			castBarTimeText:ClearAllPoints()
 			castBarTimeText:SetWidth(db.w)
 			local position = db.timetextposition
-			if position == L["Left"] then
-				castBarTimeText:SetPoint('LEFT', castBar, 'LEFT', db.timetextx, db.timetexty)
+			if position == "left" then
+				castBarTimeText:SetPoint("LEFT", castBar, "LEFT", db.timetextx, db.timetexty)
 				castBarTimeText:SetJustifyH("LEFT")
-			elseif position == L["Center"] then
-				castBarTimeText:SetPoint('CENTER', castBar, 'CENTER', db.timetextx, db.timetexty)
+			elseif position == "center" then
+				castBarTimeText:SetPoint("CENTER", castBar, "CENTER", db.timetextx, db.timetexty)
 				castBarTimeText:SetJustifyH("CENTER")
-			elseif position == L["Right"] then
-				castBarTimeText:SetPoint('RIGHT', castBar, 'RIGHT', -1 * db.timetextx, db.timetexty)
+			elseif position == "right" then
+				castBarTimeText:SetPoint("RIGHT", castBar, "RIGHT", -1 * db.timetextx, db.timetexty)
 				castBarTimeText:SetJustifyH("RIGHT")
 			end -- L["Cast Start Side"], L["Cast End Side"] --handled at runtime
 		end
-		castBarTimeText:SetFont(media:Fetch('font', db.font), db.timefontsize)
+		castBarTimeText:SetFont(media:Fetch("font", db.font), db.timefontsize)
 		castBarTimeText:SetShadowColor( 0, 0, 0, 1)
 		castBarTimeText:SetShadowOffset( 0.8, -0.8 )
 		castBarTimeText:SetTextColor(unpack(qdb.timetextcolor))
@@ -490,9 +479,9 @@ do
 		
 		local temptext = castBarTimeText:GetText()
 		if db.hidecasttime then
-			castBarTimeText:SetText('10.0')
+			castBarTimeText:SetText("10.0")
 		else
-			castBarTimeText:SetText('10.0 / 10.0')
+			castBarTimeText:SetText("10.0 / 10.0")
 		end
 		local normaltimewidth = castBarTimeText:GetStringWidth()
 		castBarTimeText:SetText(temptext)
@@ -503,28 +492,28 @@ do
 			castBarText:Show()
 			castBarText:ClearAllPoints()
 			local position = db.nametextposition
-			if position == L["Left"] then
-				castBarText:SetPoint('LEFT', castBar, 'LEFT', db.nametextx, db.nametexty)
+			if position == "left" then
+				castBarText:SetPoint("LEFT", castBar, "LEFT", db.nametextx, db.nametexty)
 				castBarText:SetJustifyH("LEFT")
-				if db.hidetimetext or db.timetextposition ~= L["Right"] then
+				if db.hidetimetext or db.timetextposition ~= "right" then
 					castBarText:SetWidth(db.w)
 				else
 					castBarText:SetWidth(db.w - normaltimewidth - 5)
 				end
-			elseif position == L["Center"] then
-				castBarText:SetPoint('CENTER', castBar, 'CENTER', db.nametextx, db.nametexty)
+			elseif position == "center" then
+				castBarText:SetPoint("CENTER", castBar, "CENTER", db.nametextx, db.nametexty)
 				castBarText:SetJustifyH("CENTER")
 			else -- L["Right"]
-				castBarText:SetPoint('RIGHT', castBar, 'RIGHT', -1 * db.nametextx, db.nametexty)
+				castBarText:SetPoint("RIGHT", castBar, "RIGHT", -1 * db.nametextx, db.nametexty)
 				castBarText:SetJustifyH("RIGHT")
-				if db.hidetimetext or db.timetextposition ~= L["Left"] then
+				if db.hidetimetext or db.timetextposition ~= "left" then
 					castBarText:SetWidth(db.w)
 				else
 					castBarText:SetWidth(db.w - normaltimewidth - 5)
 				end
 			end
 		end
-		castBarText:SetFont(media:Fetch('font', db.font), db.fontsize)
+		castBarText:SetFont(media:Fetch("font", db.font), db.fontsize)
 		castBarText:SetShadowColor( 0, 0, 0, 1)
 		castBarText:SetShadowOffset( 0.8, -0.8 )
 		castBarText:SetTextColor(unpack(qdb.spelltextcolor))
@@ -536,7 +525,7 @@ do
 		else
 			castBarIcon:Show()
 			castBarIcon:ClearAllPoints()
-			if db.iconposition == L["Left"] then
+			if db.iconposition == "left" then
 				castBarIcon:SetPoint("RIGHT", castBar, "LEFT", -1 * db.icongap, 0)
 			else --L["Right"]
 				castBarIcon:SetPoint("LEFT", castBar, "RIGHT", db.icongap, 0)
@@ -549,7 +538,7 @@ do
 		
 		castBarSpark:SetTexture("Interface\\CastingBar\\UI-CastingBar-Spark")
 		castBarSpark:SetVertexColor(unpack(qdb.sparkcolor))
-		castBarSpark:SetBlendMode('ADD')
+		castBarSpark:SetBlendMode("ADD")
 		castBarSpark:SetWidth(20)
 		castBarSpark:SetHeight(db.h*2.2)
 		
@@ -574,432 +563,352 @@ do
 end
 
 do
-	local function set(field, value)
-		db.profile[field] = value
-		Quartz3.ApplySettings()
-	end
-	local function get(field)
-		return db.profile[field]
-	end
 	local locked = true
 	local function dragstart()
 		castBarParent:StartMoving()
 	end
 	local function dragstop()
-		db.profile.x = castBarParent:GetLeft()
-		db.profile.y = castBarParent:GetBottom()
+		db.x = castBarParent:GetLeft()
+		db.y = castBarParent:GetBottom()
 		castBarParent:StopMovingOrSizing()
 	end
 	local function nothing()
-		castBarParent:SetAlpha(db.profile.alpha)
+		castBarParent:SetAlpha(db.alpha)
 	end
 	local function hideiconoptions()
-		return db.profile.hideicon
+		return db.hideicon
 	end
 	local function hidetimetextoptions()
-		return db.profile.hidetimetext
+		return db.hidetimetext
 	end
 	local function hidenametextoptions()
-		return db.profile.hidenametext
+		return db.hidenametext
+	end
+
+	local function setOpt(info, value)
+		db[info[#info]] = value
+		Focus:ApplySettings()
+	end
+
+	local function getOpt(info)
+		return db[info[#info]]
 	end
 
 	local options
 	function getOptions()
-		options = options or {
-		type = 'group',
-		name = L["Pet"],
-		desc = L["Pet"],
-		order = 600,
-		args = {
-			toggle = {
-				type = 'toggle',
-				name = L["Enable"],
-				desc = L["Enable"],
-				get = function()
-					return Quartz3:GetModuleActive(MODNAME)
-				end,
-				set = function(v)
-					Quartz3:SetModuleActive(MODNAME, v)
-				end,
-				order = 99,
-			},
-			lock = {
-				type = 'toggle',
-				name = L["Lock"],
-				desc = L["Toggle Cast Bar lock"],
-				get = function()
-					return locked
-				end,
-				set = function(v)
-					if v then
-						castBarParent.Hide = nil
-						castBarParent:EnableMouse(false)
-						castBarParent:SetScript('OnDragStart', nil)
-						castBarParent:SetScript('OnDragStop', nil)
-						if not (channeling or casting) then
-							castBarParent:Hide()
-						end
-					else
-						castBarParent:Show()
-						castBarParent:EnableMouse(true)
-						castBarParent:SetScript('OnDragStart', dragstart)
-						castBarParent:SetScript('OnDragStop', dragstop)
-						castBarParent:SetAlpha(1)
-						castBarParent.Hide = nothing
-						castBarIcon:SetTexture("Interface\\Icons\\Temp")
-					end
-					locked = v
-				end,
-				order = 100,
-			},
-			hideblizz = {
-				type = 'toggle',
-				name = L["Disable Blizzard Cast Bar"],
-				desc = L["Disable and hide the default UI's casting bar"],
-				get = get,
-				set = set,
-				--passValue = 'hideblizz',
-				order = 101,
-			},
-			h = {
-				type = 'range',
-				name = L["Height"],
-				desc = L["Height"],
-				min = 10,
-				max = 50,
-				step = 1,
-				order = 200,
-				get = get,
-				set = set,
-				--passValue = 'h',
-			},
-			w = {
-				type = 'range',
-				name = L["Width"],
-				desc = L["Width"],
-				min = 50,
-				max = 500,
-				step = 5,
-				order = 200,
-				get = get,
-				set = set,
-				--passValue = 'w',
-			},
-			x = {
-				type = 'range',
-				name = L["X"],
-				desc = L["Set an exact X value for this bar's position."],
-				min = 0,
-				max = 2560,
-				get = get,
-				set = set,
-				--passValue = 'x',
-				order = 201,
-				values = function(v)
-					return tonumber(v) and true
-				end,
-				usage = L["Number"],
-			},
-			y = {
-				type = 'range',
-				name = L["Y"],
-				desc = L["Set an exact Y value for this bar's position."],
-				min = 0,
-				max = 1600,
-				get = get,
-				set = set,
-				--passValue = 'y',
-				order = 201,
-				values = function(v)
-					return tonumber(v) and true
-				end,
-				usage = L["Number"],
-			},
-			scale = {
-				type = 'range',
-				name = L["Scale"],
-				desc = L["Scale"],
-				min = 0.2,
-				max = 1,
-				step = 0.025,
-				order = 202,
-				get = get,
-				set = set,
-				--passValue = 'scale',
-			},
-			alpha = {
-				type = 'range',
-				name = L["Alpha"],
-				desc = L["Alpha"],
-				isPercent = true,
-				min = 0.1,
-				max = 1,
-				step = 0.025,
-				order = 203,
-				get = get,
-				set = set,
-				--passValue = 'alpha',
-			},
-			header2 = {
-				type = 'header',
-				order = 204,
-			},
-			hideicon = {
-				type = 'toggle',
-				name = L["Hide Icon"],
-				desc = L["Hide Spell Cast Icon"],
-				get = get,
-				set = set,
-				--passValue = 'hideicon',
-				order = 301,
-			},
-			iconalpha = {
-				type = 'range',
-				name = L["Icon Alpha"],
-				desc = L["Set the Spell Cast icon alpha"],
-				isPercent = true,
-				min = 0.1,
-				max = 1,
-				step = 0.025,
-				order = 301,
-				get = get,
-				set = set,
-				disabled = hideiconoptions,
-				--passValue = 'iconalpha',
-			},
-			iconposition = {
-				type = 'select',
-				name = L["Icon Position"],
-				desc = L["Set where the Spell Cast icon appears"],
-				get = get,
-				set = set,
-				disabled = hideiconoptions,
-				--passValue = 'iconposition',
-				values = {["left"] = L["Left"], ["right"] = L["Right"]},
-				order = 301,
-			},
-			icongap = {
-				type = 'range',
-				name = L["Icon Gap"],
-				desc = L["Space between the cast bar and the icon."],
-				min = -35,
-				max = 35,
-				step = 1,
-				order = 301,
-				get = get,
-				set = set,
-				disabled = hideiconoptions,
-				--passValue = 'icongap',
-			},
-			texture = {
-				type = 'select',
-				dialogControl = "LSM30_Statusbar",
-				name = L["Texture"],
-				desc = L["Set the Cast Bar Texture"],
-				values = lsmlist.statusbar,
-				order = 302,
-				get = get,
-				set = set,
-				--passValue = 'texture',
-			},
-			font = {
-				type = 'select',
-				dialogControl = "LSM30_Font",
-				name = L["Font"],
-				desc = L["Set the font used in the Name and Time texts"],
-				values = lsmlist.font,
-				order = 400,
-				get = get,
-				set = set,
-				--passValue = 'font',
-			},
-			hidenametext = {
-				type = 'toggle',
-				name = L["Hide Name Text"],
-				desc = L["Disable the text that displays the spell name/rank"],
-				get = get,
-				set = set,
-				--passValue = 'hidenametext',
-				order = 401,
-			},
-			nametextposition = {
-				type = 'select',
-				name = L["Name Text Position"],
-				desc = L["Set the alignment of the spell name text"],
-				get = get,
-				set = set,
-				--passValue = 'nametextposition',
-				values = {["left"] = L["Left"], ["right"] = L["Right"], ["center"] = L["Center"]},
-				disabled = hidenametextoptions,
-				order = 402,
-			},
-			nametextx = {
-				type = 'range',
-				name = L["Name Text X Offset"],
-				desc = L["Adjust the X position of the name text"],
-				get = get,
-				set = set,
-				--passValue = 'nametextx',
-				min = -35,
-				max = 35,
-				step = 1,
-				disabled = hidenametextoptions,
-				order = 402,
-			},
-			nametexty = {
-				type = 'range',
-				name = L["Name Text Y Offset"],
-				desc = L["Adjust the Y position of the name text"],
-				get = get,
-				set = set,
-				--passValue = 'nametexty',
-				min = -35,
-				max = 35,
-				step = 1,
-				disabled = hidenametextoptions,
-				order = 402,
-			},
-			namefontsize = {
-				type = 'range',
-				name = L["Name Text Font Size"],
-				desc = L["Set the size of the spell name text"],
-				min = 7,
-				max = 20,
-				step = 1,
-				order = 403,
-				get = get,
-				set = set,
-				disabled = hidenametextoptions,
-				--passValue = 'fontsize',
-			},
-			spellrank = {
-				type = 'toggle',
-				name = L["Spell Rank"],
-				desc = L["Display the rank of spellcasts alongside their name"],
-				get = get,
-				set = set,
-				disabled = hidenametextoptions,
-				--passValue = 'spellrank',
-				order = 404,
-			},
-			spellrankstyle = {
-				type = 'select',
-				name = L["Spell Rank Style"],
-				desc = L["Set the display style of the spell rank"],
-				get = get,
-				set = set,
-				disabled = function()
-					return db.profile.hidenametext or not db.profile.spellrank
-				end,
-				--passValue = 'spellrankstyle',
-				values = {["number"] = L["Number"], ["roman"] = L["Roman"], ["full"] = L["Full Text"], ["romanfull"] = L["Roman Full Text"]},
-				order = 405,
-			},
-			hidetimetext = {
-				type = 'toggle',
-				name = L["Hide Time Text"],
-				desc = L["Disable the text that displays the time remaining on your cast"],
-				get = get,
-				set = set,
-				--passValue = 'hidetimetext',
-				order = 411,
-			},
-			hidecasttime = {
-				type = 'toggle',
-				name = L["Hide Cast Time"],
-				desc = L["Disable the text that displays the total cast time"],
-				get = get,
-				set = set,
-				--passValue = 'hidecasttime',
-				disabled = hidetimetextoptions,
-				order = 412,
-			},
-			timefontsize = {
-				type = 'range',
-				name = L["Time Font Size"],
-				desc = L["Set the size of the time text"],
-				min = 7,
-				max = 20,
-				step = 1,
-				order = 413,
-				get = get,
-				set = set,
-				disabled = hidetimetextoptions,
-				--passValue = 'timefontsize',
-			},
-			timetextposition = {
-				type = 'select',
-				name = L["Time Text Position"],
-				desc = L["Set the alignment of the time text"],
-				get = get,
-				set = set,
-				--passValue = 'timetextposition',
-				values = {["left"] = L["Left"], ["right"] = L["Right"], ["center"] = L["Center"], ["caststart"] = L["Cast Start Side"], ["castend"] = L["Cast End Side"]},
-				disabled = hidetimetextoptions,
-				order = 414,
-			},
-			timetextx = {
-				type = 'range',
-				name = L["Time Text X Offset"],
-				desc = L["Adjust the X position of the time text"],
-				get = get,
-				set = set,
-				--passValue = 'timetextx',
-				min = -35,
-				max = 35,
-				step = 1,
-				disabled = hidetimetextoptions,
-				order = 415,
-			},
-			timetexty = {
-				type = 'range',
-				name = L["Time Text Y Offset"],
-				desc = L["Adjust the Y position of the time text"],
-				get = get,
-				set = set,
-				--passValue = 'timetexty',
-				min = -35,
-				max = 35,
-				step = 1,
-				disabled = hidetimetextoptions,
-				order = 416,
-			},
-			header6 = {
-				type = 'header',
-				order = 501,
-			},
-			snaptocenter = {
-				type = 'execute',
-				name = L["Snap to Center"],
-				desc = L["Move the CastBar to center of the screen along the specified axis"],
-				get = false,
-				set = function(v)
-					local scale = db.profile.scale
-					if v == L["Horizontal"] then
-						db.profile.x = (UIParent:GetWidth() / 2 - (db.profile.w * scale) / 2) / scale
-					else -- L["Vertical"]
-						db.profile.y = (UIParent:GetHeight() / 2 - (db.profile.h * scale) / 2) / scale
-					end
-					Quartz3.ApplySettings()
-				end,
-				values = {L["Horizontal"], L["Vertical"]},
-				order = 503,
-			},
-			copysettings = {
-				type = 'input',
-				name = L["Copy Settings From"],
-				desc = L["Select a bar from which to copy settings"],
-				get = false,
-				set = function(v)
-					local from = Quartz3:GetModule(v)
-					Quartz3:CopySettings(from.profile, db.profile)
-					Quartz3.ApplySettings()
-				end,
-				values = {L["Player"], L["Target"], L["Focus"]},
-				order = 504
-			},
-		},
-	}
-	return options
+		if not options then
+			options = {
+				type = "group",
+				name = L["Pet"],
+				order = 600,
+				get = getOpt,
+				set = setOpt,
+				args = {
+					toggle = {
+						type = "toggle",
+						name = L["Enable"],
+						desc = L["Enable"],
+						get = function()
+							return Quartz3:GetModuleEnabled(MODNAME)
+						end,
+						set = function(info, v)
+							Quartz3:SetModuleEnabled(MODNAME, v)
+						end,
+						order = 99,
+					},
+					lock = {
+						type = "toggle",
+						name = L["Lock"],
+						desc = L["Toggle Cast Bar lock"],
+						get = function()
+							return locked
+						end,
+						set = function(info, v)
+							if v then
+								castBarParent.Hide = nil
+								castBarParent:EnableMouse(false)
+								castBarParent:SetScript("OnDragStart", nil)
+								castBarParent:SetScript("OnDragStop", nil)
+								if not (channeling or casting) then
+									castBarParent:Hide()
+								end
+							else
+								castBarParent:Show()
+								castBarParent:EnableMouse(true)
+								castBarParent:SetScript("OnDragStart", dragstart)
+								castBarParent:SetScript("OnDragStop", dragstop)
+								castBarParent:SetAlpha(1)
+								castBarParent.Hide = nothing
+								castBarIcon:SetTexture("Interface\\Icons\\Temp")
+							end
+							locked = v
+						end,
+						order = 100,
+					},
+					hideblizz = {
+						type = "toggle",
+						name = L["Disable Blizzard Cast Bar"],
+						desc = L["Disable and hide the default UI's casting bar"],
+						order = 101,
+						width = "full",
+					},
+					h = {
+						type = "range",
+						name = L["Height"],
+						desc = L["Height"],
+						min = 10, max = 50, step = 1,
+						order = 200,
+					},
+					w = {
+						type = "range",
+						name = L["Width"],
+						desc = L["Width"],
+						min = 50, max = 1500, bigStep = 5,
+						order = 200,
+					},
+					x = {
+						type = "range",
+						name = L["X"],
+						desc = L["Set an exact X value for this bar's position."],
+						min = -2560, max = 2560, bigStep = 1,
+						order = 200,
+					},
+					y = {
+						type = "range",
+						name = L["Y"],
+						desc = L["Set an exact Y value for this bar's position."],
+						min = -1600, max = 1600, bigStep = 1,
+						order = 200,
+					},
+					scale = {
+						type = "range",
+						name = L["Scale"],
+						desc = L["Scale"],
+						min = 0.2, max = 1, bigStep = 0.025,
+						order = 201,
+					},
+					alpha = {
+						type = "range",
+						name = L["Alpha"],
+						desc = L["Alpha"],
+						isPercent = true,
+						min = 0.1, max = 1, bigStep = 0.025,
+						order = 202,
+					},
+					icon = {
+						type = "header",
+						name = L["Icon"],
+						order = 300,
+					},
+					hideicon = {
+						type = "toggle",
+						name = L["Hide Icon"],
+						desc = L["Hide Spell Cast Icon"],
+						order = 301,
+					},
+					iconposition = {
+						type = "select",
+						name = L["Icon Position"],
+						desc = L["Set where the Spell Cast icon appears"],
+						disabled = hideiconoptions,
+						values = {["left"] = L["Left"], ["right"] = L["Right"]},
+						order = 301,
+					},
+					iconalpha = {
+						type = "range",
+						name = L["Icon Alpha"],
+						desc = L["Set the Spell Cast icon alpha"],
+						isPercent = true,
+						min = 0.1, max = 1, bigStep = 0.025,
+						order = 302,
+						disabled = hideiconoptions,
+					},
+					icongap = {
+						type = "range",
+						name = L["Icon Gap"],
+						desc = L["Space between the cast bar and the icon."],
+						min = -35, max = 35, bigStep = 1,
+						order = 302,
+						disabled = hideiconoptions,
+					},
+					fonthead = {
+						type = "header",
+						name = L["Font and Text"],
+						order = 398,
+					},
+					font = {
+						type = "select",
+						dialogControl = "LSM30_Font",
+						name = L["Font"],
+						desc = L["Set the font used in the Name and Time texts"],
+						values = lsmlist.font,
+						order = 399,
+					},
+					nlfont = {
+						type = "description",
+						name = "",
+						order = 400,
+					},
+					hidenametext = {
+						type = "toggle",
+						name = L["Hide Spell Name"],
+						desc = L["Disable the text that displays the spell name/rank"],
+						order = 401,
+						width = "full",
+					},
+					nametextposition = {
+						type = "select",
+						name = L["Spell Name Position"],
+						desc = L["Set the alignment of the spell name text"],
+						values = {["left"] = L["Left"], ["right"] = L["Right"], ["center"] = L["Center"]},
+						disabled = hidenametextoptions,
+						order = 403,
+					},
+					namefontsize = {
+						type = "range",
+						name = L["Spell Name Font Size"],
+						desc = L["Set the size of the spell name text"],
+						min = 7, max = 20, step = 1,
+						order = 404,
+						disabled = hidenametextoptions,
+					},
+					nametextx = {
+						type = "range",
+						name = L["Spell Name X Offset"],
+						desc = L["Adjust the X position of the spell name text"],
+						min = -35, max = 35, step = 1,
+						disabled = hidenametextoptions,
+						order = 405,
+					},
+					nametexty = {
+						type = "range",
+						name = L["Spell Name Y Offset"],
+						desc = L["Adjust the Y position of the name text"],
+						min = -35, max = 35, step = 1,
+						disabled = hidenametextoptions,
+						order = 406,
+					},
+					spellrank = {
+						type = "toggle",
+						name = L["Spell Rank"],
+						desc = L["Display the rank of spellcasts alongside their name"],
+						disabled = hidenametextoptions,
+						order = 407,
+					},
+					spellrankstyle = {
+						type = "select",
+						name = L["Spell Rank Style"],
+						desc = L["Set the display style of the spell rank"],
+						disabled = function()
+							return db.hidenametext or not db.spellrank
+						end,
+						values = {["number"] = L["Number"], ["roman"] = L["Roman"], ["full"] = L["Full Text"], ["romanfull"] = L["Roman Full Text"]},
+						order = 408,
+					},
+					hidetimetext = {
+						type = "toggle",
+						name = L["Hide Time Text"],
+						desc = L["Disable the text that displays the time remaining on your cast"],
+						order = 411,
+					},
+					hidecasttime = {
+						type = "toggle",
+						name = L["Hide Cast Time"],
+						desc = L["Disable the text that displays the total cast time"],
+						disabled = hidetimetextoptions,
+						order = 412,
+					},
+					timefontsize = {
+						type = "range",
+						name = L["Time Font Size"],
+						desc = L["Set the size of the time text"],
+						min = 7, max = 20, step = 1,
+						order = 414,
+						disabled = hidetimetextoptions,
+					},
+					timetextx = {
+						type = "range",
+						name = L["Time Text X Offset"],
+						desc = L["Adjust the X position of the time text"],
+						min = -35, max = 35, step = 1,
+						disabled = hidetimetextoptions,
+						order = 416,
+					},
+					timetexty = {
+						type = "range",
+						name = L["Time Text Y Offset"],
+						desc = L["Adjust the Y position of the time text"],
+						min = -35, max = 35, step = 1,
+						disabled = hidetimetextoptions,
+						order = 417,
+					},
+					timetextposition = {
+						type = "select",
+						name = L["Time Text Position"],
+						desc = L["Set the alignment of the time text"],
+						values = {["left"] = L["Left"], ["right"] = L["Right"], ["center"] = L["Center"], ["caststart"] = L["Cast Start Side"], ["castend"] = L["Cast End Side"]},
+						disabled = hidetimetextoptions,
+						order = 418,
+					},
+					textureheader = {
+						type = "header",
+						name = L["Texture and Border"],
+						order = 450,
+					},
+					texture = {
+						type = "select",
+						dialogControl = "LSM30_Statusbar",
+						name = L["Texture"],
+						desc = L["Set the Cast Bar Texture"],
+						values = lsmlist.statusbar,
+						order = 451,
+					},
+					border = {
+						type = "select",
+						dialogControl = "LSM30_Border",
+						name = L["Border"],
+						desc = L["Set the border style"],
+						values = lsmlist.border,
+						order = 452,
+					},
+					toolheader = {
+						type = "header",
+						name = L["Tools"],
+						order = 500,
+					},
+					snaptocenter = {
+						type = "select",
+						name = L["Snap to Center"],
+						desc = L["Move the CastBar to center of the screen along the specified axis"],
+						get = false,
+						set = function(info, v)
+							local scale = db.scale
+							if v == "horizontal" then
+								db.x = (UIParent:GetWidth() / 2 - (db.w * scale) / 2) / scale
+							else -- L["Vertical"]
+								db.y = (UIParent:GetHeight() / 2 - (db.h * scale) / 2) / scale
+							end
+							Pet:ApplySettings()
+						end,
+						values = {["horizontal"] = L["Horizontal"], ["vertical"] = L["Vertical"]},
+						order = 503,
+					},
+					copysettings = {
+						type = "select",
+						name = L["Copy Settings From"],
+						desc = L["Select a bar from which to copy settings"],
+						get = false,
+						set = function(info, v)
+								local from = Quartz3:GetModule(v)
+								Quartz3:CopySettings(from.db.profile, Pet.db.profile)
+								Pet:ApplySettings()
+						end,
+						values = {["Target"] = L["Target"], ["Player"] = L["Player"], ["Focus"] = L["Focus"]},
+						order = 504
+					},
+				},
+			}
+		end
+		return options
 	end
 end
