@@ -134,34 +134,36 @@ end
 do
 	local options
 	function getOptions()
-		options = options or {
-		type = "group",
-		name = L["Range"],
-		desc = L["Range"],
-		order = 600,
-		args = {
-			toggle = {
-				type = "toggle",
-				name = L["Enable"],
-				desc = L["Enable"],
-				get = function()
-					return Quartz3:GetModuleEnabled(MODNAME)
-				end,
-				set = function(v)
-					Quartz3:SetModuleEnabled(MODNAME, v)
-				end,
-				order = 100,
-			},
-			rangecolor = {
-				type = "color",
-				name = L["Out of Range Color"],
-				desc = L["Set the color to turn the cast bar when the target is out of range"],
-				get = function() return unpack(db.rangecolor) end,
-				set = function(info, ...) db.rangecolor = {...} end,
-				order = 101,
-			},
-		},
-	}
-	return options
+		if not options then
+			options = {
+				type = "group",
+				name = L["Range"],
+				desc = L["Range"],
+				order = 600,
+				args = {
+					toggle = {
+						type = "toggle",
+						name = L["Enable"],
+						desc = L["Enable"],
+						get = function()
+							return Quartz3:GetModuleEnabled(MODNAME)
+						end,
+						set = function(info, v)
+							Quartz3:SetModuleEnabled(MODNAME, v)
+						end,
+						order = 100,
+					},
+					rangecolor = {
+						type = "color",
+						name = L["Out of Range Color"],
+						desc = L["Set the color to turn the cast bar when the target is out of range"],
+						get = function() return unpack(db.rangecolor) end,
+						set = function(info, ...) db.rangecolor = {...} end,
+						order = 101,
+					},
+				},
+			}
+		end
+		return options
 	end
 end
