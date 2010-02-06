@@ -807,15 +807,18 @@ end
 
 function Target:PLAYER_TARGET_CHANGED()
 	if not UnitExists("target") then
+		castBarParent:Hide()
 		return
 	end
 	if not db.showfriendly then
 		if UnitIsFriend("player", "target") then
+			castBarParent:Hide()
 			return
 		end
 	end
 	if not db.showhostile then
 		if UnitIsEnemy("player", "target") then
+			castBarParent:Hide()
 			return
 		end
 	end

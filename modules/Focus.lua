@@ -468,20 +468,24 @@ function Focus:UNIT_SPELLCAST_CHANNEL_UPDATE(event, unit)
 end
 function Focus:PLAYER_FOCUS_CHANGED()
 	if not UnitExists("focus") then
+		castBarParent:Hide()
 		return
 	end
 	if not db.showfriendly then
 		if UnitIsFriend("player", "focus") then
+			castBarParent:Hide()
 			return
 		end
 	end
 	if not db.showhostile then
 		if UnitIsEnemy("player", "focus") then
+			castBarParent:Hide()
 			return
 		end
 	end
 	if not db.showtarget then
 		if UnitIsUnit("target", "focus") then
+			castBarParent:Hide()
 			return
 		end
 	end
