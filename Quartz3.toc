@@ -3,7 +3,7 @@
 ## Notes: Modular casting bar.
 ## Author: Nymbia, Nevcairiel
 ## X-License: GPL v2
-## OptionalDeps: Ace3, LibSharedMedia-3.0, AceGUI-3.0-SharedMediaWidgets, SharedMedia, FlightMap, InFlight, FuBar_ToFu
+## OptionalDeps: Ace3, LibSharedMedia-3.0, AceGUI-3.0-SharedMediaWidgets, SharedMedia, FlightMap, InFlight
 ## SavedVariables: Quartz3DB
 
 ## X-Credits: Ammo (some code based on PitBull_CastBar), kergoth (Tradeskill Merge module idea), Roartindon (Lag Embed mode for Latency module)
@@ -50,4 +50,4 @@ modules\Timer.lua
 modules\Swing.lua
 modules\Interrupt.lua
 modules\Range.lua
-#modules\Flight.lua
+modules\Flight.lua
