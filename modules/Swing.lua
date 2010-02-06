@@ -58,7 +58,7 @@ local resetspells = {
 }
 
 local resetautoshotspells = {
-	[GetSpellInfo(19434)] = true, -- Aimed Shot
+	--[GetSpellInfo(19434)] = true, -- Aimed Shot
 }
 
 local swingbar, swingbar_width, swingstatusbar, remainingtext, durationtext, db

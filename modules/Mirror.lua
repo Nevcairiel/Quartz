@@ -1,5 +1,6 @@
 --[[
 	Copyright (C) 2006-2007 Nymbia
+	Copyright (C) 2010 Hendrik "Nevcairiel" Leppkes < h.leppkes@gmail.com >
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -21,16 +22,14 @@ local LibStub = _G.LibStub
 local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
-local MODNAME = L["Mirror"]
-local Mirror = Quartz3:NewModule(MODNAME, "AceHook-3.0", "AceEvent-3.0")
-local Player = Quartz3:GetModule(L["Player"])
-local Focus = Quartz3:GetModule(L["Focus"])
-local Target = Quartz3:GetModule(L["Target"])
+local MODNAME = "Mirror"
+local Mirror = Quartz3:NewModule(MODNAME, "AceHook-3.0", "AceEvent-3.0", "AceTimer-3.0")
+local Player = Quartz3:GetModule("Player")
+local Focus = Quartz3:GetModule("Focus")
+local Target = Quartz3:GetModule("Target")
 
 local media = LibStub("LibSharedMedia-3.0")
 local lsmlist = _G.AceGUIWidgetLSMlists
-
-local new, del = Quartz3.new, Quartz3.del
 
 local GetTime = _G.GetTime
 local table_sort = _G.table.sort
@@ -45,25 +44,25 @@ local GetMirrorTimerProgress = _G.GetMirrorTimerProgress
 local GetMirrorTimerInfo = _G.GetMirrorTimerInfo
 local UnitHealth = _G.UnitHealth
 
-local db
-
 local gametimebase, gametimetostart
 local locked = true
 
-local getOptions
+local db, getOptions
+
+local new, del
 
 local defaults = {
 	profile = {
 		mirroricons = true,
-		mirroriconside = L["Left"],
+		mirroriconside = "left",
 		
-		mirroranchor = L["Player"],--L["Free"], L["Target"], L["Focus"]
+		mirroranchor = "player",--L["Free"], L["Target"], L["Focus"]
 		
 		mirrorx = 500,
 		mirrory = 700,
-		mirrorgrowdirection = L["Up"], --L["Down"]
+		mirrorgrowdirection = "up", --L["Down"]
 		
-		mirrorposition = L["Top Left"],
+		mirrorposition = "topleft",
 		
 		mirrorgap = 1,
 		mirrorspacing = 1,
@@ -72,10 +71,10 @@ local defaults = {
 		mirrornametext = true,
 		mirrortimetext = true,
 		
-		mirrortexture = 'LiteStep',
+		mirrortexture = "LiteStep",
 		mirrorwidth = 120,
 		mirrorheight = 12,
-		mirrorfont = 'Friz Quadrata TT',
+		mirrorfont = "Friz Quadrata TT",
 		mirrorfontsize = 9,
 		mirroralpha = 1,
 		
@@ -106,21 +105,21 @@ local defaults = {
 }
 
 local icons = {
-	BREATH = 'Interface\\Icons\\Spell_Shadow_DemonBreath',
-	EXHAUSTION = 'Interface\\Icons\\Ability_Suffocate',
-	FEIGNDEATH = 'Interface\\Icons\\Ability_Rogue_FeignDeath',
-	CAMP = 'Interface\\Icons\\INV_Misc_GroupLooking',
-	DEATH = 'Interface\\Icons\\Ability_Vanish',
-	QUIT = 'Interface\\Icons\\INV_Misc_GroupLooking',
-	DUEL_OUTOFBOUNDS = 'Interface\\Icons\\Ability_Rogue_Sprint',
-	INSTANCE_BOOT = 'Interface\\Icons\\INV_Misc_Rune_01',
-	CONFIRM_SUMMON = 'Interface\\Icons\\Spell_Shadow_Twilight',
-	AREA_SPIRIT_HEAL = 'Interface\\Icons\\Spell_Holy_Resurrection',
-	REZTIMER = '',
-	RESURRECT_NO_SICKNESS = '',
-	PARTY_INVITE = '',
-	DUEL_REQUESTED = '',
-	GAMESTART = '',
+	BREATH = "Interface\\Icons\\Spell_Shadow_DemonBreath",
+	EXHAUSTION = "Interface\\Icons\\Ability_Suffocate",
+	FEIGNDEATH = "Interface\\Icons\\Ability_Rogue_FeignDeath",
+	CAMP = "Interface\\Icons\\INV_Misc_GroupLooking",
+	DEATH = "Interface\\Icons\\Ability_Vanish",
+	QUIT = "Interface\\Icons\\INV_Misc_GroupLooking",
+	DUEL_OUTOFBOUNDS = "Interface\\Icons\\Ability_Rogue_Sprint",
+	INSTANCE_BOOT = "Interface\\Icons\\INV_Misc_Rune_01",
+	CONFIRM_SUMMON = "Interface\\Icons\\Spell_Shadow_Twilight",
+	AREA_SPIRIT_HEAL = "Interface\\Icons\\Spell_Holy_Resurrection",
+	REZTIMER = "",
+	RESURRECT_NO_SICKNESS = "",
+	PARTY_INVITE = "",
+	DUEL_REQUESTED = "",
+	GAMESTART = "",
 }
 local popups = {
 	CAMP = L["Logout"],
@@ -161,13 +160,13 @@ local mirrorOnUpdate, fakeOnUpdate
 do
 	local function timenum(num)
 		if num <= 10 then
-			return ('%.1f'):format(num)
+			return ("%.1f"):format(num)
 		elseif num <= 60 then
-			return ('%d'):format(num)
+			return ("%d"):format(num)
 		elseif num <= 3600 then
-			return ('%d:%02d'):format(num / 60, num % 60)
+			return ("%d:%02d"):format(num / 60, num % 60)
 		else
-			return ('%d:%02d'):format(num / 3600, (num % 3600) / 60)
+			return ("%d:%02d"):format(num / 3600, (num % 3600) / 60)
 		end
 	end
 	function mirrorOnUpdate(frame)
@@ -183,7 +182,7 @@ do
 		
 		local frame_num = frame.framenum
 		if frame_num > 0 then
-			local popup = _G["StaticPopup"..frame_num] -- hate to do this, but I can't think of a better way.
+			local popup = _G["StaticPopup"..frame_num] -- hate to do this, but I can"t think of a better way.
 			if popup.which ~= frame.which or not popup:IsVisible() then
 				return Mirror:UpdateBars()
 			end
@@ -199,23 +198,23 @@ do
 	end
 end
 local function OnHide(frame)
-	frame:SetScript('OnUpdate', nil)
+	frame:SetScript("OnUpdate", nil)
 end
 local mirrorbars = setmetatable({}, {
 	__index = function(t,k)
-		local bar = CreateFrame('StatusBar', nil, UIParent)
+		local bar = CreateFrame("StatusBar", nil, UIParent)
 		t[k] = bar
-		bar:SetFrameStrata('MEDIUM')
+		bar:SetFrameStrata("MEDIUM")
 		bar:Hide()
-		bar:SetScript('OnHide', OnHide)
+		bar:SetScript("OnHide", OnHide)
 		bar:SetBackdrop({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16})
 		bar:SetBackdropColor(0,0,0)
-		bar.text = bar:CreateFontString(nil, 'OVERLAY')
-		bar.timetext = bar:CreateFontString(nil, 'OVERLAY')
-		bar.icon = bar:CreateTexture(nil, 'DIALOG')
+		bar.text = bar:CreateFontString(nil, "OVERLAY")
+		bar.timetext = bar:CreateFontString(nil, "OVERLAY")
+		bar.icon = bar:CreateTexture(nil, "DIALOG")
 		if k == 1 then
 			bar:SetMovable(true)
-			bar:RegisterForDrag('LeftButton')
+			bar:RegisterForDrag("LeftButton")
 			bar:SetClampedToScreen(true)
 		end
 		Mirror:ApplySettings()
@@ -231,6 +230,7 @@ function Mirror:OnInitialize()
 	Quartz3:RegisterModuleOptions(MODNAME, getOptions, MODNAME)
 
 end
+
 function Mirror:OnEnable()
 	self:RegisterEvent("MIRROR_TIMER_PAUSE", "UpdateBars")
 	self:RegisterEvent("MIRROR_TIMER_START", "UpdateBars")
@@ -247,30 +247,44 @@ function Mirror:OnEnable()
 			end
 		end
 	end)
-	Quartz3.ApplySettings()
+	self:ApplySettings()
 end
+
 function Mirror:OnDisable()
 	mirrorbars[1].Hide = nil
 	mirrorbars[1]:EnableMouse(false)
-	mirrorbars[1]:SetScript('OnDragStart', nil)
-	mirrorbars[1]:SetScript('OnDragStop', nil)
+	mirrorbars[1]:SetScript("OnDragStart", nil)
+	mirrorbars[1]:SetScript("OnDragStop", nil)
 	for _, v in pairs(mirrorbars) do
 		v:Hide()
 	end
 	for i = 1, 3 do
-		_G['MirrorTimer'..i]:RegisterEvent("MIRROR_TIMER_PAUSE")
-		_G['MirrorTimer'..i]:RegisterEvent("MIRROR_TIMER_STOP")
+		_G["MirrorTimer"..i]:RegisterEvent("MIRROR_TIMER_PAUSE")
+		_G["MirrorTimer"..i]:RegisterEvent("MIRROR_TIMER_STOP")
 	end
 	UIParent:RegisterEvent("MIRROR_TIMER_START")
 end
+
 do
+	local tblCache = setmetatable({}, {__mode="k"})
+	function new()
+		local entry = next(tblCache)
+		if entry then tblCache[entry] = nil else entry = {} end
+		return entry
+	end
+	function del(tbl)
+		wipe(tbl)
+		tblCache[tbl] = true
+	end
+	
 	local function sort(a,b)
 		return a.name < b.name
 	end
+	
 	local tmp = {}
 	local reztimermax = 0
 	local function update()
-		local db = db.profile
+		Mirror.updateMirrorBar = nil
 		local currentTime = GetTime()
 		for k in pairs(tmp) do
 			tmp[k] = del(tmp[k])
@@ -280,7 +294,7 @@ do
 			if gametimebase then
 				local endTime = gametimebase + gametimetostart
 				if endTime > currentTime then
-					local which = 'GAMESTART'
+					local which = "GAMESTART"
 					local t = new()
 					tmp[#tmp+1] = t
 					t.name = popups[which]
@@ -300,7 +314,7 @@ do
 		if db.showmirror then
 			for i = 1, MIRRORTIMER_NUMTIMERS do
 				local timer, value, maxvalue, scale, paused, label = GetMirrorTimerInfo(i)
-				if timer ~= 'UNKNOWN' then
+				if timer ~= "UNKNOWN" then
 					local t = new()
 					tmp[#tmp+1] = t
 					t.name = label
@@ -314,11 +328,11 @@ do
 		
 		if db.showstatic then
 			local recoverydelay = GetCorpseRecoveryDelay()
-			if recoverydelay > 0 and UnitHealth('player') < 2 then
+			if recoverydelay > 0 and UnitHealth("player") < 2 then
 				if reztimermax == 0 then
 					reztimermax = recoverydelay
 				end
-				local which = 'REZTIMER'
+				local which = "REZTIMER"
 				local t = new()
 				tmp[#tmp+1] = t
 				t.name = popups[which]
@@ -339,7 +353,7 @@ do
 				local name = popups[which]
 				
 				--special case for a timered rez
-				if which == 'RESURRECT_NO_SICKNESS' then
+				if which == "RESURRECT_NO_SICKNESS" then
 					if timeleft > 60 then
 						name = nil
 					end
@@ -355,11 +369,6 @@ do
 					if not timeout or timeout == 0 then
 						timeout = timeoutoverrides[which]
 					end
-					--!!delete this check eventually
-					if not timeout then
-						error(which..' has no timeout value set, tell nymbia!')
-					end
-					--
 					t.startTime = currentTime - (timeout - timeleft)
 					t.endTime = currentTime + timeleft
 					t.isfake = true
@@ -372,7 +381,7 @@ do
 		for name, v in pairs(external) do
 			local endTime = v.endTime
 			if not v.startTime or not endTime then
-				error('bad custom table')
+				error("bad custom table")
 			end
 			if endTime > currentTime then
 				local t = new()
@@ -407,7 +416,7 @@ do
 				bar.framenum = v.framenum
 				bar.which = v.mode
 				bar:Show()
-				bar:SetScript('OnUpdate', fakeOnUpdate)
+				bar:SetScript("OnUpdate", fakeOnUpdate)
 				if v.mode then
 					bar:SetStatusBarColor(unpack(db[v.mode]))
 				elseif v.color then
@@ -420,7 +429,7 @@ do
 				bar:SetMinMaxValues(0, duration)
 				bar.duration = duration
 				bar:Show()
-				bar:SetScript('OnUpdate', mirrorOnUpdate)
+				bar:SetScript("OnUpdate", mirrorOnUpdate)
 				bar:SetStatusBarColor(unpack(db[v.mode]))
 			end
 		end
@@ -428,9 +437,10 @@ do
 			mirrorbars[i]:Hide()
 		end
 	end
+	
 	function Mirror:UpdateBars()
-		if not self:IsEventScheduled('Quartz3MirrorUpdate') then
-			self:ScheduleEvent('Quartz3MirrorUpdate', update, 0) -- API funcs don't return helpful crap until after the event.
+		if not self.updateMirrorBar then
+			self.updateMirrorBar = self:ScheduleTimer(update, 0) -- API funcs dont return helpful crap until after the event.
 		end
 	end
 end
@@ -460,99 +470,99 @@ do
 		offset = db.mirroroffset
 		
 		bar:ClearAllPoints()
-		bar:SetStatusBarTexture(media:Fetch('statusbar', db.mirrortexture))
+		bar:SetStatusBarTexture(media:Fetch("statusbar", db.mirrortexture))
 		bar:SetWidth(db.mirrorwidth)
 		bar:SetHeight(db.mirrorheight)
 		bar:SetScale(qpdb.scale)
 		bar:SetAlpha(db.mirroralpha)
 		
-		if db.mirroranchor == L["Free"] then
+		if db.mirroranchor == "free" then
 			if i == 1 then
-				bar:SetPoint('BOTTOMLEFT', UIParent, 'BOTTOMLEFT', db.mirrorx, db.mirrory)
-				if db.mirrorgrowdirection == L["Up"] then
+				bar:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", db.mirrorx, db.mirrory)
+				if db.mirrorgrowdirection == "up" then
 					direction = 1
 				else --L["Down"]
 					direction = -1
 				end
 			else
 				if direction == 1 then
-					bar:SetPoint('BOTTOMRIGHT', mirrorbars[i-1], 'TOPRIGHT', 0, spacing)
+					bar:SetPoint("BOTTOMRIGHT", mirrorbars[i-1], "TOPRIGHT", 0, spacing)
 				else -- -1
-					bar:SetPoint('TOPRIGHT', mirrorbars[i-1], 'BOTTOMRIGHT', 0, -1 * spacing)
+					bar:SetPoint("TOPRIGHT", mirrorbars[i-1], "BOTTOMRIGHT", 0, -1 * spacing)
 				end
 			end
 		else
 			if i == 1 then
 				local anchorframe
 				local anchor = db.mirroranchor
-				if anchor == L["Focus"] and Focus.Bar then
+				if anchor == "focus" and Focus.Bar then
 					anchorframe = Focus.Bar
-				elseif anchor == L["Target"] and Target.Bar then
+				elseif anchor == "target" and Target.Bar then
 					anchorframe = Target.Bar
 				else -- L["Player"]
 					anchorframe = Player.Bar
 				end
 				
-				if position == L["Top"] then
+				if position == "top" then
 					direction = 1
-					bar:SetPoint('BOTTOM', anchorframe, 'TOP', 0, gap)
-				elseif position == L["Bottom"] then
+					bar:SetPoint("BOTTOM", anchorframe, "TOP", 0, gap)
+				elseif position == "bottom" then
 					direction = -1
-					bar:SetPoint('TOP', anchorframe, 'BOTTOM', 0, -1 * gap)
-				elseif position == L["Top Right"] then
+					bar:SetPoint("TOP", anchorframe, "BOTTOM", 0, -1 * gap)
+				elseif position == "topright" then
 					direction = 1
-					bar:SetPoint('BOTTOMRIGHT', anchorframe, 'TOPRIGHT', -1 * offset, gap)
-				elseif position == L["Bottom Right"] then
+					bar:SetPoint("BOTTOMRIGHT", anchorframe, "TOPRIGHT", -1 * offset, gap)
+				elseif position == "bottomright" then
 					direction = -1
-					bar:SetPoint('TOPRIGHT', anchorframe, 'BOTTOMRIGHT', -1 * offset, -1 * gap)
-				elseif position == L["Top Left"] then
+					bar:SetPoint("TOPRIGHT", anchorframe, "BOTTOMRIGHT", -1 * offset, -1 * gap)
+				elseif position == "topleft" then
 					direction = 1
-					bar:SetPoint('BOTTOMLEFT', anchorframe, 'TOPLEFT', offset, gap)
-				elseif position == L["Bottom Left"] then
+					bar:SetPoint("BOTTOMLEFT", anchorframe, "TOPLEFT", offset, gap)
+				elseif position == "bottomleft" then
 					direction = -1
-					bar:SetPoint('TOPLEFT', anchorframe, 'BOTTOMLEFT', offset, -1 * gap)
-				elseif position == L["Left (grow up)"] then
-					if iconside == L["Right"] and showicons then
+					bar:SetPoint("TOPLEFT", anchorframe, "BOTTOMLEFT", offset, -1 * gap)
+				elseif position == "leftup" then
+					if iconside == "right" and showicons then
 						offset = offset + db.mirrorheight
 					end
-					if qpdb.iconposition == L["Left"] and not qpdb.hideicon then
+					if qpdb.iconposition == "left" and not qpdb.hideicon then
 						offset = offset + qpdb.h
 					end
 					direction = 1
-					bar:SetPoint('BOTTOMRIGHT', anchorframe, 'BOTTOMLEFT', -1 * offset, gap)
-				elseif position == L["Left (grow down)"] then
-					if iconside == L["Right"] and showicons then
+					bar:SetPoint("BOTTOMRIGHT", anchorframe, "BOTTOMLEFT", -1 * offset, gap)
+				elseif position == "leftdown" then
+					if iconside == "right" and showicons then
 						offset = offset + db.mirrorheight
 					end
-					if qpdb.iconposition == L["Left"] and not qpdb.hideicon then
+					if qpdb.iconposition == "left" and not qpdb.hideicon then
 						offset = offset + qpdb.h
 					end
 					direction = -1
-					bar:SetPoint('TOPRIGHT', anchorframe, 'TOPLEFT', -3 * offset, -1 * gap)
-				elseif position == L["Right (grow up)"] then
-					if iconside == L["Left"] and showicons then
+					bar:SetPoint("TOPRIGHT", anchorframe, "TOPLEFT", -3 * offset, -1 * gap)
+				elseif position == "rightup" then
+					if iconside == "left" and showicons then
 						offset = offset + db.mirrorheight
 					end
-					if qpdb.iconposition == L["Right"] and not qpdb.hideicon then
+					if qpdb.iconposition == "right" and not qpdb.hideicon then
 						offset = offset + qpdb.h
 					end
 					direction = 1
-					bar:SetPoint('BOTTOMLEFT', anchorframe, 'BOTTOMRIGHT', offset, gap)
-				elseif position == L["Right (grow down)"] then
-					if iconside == L["Left"] and showicons then
+					bar:SetPoint("BOTTOMLEFT", anchorframe, "BOTTOMRIGHT", offset, gap)
+				elseif position == "rightdown" then
+					if iconside == "left" and showicons then
 						offset = offset + db.mirrorheight
 					end
-					if qpdb.iconposition == L["Right"] and not qpdb.hideicon then
+					if qpdb.iconposition == "right" and not qpdb.hideicon then
 						offset = offset + qpdb.h
 					end
 					direction = -1
-					bar:SetPoint('TOPLEFT', anchorframe, 'TOPRIGHT', offset, -1 * gap)
+					bar:SetPoint("TOPLEFT", anchorframe, "TOPRIGHT", offset, -1 * gap)
 				end
 			else
 				if direction == 1 then
-					bar:SetPoint('BOTTOMRIGHT', mirrorbars[i-1], 'TOPRIGHT', 0, spacing)
+					bar:SetPoint("BOTTOMRIGHT", mirrorbars[i-1], "TOPRIGHT", 0, spacing)
 				else -- -1
-					bar:SetPoint('TOPRIGHT', mirrorbars[i-1], 'BOTTOMRIGHT', 0, -1 * spacing)
+					bar:SetPoint("TOPRIGHT", mirrorbars[i-1], "BOTTOMRIGHT", 0, -1 * spacing)
 				end
 			end
 		end
@@ -567,7 +577,7 @@ do
 		else
 			timetext:Hide()
 		end
-		timetext:SetFont(media:Fetch('font', db.mirrorfont), db.mirrorfontsize)
+		timetext:SetFont(media:Fetch("font", db.mirrorfont), db.mirrorfontsize)
 		timetext:SetShadowColor( 0, 0, 0, 1)
 		timetext:SetShadowOffset( 0.8, -0.8 )
 		timetext:SetTextColor(unpack(db.mirrortextcolor))
@@ -575,7 +585,7 @@ do
 		timetext:SetHeight(db.mirrorheight)
 		
 		local temptext = timetext:GetText()
-		timetext:SetText('10.0')
+		timetext:SetText("10.0")
 		local normaltimewidth = timetext:GetStringWidth()
 		timetext:SetText(temptext)
 		
@@ -593,7 +603,7 @@ do
 		else
 			text:Hide()
 		end
-		text:SetFont(media:Fetch('font', db.mirrorfont), db.mirrorfontsize)
+		text:SetFont(media:Fetch("font", db.mirrorfont), db.mirrorfontsize)
 		text:SetShadowColor( 0, 0, 0, 1)
 		text:SetShadowOffset( 0.8, -0.8 )
 		text:SetTextColor(unpack(db.mirrortextcolor))
@@ -607,10 +617,10 @@ do
 			icon:SetHeight(db.mirrorheight-1)
 			icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
 			icon:ClearAllPoints()
-			if iconside == L["Left"] then
-				icon:SetPoint('RIGHT', bar, "LEFT", -1, 0)
+			if iconside == "left" then
+				icon:SetPoint("RIGHT", bar, "LEFT", -1, 0)
 			else
-				icon:SetPoint('LEFT', bar, "RIGHT", 1, 0)
+				icon:SetPoint("LEFT", bar, "RIGHT", 1, 0)
 			end
 		else
 			icon:Hide()
@@ -619,28 +629,28 @@ do
 		return direction
 	end
 	function Mirror:ApplySettings()
-		if self:IsEnabled() and db then
-			local db = db.profile
+		if self:IsEnabled() then
+			db = self.db.profile
 			local direction
-			if db.mirroranchor ~= L["Free"] then
+			if db.mirroranchor ~= "free" then
 				mirrorbars[1].Hide = nil
 				mirrorbars[1]:EnableMouse(false)
-				mirrorbars[1]:SetScript('OnDragStart', nil)
-				mirrorbars[1]:SetScript('OnDragStop', nil)
+				mirrorbars[1]:SetScript("OnDragStart", nil)
+				mirrorbars[1]:SetScript("OnDragStop", nil)
 			end
 			for i, v in pairs(mirrorbars) do
 				direction = apply(i, v, db, direction)
 			end
 			if db.hideblizzmirrors then
 				for i = 1, 3 do
-					_G['MirrorTimer'..i]:UnregisterAllEvents()
-					_G['MirrorTimer'..i]:Hide()
+					_G["MirrorTimer"..i]:UnregisterAllEvents()
+					_G["MirrorTimer"..i]:Hide()
 				end
 				UIParent:UnregisterEvent("MIRROR_TIMER_START")
 			else
 				for i = 1, 3 do
-					_G['MirrorTimer'..i]:RegisterEvent("MIRROR_TIMER_PAUSE")
-					_G['MirrorTimer'..i]:RegisterEvent("MIRROR_TIMER_STOP")
+					_G["MirrorTimer"..i]:RegisterEvent("MIRROR_TIMER_PAUSE")
+					_G["MirrorTimer"..i]:RegisterEvent("MIRROR_TIMER_STOP")
 				end
 				UIParent:RegisterEvent("MIRROR_TIMER_START")
 			end
@@ -651,46 +661,40 @@ do
 end
 
 do
-	local function set(field, value)
-		db.profile[field] = value
-		Quartz3.ApplySettings()
-	end
-	local function get(field)
-		return db.profile[field]
-	end
-	local function setcolor(field, ...)
-		db.profile[field] = {...}
-		Quartz3.ApplySettings()
-	end
-	local function getcolor(field)
-		return unpack(db.profile[field])
-	end
 	local function getmirrorhidden()
-		return not db.profile.showmirror
+		return not db.showmirror
 	end
+	
 	local function getstatichidden()
-		return not db.profile.showstatic
+		return not db.showstatic
 	end
+	
 	local function getpvphidden()
-		return not db.profile.showpvp
+		return not db.showpvp
 	end
+	
 	local function getfreeoptionshidden()
-		return db.profile.mirroranchor ~= L["Free"]
+		return db.mirroranchor ~= "free"
 	end
+	
 	local function getnotfreeoptionshidden()
-		return db.profile.mirroranchor == L["Free"]
+		return db.mirroranchor == "free"
 	end
+	
 	local function dragstart()
 		mirrorbars[1]:StartMoving()
 	end
+	
 	local function dragstop()
-		db.profile.mirrorx = mirrorbars[1]:GetLeft()
-		db.profile.mirrory = mirrorbars[1]:GetBottom()
+		db.mirrorx = mirrorbars[1]:GetLeft()
+		db.mirrory = mirrorbars[1]:GetBottom()
 		mirrorbars[1]:StopMovingOrSizing()
 	end
+	
 	local function nothing()
-		mirrorbars[1]:SetAlpha(db.profile.mirroralpha)
+		mirrorbars[1]:SetAlpha(db.mirroralpha)
 	end
+	
 	local positions = {
 		["bottom"] = L["Bottom"],
 		["top"] = L["Top"],
@@ -703,473 +707,412 @@ do
 		["rightup"] = L["Right (grow up)"],
 		["rightdown"] = L["Right (grow down)"],
 	}
+	
+	local function setOpt(info, value)
+		db[info[#info]] = value
+		Mirror:ApplySettings()
+	end
+
+	local function getOpt(info)
+		return db[info[#info]]
+	end
+
+	function getColor(info)
+		return unpack(getOpt(info))
+	end
+
+	function setColor(info, r, g, b, a)
+		setOpt(info, {r, g, b, a})
+	end
 
 	local options
 	function getOptions()
-		options = options or {
-		type = 'group',
-		name = L["Mirror"],
-		desc = L["Mirror"],
-		order = 600,
-		args = {
-			toggle = {
-				type = 'toggle',
-				name = L["Enable"],
-				desc = L["Enable"],
-				get = function()
-					return Quartz3:GetModuleEnabled(MODNAME)
-				end,
-				set = function(v)
-					Quartz3:SetModuleEnabled(MODNAME, v)
-				end,
-				order = 99,
-			},
-			mirroranchor = {
-				type = 'select',
-				name = L["Anchor Frame"],
-				desc = L["Select where to anchor the mirror bars"],
-				get = get,
-				set = set,
-				values = {["player"] = L["Player"], ["free"] = L["Free"], ["target"] = L["Target"], ["focus"] = L["Focus"]},
-				--passValue = 'mirroranchor',
-			},
-			-- free
-			mirrorlock = {
-				type = 'toggle',
-				name = L["Lock"],
-				desc = L["Toggle mirror bar lock"],
-				get = function()
-					return locked
-				end,
-				set = function(v)
-					if v then
-						mirrorbars[1].Hide = nil
-						mirrorbars[1]:EnableMouse(false)
-						mirrorbars[1]:SetScript('OnDragStart', nil)
-						mirrorbars[1]:SetScript('OnDragStop', nil)
-						Mirror:UpdateBars()
-					else
-						mirrorbars[1]:Show()
-						mirrorbars[1]:EnableMouse(true)
-						mirrorbars[1]:SetScript('OnDragStart', dragstart)
-						mirrorbars[1]:SetScript('OnDragStop', dragstop)
-						mirrorbars[1]:SetAlpha(1)
-						mirrorbars[1].Hide = nothing
-					end
-					locked = v
-				end,
-				hidden = getfreeoptionshidden,
-				order = 102,
-			},
-			mirrorgrowdirection = {
-				type = 'select',
-				name = L["Grow Direction"],
-				desc = L["Set the grow direction of the mirror bars"],
-				get = get,
-				set = set,
-				values = {["up"] = L["Up"], ["down"] = L["Down"]},
-				--passValue = 'mirrorgrowdirection',
-				hidden = getfreeoptionshidden,
-				order = 103,
-			},
-			x = {
-				type = 'range',
-				name = L["X"],
-				desc = L["Set an exact X value for this bar's position."],
-				min = 0,
-				max = 2560,
-				get = get,
-				set = set,
-				--passValue = 'mirrorx',
-				order = 103,
-				values = function(v)
-					return tonumber(v) and true
-				end,
-				hidden = getfreeoptionshidden,
-				usage = L["Number"],
-			},
-			y = {
-				type = 'range',
-				name = L["Y"],
-				desc = L["Set an exact Y value for this bar's position."],
-				min = 0,
-				max = 1600,
-				get = get,
-				set = set,
-				--passValue = 'mirrory',
-				order = 103,
-				values = function(v)
-					return tonumber(v) and true
-				end,
-				hidden = getfreeoptionshidden,
-				usage = L["Number"],
-			},
-			-- anchored to a cast bar
-			mirrorposition = {
-				type = 'select',
-				name = L["Position"],
-				desc = L["Position the mirror bars"],
-				get = get,
-				set = set,
-				values = positions,
-				--passValue = 'mirrorposition',
-				hidden = getnotfreeoptionshidden,
-				order = 101,
-			},
-			mirrorgap = {
-				type = 'range',
-				name = L["Gap"],
-				desc = L["Tweak the vertical position of the mirror bars"],
-				min = -35,
-				max = 35,
-				step = 1,
-				get = get,
-				set = set,
-				--passValue = 'mirrorgap',
-				hidden = getnotfreeoptionshidden,
-				order = 102,
-			},
-			mirroroffset = {
-				type = 'range',
-				name = L["Offset"],
-				desc = L["Tweak the horizontal position of the mirror bars"],
-				min = -35,
-				max = 35,
-				step = 1,
-				get = get,
-				set = set,
-				--passValue = 'mirroroffset',
-				hidden = getnotfreeoptionshidden,
-				order = 103,
-			},
-			mirrorspacing = {
-				type = 'range',
-				name = L["Spacing"],
-				desc = L["Tweak the space between mirror bars"],
-				min = -35,
-				max = 35,
-				step = 1,
-				get = get,
-				set = set,
-				--passValue = 'mirrorspacing',
-				order = 104,
-			},
-			mirroricons = {
-				type = 'toggle',
-				name = L["Show Icons"],
-				desc = L["Show icons on mirror bars"],
-				get = get,
-				set = set,
-				--passValue = 'mirroricons',
-				order = 110,
-			},
-			mirroriconside = {
-				type = 'select',
-				name = L["Icon Position"],
-				desc = L["Set the side of the mirror bar that the icon appears on"],
-				get = get,
-				set = set,
-				values = {["left"] = L["Left"], ["right"] = L["Right"]},
-				--passValue = 'mirroriconside',
-				order = 111,
-			},
-			mirrortexture = {
-				type = 'select',
-				dialogControl = "LSM30_Statusbar",
-				name = L["Texture"],
-				desc = L["Set the mirror bar Texture"],
-				values = lsmlist.statusbar,
-				order = 112,
-				get = get,
-				set = set,
-				--passValue = 'mirrortexture',
-			},
-			mirrorwidth = {
-				type = 'range',
-				name = L["Mirror Bar Width"],
-				desc = L["Set the width of the mirror bars"],
-				min = 50,
-				max = 300,
-				step = 1,
-				get = get,
-				set = set,
-				--passValue = 'mirrorwidth',
-				order = 113,
-			},
-			mirrorheight = {
-				type = 'range',
-				name = L["Mirror Bar Height"],
-				desc = L["Set the height of the mirror bars"],
-				min = 4,
-				max = 25,
-				step = 1,
-				get = get,
-				set = set,
-				--passValue = 'mirrorheight',
-				order = 114,
-			},
-			mirroralpha = {
-				type = 'range',
-				name = L["Alpha"],
-				desc = L["Set the alpha of the mirror bars"],
-				min = 0.05,
-				max = 1,
-				step = 0.05,
-				isPercent = true,
-				get = get,
-				set = set,
-				--passValue = 'mirroralpha',
-				order = 115,
-			},
-			mirrornametext = {
-				type = 'toggle',
-				name = L["Mirror Name Text"],
-				desc = L["Display the names of Mirror Bar Types on their bars"],
-				get = get,
-				set = set,
-				--passValue = 'mirrornametext',
-				order = 120,
-			},
-			mirrortimetext = {
-				type = 'toggle',
-				name = L["Mirror Time Text"],
-				desc = L["Display the time remaining on mirror bars"],
-				get = get,
-				set = set,
-				--passValue = 'mirrortimetext',
-				order = 121,
-			},
-			mirrorfont = {
-				type = 'select',
-				dialogControl = "LSM30_Font",
-				name = L["Font"],
-				desc = L["Set the font used in the mirror bars"],
-				values = lsmlist.font,
-				get = get,
-				set = set,
-				--passValue = 'mirrorfont',
-				order = 122,
-			},
-			mirrorfontsize = {
-				type = 'range',
-				name = L["Font Size"],
-				desc = L["Set the font size for the mirror bars"],
-				min = 3,
-				max = 15,
-				step = 1,
-				get = get,
-				set = set,
-				--passValue = 'mirrorfontsize',
-				order = 123,
-			},
-			mirrortextcolor = {
-				type = 'color',
-				name = L["Text Color"],
-				desc = L["Set the color of the text for the mirror bars"],
-				get = getcolor,
-				set = setcolor,
-				--passValue = 'mirrortextcolor',
-				order = 124,
-			},
-			hideblizzmirrors = {
-				type = 'toggle',
-				name = L["Hide Blizz Mirror Bars"],
-				desc = L["Hide Blizzard's mirror bars"],
-				get = get,
-				set = set,
-				--passValue = 'hideblizzmirrors',
-				order = 130,
-			},
-			colors = {
-				type = 'group',
-				name = L["Colors"],
-				desc = L["Colors"],
-				order = -1,
+		if not options then
+			options = {
+				type = "group",
+				name = L["Mirror"],
+				order = 600,
+				set = setOpt,
+				get = getOpt,
+				childGroups = "tab",
 				args = {
-					-- mirror
-					showmirror = {
-						type = 'toggle',
-						name = L["Show Mirror"],
-						desc = L["Show mirror bars such as breath and feign death"],
-						get = get,
-						set = set,
-						--passValue = 'showmirror',
-						order = 100,
+					toggle = {
+						type = "toggle",
+						name = L["Enable"],
+						desc = L["Enable"],
+						get = function()
+							return Quartz3:GetModuleEnabled(MODNAME)
+						end,
+						set = function(v)
+							Quartz3:SetModuleEnabled(MODNAME, v)
+						end,
+						order = 96,
+						width = "full",
 					},
-					BREATH = {
-						type = 'color',
-						name = L["%s Color"]:format(L["Breath"]),
-						desc = L["Set the color of the bars for %s"]:format(L["Breath"]),
-						get = getcolor,
-						set = setcolor,
-						--passValue = 'BREATH',
-						disabled = getmirrorhidden,
-						order = 101,
+					settings = {
+						type = "group",
+						name = L["Settings"],
+						args = {
+							mirroranchor = {
+								type = "select",
+								name = L["Anchor Frame"],
+								desc = L["Select where to anchor the mirror bars"],
+								values = {["player"] = L["Player"], ["free"] = L["Free"], ["target"] = L["Target"], ["focus"] = L["Focus"]},
+							},
+							-- free
+							mirrorlock = {
+								type = "toggle",
+								name = L["Lock"],
+								desc = L["Toggle mirror bar lock"],
+								get = function()
+									return locked
+								end,
+								set = function(info, v)
+									if v then
+										mirrorbars[1].Hide = nil
+										mirrorbars[1]:EnableMouse(false)
+										mirrorbars[1]:SetScript("OnDragStart", nil)
+										mirrorbars[1]:SetScript("OnDragStop", nil)
+										Mirror:UpdateBars()
+									else
+										mirrorbars[1]:Show()
+										mirrorbars[1]:EnableMouse(true)
+										mirrorbars[1]:SetScript("OnDragStart", dragstart)
+										mirrorbars[1]:SetScript("OnDragStop", dragstop)
+										mirrorbars[1]:SetAlpha(1)
+										mirrorbars[1].Hide = nothing
+									end
+									locked = v
+								end,
+								hidden = getfreeoptionshidden,
+								order = 98,
+							},
+							mirrorgrowdirection = {
+								type = "select",
+								name = L["Grow Direction"],
+								desc = L["Set the grow direction of the mirror bars"],
+								values = {["up"] = L["Up"], ["down"] = L["Down"]},
+								hidden = getfreeoptionshidden,
+								order = 102,
+							},
+							mirrorx = {
+								type = "range",
+								name = L["X"],
+								desc = L["Set an exact X value for this bar's position."],
+								min = 0, max = 2560, bigStep = 1,
+								order = 103,
+								hidden = getfreeoptionshidden,
+							},
+							mirrory = {
+								type = "range",
+								name = L["Y"],
+								desc = L["Set an exact Y value for this bar's position."],
+								min = 0, max = 1600, bigStep = 1,
+								order = 103,
+								hidden = getfreeoptionshidden,
+							},
+							-- anchored to a cast bar
+							mirrorposition = {
+								type = "select",
+								name = L["Position"],
+								desc = L["Position the mirror bars"],
+								values = positions,
+								hidden = getnotfreeoptionshidden,
+								order = 101,
+							},
+							mirrorgap = {
+								type = "range",
+								name = L["Gap"],
+								desc = L["Tweak the vertical position of the mirror bars"],
+								min = -35, max = 35, step = 1,
+								hidden = getnotfreeoptionshidden,
+								order = 102,
+							},
+							mirroroffset = {
+								type = "range",
+								name = L["Offset"],
+								desc = L["Tweak the horizontal position of the mirror bars"],
+								min = -35, max = 35, step = 1,
+								hidden = getnotfreeoptionshidden,
+								order = 103,
+							},
+							mirrorspacing = {
+								type = "range",
+								name = L["Spacing"],
+								desc = L["Tweak the space between mirror bars"],
+								min = -35, max = 35, step = 1,
+								order = 104,
+							},
+							nl4 = {
+								type = "description",
+								name = "",
+								order = 109,
+							},
+							mirroricons = {
+								type = "toggle",
+								name = L["Show Icons"],
+								desc = L["Show icons on mirror bars"],
+								order = 110,
+							},
+							mirroriconside = {
+								type = "select",
+								name = L["Icon Position"],
+								desc = L["Set the side of the mirror bar that the icon appears on"],
+								values = {["left"] = L["Left"], ["right"] = L["Right"]},
+								order = 111,
+							},
+							mirrortexture = {
+								type = "select",
+								dialogControl = "LSM30_Statusbar",
+								name = L["Texture"],
+								desc = L["Set the mirror bar Texture"],
+								values = lsmlist.statusbar,
+								order = 112,
+							},
+							nl5 = {
+								type = "description",
+								name = "",
+								order = 113,
+							},
+							mirrorwidth = {
+								type = "range",
+								name = L["Mirror Bar Width"],
+								desc = L["Set the width of the mirror bars"],
+								min = 50, max = 300, step = 1,
+								order = 114,
+							},
+							mirrorheight = {
+								type = "range",
+								name = L["Mirror Bar Height"],
+								desc = L["Set the height of the mirror bars"],
+								min = 4, max = 25, step = 1,
+								order = 115,
+							},
+							mirroralpha = {
+								type = "range",
+								name = L["Alpha"],
+								desc = L["Set the alpha of the mirror bars"],
+								min = 0.05, max = 1, bigStep = 0.05,
+								isPercent = true,
+								order = 116,
+							},
+							nl6 = {
+								type = "description",
+								name = "",
+								order = 119,
+							},
+							mirrornametext = {
+								type = "toggle",
+								name = L["Mirror Name Text"],
+								desc = L["Display the names of Mirror Bar Types on their bars"],
+								order = 120,
+							},
+							mirrortimetext = {
+								type = "toggle",
+								name = L["Mirror Time Text"],
+								desc = L["Display the time remaining on mirror bars"],
+								order = 121,
+							},
+							mirrorfont = {
+								type = "select",
+								dialogControl = "LSM30_Font",
+								name = L["Font"],
+								desc = L["Set the font used in the mirror bars"],
+								values = lsmlist.font,
+								order = 122,
+							},
+							mirrorfontsize = {
+								type = "range",
+								name = L["Font Size"],
+								desc = L["Set the font size for the mirror bars"],
+								min = 3, max = 15, step = 1,
+								order = 123,
+							},
+							mirrortextcolor = {
+								type = "color",
+								name = L["Text Color"],
+								desc = L["Set the color of the text for the mirror bars"],
+								get = getColor,
+								set = setColor,
+								order = 124,
+							},
+							hideblizzmirrors = {
+								type = "toggle",
+								name = L["Hide Blizz Mirror Bars"],
+								desc = L["Hide Blizzard's mirror bars"],
+								order = 130,
+							},
+						}
 					},
-					EXHAUSTION = {
-						type = 'color',
-						name = L["%s Color"]:format(L["Exhaustion"]),
-						desc = L["Set the color of the bars for %s"]:format(L["Exhaustion"]),
-						get = getcolor,
-						set = setcolor,
-						--passValue = 'EXHAUSTION',
-						disabled = getmirrorhidden,
-						order = 101,
-					},
-					FEIGNDEATH = {
-						type = 'color',
-						name = L["%s Color"]:format(L["Feign Death"]),
-						desc = L["Set the color of the bars for %s"]:format(L["Feign Death"]),
-						get = getcolor,
-						set = setcolor,
-						--passValue = 'FEIGNDEATH',
-						disabled = getmirrorhidden,
-						order = 101,
-					},
-					-- static
-					showstatic = {
-						type = 'toggle',
-						name = L["Show Static"],
-						desc = L["Show bars for static popup items such as rez and summon timers"],
-						get = get,
-						set = set,
-						--passValue = 'showstatic',
-						order = 200,
-					},
-					CAMP = {
-						type = 'color',
-						name = L["%s Color"]:format(L["Logout"]),
-						desc = L["Set the color of the bars for %s"]:format(L["Logout"]),
-						get = getcolor,
-						set = setcolor,
-						--passValue = 'CAMP',
-						disabled = getstatichidden,
-						order = 201,
-					},
-					DEATH = {
-						type = 'color',
-						name = L["%s Color"]:format(L["Release"]),
-						desc = L["Set the color of the bars for %s"]:format(L["Release"]),
-						get = getcolor,
-						set = setcolor,
-						--passValue = 'DEATH',
-						disabled = getstatichidden,
-						order = 201,
-					},
-					QUIT = {
-						type = 'color',
-						name = L["%s Color"]:format(L["Quit"]),
-						desc = L["Set the color of the bars for %s"]:format(L["Quit"]),
-						get = getcolor,
-						set = setcolor,
-						--passValue = 'QUIT',
-						disabled = getstatichidden,
-						order = 201,
-					},
-					DUEL_OUTOFBOUNDS = {
-						type = 'color',
-						name = L["%s Color"]:format(L["Forfeit Duel"]),
-						desc = L["Set the color of the bars for %s"]:format(L["Forfeit Duel"]),
-						get = getcolor,
-						set = setcolor,
-						--passValue = 'DUEL_OUTOFBOUNDS',
-						disabled = getstatichidden,
-						order = 201,
-					},
-					INSTANCE_BOOT = {
-						type = 'color',
-						name = L["%s Color"]:format(L["Instance Boot"]),
-						desc = L["Set the color of the bars for %s"]:format(L["Instance Boot"]),
-						get = getcolor,
-						set = setcolor,
-						--passValue = 'INSTANCE_BOOT',
-						disabled = getstatichidden,
-						order = 201,
-					},
-					CONFIRM_SUMMON = {
-						type = 'color',
-						name = L["%s Color"]:format(L["Summon"]),
-						desc = L["Set the color of the bars for %s"]:format(L["Summon"]),
-						get = getcolor,
-						set = setcolor,
-						--passValue = 'CONFIRM_SUMMON',
-						disabled = getstatichidden,
-						order = 201,
-					},
-					AREA_SPIRIT_HEAL = {
-						type = 'color',
-						name = L["%s Color"]:format(L["AOE Rez"]),
-						desc = L["Set the color of the bars for %s"]:format(L["AOE Rez"]),
-						get = getcolor,
-						set = setcolor,
-						--passValue = 'AREA_SPIRIT_HEAL',
-						disabled = getstatichidden,
-						order = 201,
-					},
-					REZTIMER = {
-						type = 'color',
-						name = L["%s Color"]:format(L["Resurrect Timer"]),
-						desc = L["Set the color of the bars for %s"]:format(L["Resurrect Timer"]),
-						get = getcolor,
-						set = setcolor,
-						--passValue = 'REZTIMER',
-						disabled = getstatichidden,
-						order = 201,
-					},
-					RESURRECT_NO_SICKNESS = {
-						type = 'color',
-						name = L["%s Color"]:format(L["Resurrect"]),
-						desc = L["Set the color of the bars for %s"]:format(L["Resurrect"]),
-						get = getcolor,
-						set = setcolor,
-						--passValue = 'RESURRECT_NO_SICKNESS',
-						disabled = getstatichidden,
-						order = 201,
-					},
-					PARTY_INVITE = {
-						type = 'color',
-						name = L["%s Color"]:format(L["Party Invite"]),
-						desc = L["Set the color of the bars for %s"]:format(L["Party Invite"]),
-						get = getcolor,
-						set = setcolor,
-						--passValue = 'PARTY_INVITE',
-						disabled = getstatichidden,
-						order = 201,
-					},
-					DUEL_REQUESTED = {
-						type = 'color',
-						name = L["%s Color"]:format(L["Duel Request"]),
-						desc = L["Set the color of the bars for %s"]:format(L["Duel Request"]),
-						get = getcolor,
-						set = setcolor,
-						--passValue = 'DUEL_REQUESTED',
-						disabled = getstatichidden,
-						order = 201,
-					},
-					--pvp
-					showpvp = {
-						type = 'toggle',
-						name = L["Show PvP"],
-						desc = L["Show bar for start of arena and battleground games"],
-						get = get,
-						set = set,
-						--passValue = 'showpvp',
-						order = 300,
-					},
-					GAMESTART = {
-						type = 'color',
-						name = L["%s Color"]:format(L["Game Start"]),
-						desc = L["Set the color of the bars for %s"]:format(L["Game Start"]),
-						get = getcolor,
-						set = setcolor,
-						--passValue = 'GAMESTART',
-						disabled = getpvphidden,
-						order = 301,
+					bars = {
+						type = "group",
+						name = L["Bars and Colors"],
+						order = -1,
+						args = {
+							-- mirror
+							showmirror = {
+								type = "toggle",
+								name = L["Show Mirror"],
+								desc = L["Show mirror bars such as breath and feign death"],
+								order = 97,
+								width = "full",
+							},
+							BREATH = {
+								type = "color",
+								name = L["%s Color"]:format(L["Breath"]),
+								desc = L["Set the color of the bars for %s"]:format(L["Breath"]),
+								get = getColor,
+								set = setColor,
+								disabled = getmirrorhidden,
+								order = 101,
+							},
+							EXHAUSTION = {
+								type = "color",
+								name = L["%s Color"]:format(L["Exhaustion"]),
+								desc = L["Set the color of the bars for %s"]:format(L["Exhaustion"]),
+								get = getColor,
+								set = setColor,
+								disabled = getmirrorhidden,
+								order = 101,
+							},
+							FEIGNDEATH = {
+								type = "color",
+								name = L["%s Color"]:format(L["Feign Death"]),
+								desc = L["Set the color of the bars for %s"]:format(L["Feign Death"]),
+								get = getColor,
+								set = setColor,
+								disabled = getmirrorhidden,
+								order = 101,
+							},
+							-- static
+							showstatic = {
+								type = "toggle",
+								name = L["Show Static"],
+								desc = L["Show bars for static popup items such as rez and summon timers"],
+								order = 200,
+								width = "full",
+							},
+							CAMP = {
+								type = "color",
+								name = L["%s Color"]:format(L["Logout"]),
+								desc = L["Set the color of the bars for %s"]:format(L["Logout"]),
+								get = getColor,
+								set = setColor,
+								disabled = getstatichidden,
+								order = 201,
+							},
+							DEATH = {
+								type = "color",
+								name = L["%s Color"]:format(L["Release"]),
+								desc = L["Set the color of the bars for %s"]:format(L["Release"]),
+								get = getColor,
+								set = setColor,
+								disabled = getstatichidden,
+								order = 201,
+							},
+							QUIT = {
+								type = "color",
+								name = L["%s Color"]:format(L["Quit"]),
+								desc = L["Set the color of the bars for %s"]:format(L["Quit"]),
+								get = getColor,
+								set = setColor,
+								disabled = getstatichidden,
+								order = 201,
+							},
+							DUEL_OUTOFBOUNDS = {
+								type = "color",
+								name = L["%s Color"]:format(L["Forfeit Duel"]),
+								desc = L["Set the color of the bars for %s"]:format(L["Forfeit Duel"]),
+								get = getColor,
+								set = setColor,
+								disabled = getstatichidden,
+								order = 201,
+							},
+							INSTANCE_BOOT = {
+								type = "color",
+								name = L["%s Color"]:format(L["Instance Boot"]),
+								desc = L["Set the color of the bars for %s"]:format(L["Instance Boot"]),
+								get = getColor,
+								set = setColor,
+								disabled = getstatichidden,
+								order = 201,
+							},
+							CONFIRM_SUMMON = {
+								type = "color",
+								name = L["%s Color"]:format(L["Summon"]),
+								desc = L["Set the color of the bars for %s"]:format(L["Summon"]),
+								get = getColor,
+								set = setColor,
+								disabled = getstatichidden,
+								order = 201,
+							},
+							AREA_SPIRIT_HEAL = {
+								type = "color",
+								name = L["%s Color"]:format(L["AOE Rez"]),
+								desc = L["Set the color of the bars for %s"]:format(L["AOE Rez"]),
+								get = getColor,
+								set = setColor,
+								disabled = getstatichidden,
+								order = 201,
+							},
+							REZTIMER = {
+								type = "color",
+								name = L["%s Color"]:format(L["Resurrect Timer"]),
+								desc = L["Set the color of the bars for %s"]:format(L["Resurrect Timer"]),
+								get = getColor,
+								set = setColor,
+								disabled = getstatichidden,
+								order = 201,
+							},
+							RESURRECT_NO_SICKNESS = {
+								type = "color",
+								name = L["%s Color"]:format(L["Resurrect"]),
+								desc = L["Set the color of the bars for %s"]:format(L["Resurrect"]),
+								get = getColor,
+								set = setColor,
+								disabled = getstatichidden,
+								order = 201,
+							},
+							PARTY_INVITE = {
+								type = "color",
+								name = L["%s Color"]:format(L["Party Invite"]),
+								desc = L["Set the color of the bars for %s"]:format(L["Party Invite"]),
+								get = getColor,
+								set = setColor,
+								disabled = getstatichidden,
+								order = 201,
+							},
+							DUEL_REQUESTED = {
+								type = "color",
+								name = L["%s Color"]:format(L["Duel Request"]),
+								desc = L["Set the color of the bars for %s"]:format(L["Duel Request"]),
+								get = getColor,
+								set = setColor,
+								disabled = getstatichidden,
+								order = 201,
+							},
+							--pvp
+							showpvp = {
+								type = "toggle",
+								name = L["Show PvP"],
+								desc = L["Show bar for start of arena and battleground games"],
+								order = 300,
+								width = "full",
+							},
+							GAMESTART = {
+								type = "color",
+								name = L["%s Color"]:format(L["Game Start"]),
+								desc = L["Set the color of the bars for %s"]:format(L["Game Start"]),
+								get = getColor,
+								set = setColor,
+								disabled = getpvphidden,
+								order = 301,
+							},
+						},
 					},
 				},
-			},
-		},
-	}
-	return options
+			}
+		end
+		return options
 	end
 end
