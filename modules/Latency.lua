@@ -413,7 +413,7 @@ do
 						name = L["Text Color"],
 						desc = L["Set the color of the latency text"],
 						get = getColor,
-						set = setSolor,
+						set = setColor,
 						disabled = hidelagtextoptions,
 						hasAlpha = true,
 						order = 115,

@@ -62,7 +62,6 @@ do
 				desc = L["Set the color to turn the cast bar when taking a flight path"],
 				get = function() return unpack(db.color) end,
 				set = function(info, ...) db.color = {...} end,
-				--passValue = "color",
 				order = 101,
 			},
 			deplete = {
@@ -71,7 +70,6 @@ do
 				desc = L["Deplete"],
 				get = function() return db.deplete end,
 				set = function(info, v) db.deplete = v end,
-				--passValue = "deplete",
 				order = 102,
 			},
 		},

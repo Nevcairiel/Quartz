@@ -582,7 +582,7 @@ function Target:OnEnable()
 		castBarParent:RegisterForDrag("LeftButton")
 		castBarParent:SetClampedToScreen(true)
 
-		self.Bar = CastBarParent
+		self.Bar = castBarParent
 		
 		castBar = CreateFrame("StatusBar", nil, castBarParent)
 		castBarText = castBar:CreateFontString(nil, "OVERLAY")

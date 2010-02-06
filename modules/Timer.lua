@@ -86,7 +86,7 @@ end
 
 function Timer:OnDisable()
 	for k, v in pairs(thistimers) do
-		external[v] = del(external[v])
+		external[v] = nil
 		thistimers[k] = nil
 	end
 	self:SendMessage("Quartz3Mirror_UpdateCustom")
