@@ -31,6 +31,7 @@ local lsmlist = _G.AceGUIWidgetLSMlists
 local math_min = _G.math.min
 local unpack = _G.unpack
 local tonumber = _G.tonumber
+local format = _G.string.format
 local UnitCastingInfo = _G.UnitCastingInfo
 local UnitChannelInfo = _G.UnitChannelInfo
 local UnitName = _G.UnitName
@@ -477,12 +478,12 @@ end
 local function timenum(num, isCastTime)
 	if num <= 60 then
 		if isCastTime then
-			return (castTimeFormatString):format(num)
+			return castTimeFormatString, num
 		else
-			return ("%.1f"):format(num)
+			return "%.1f", num
 		end
 	else
-		return ("%d:%02d"):format(num / 60, num % 60)
+		return "%d:%02d", num / 60, num % 60
 	end
 end
 
@@ -507,15 +508,15 @@ local function OnUpdate()
 		
 		if delay and delay ~= 0 then
 			if db.hidecasttime then
-				castBarTimeText:SetFormattedText("|cffff0000+%.1f|cffffffff %s", delay, timenum(endTime - showTime))
+				castBarTimeText:SetFormattedText("|cffff0000+%.1f|cffffffff %s", delay, format(timenum(endTime - showTime)))
 			else
-				castBarTimeText:SetFormattedText("|cffff0000+%.1f|cffffffff %s / %s", delay, timenum(endTime - showTime), timenum(endTime - startTime, true))
+				castBarTimeText:SetFormattedText("|cffff0000+%.1f|cffffffff %s / %s", delay, format(timenum(endTime - showTime)), format(timenum(endTime - startTime, true)))
 			end
 		else
 			if db.hidecasttime then
-				castBarTimeText:SetText(timenum(endTime - showTime))
+				castBarTimeText:SetFormattedText(timenum(endTime - showTime))
 			else
-				castBarTimeText:SetFormattedText("%s / %s", timenum(endTime - showTime), timenum(endTime - startTime, true))
+				castBarTimeText:SetFormattedText("%s / %s", format(timenum(endTime - showTime)), format(timenum(endTime - startTime, true)))
 			end
 		end
 	elseif Player.channeling then
@@ -533,15 +534,15 @@ local function OnUpdate()
 		
 		if delay and delay ~= 0 then
 			if db.hidecasttime then
-				castBarTimeText:SetFormattedText("|cffFF0000-%.1f|cffffffff %s", delay, timenum(remainingTime))
+				castBarTimeText:SetFormattedText("|cffFF0000-%.1f|cffffffff %s", delay, format(timenum(remainingTime)))
 			else
-				castBarTimeText:SetFormattedText("|cffFF0000-%.1f|cffffffff %s / %s", delay, timenum(remainingTime), timenum(endTime - startTime, true))
+				castBarTimeText:SetFormattedText("|cffFF0000-%.1f|cffffffff %s / %s", delay, format(timenum(remainingTime)), format(timenum(endTime - startTime, true)))
 			end
 		else
 			if db.hidecasttime then
-				castBarTimeText:SetText(timenum(remainingTime))
+				castBarTimeText:SetFormattedText(timenum(remainingTime))
 			else
-				castBarTimeText:SetFormattedText("%s / %s", timenum(remainingTime), timenum(endTime - startTime, true))
+				castBarTimeText:SetFormattedText("%s / %s", format(timenum(remainingTime)), format(timenum(endTime - startTime, true)))
 			end
 		end
 	elseif Player.fadeOut then
@@ -595,27 +596,35 @@ do
 	}
 
 	function setnametext(name, rank)
-		local text = name
+		local mask, arg = nil, nil
 		if db.spellrank and rank then
 			local num = tonumber(rank:match(L["Rank (%d+)"]))
 			if num and num > 0 then
 				local rankstyle = db.spellrankstyle
 				if rankstyle == "number" then
-					text = ("%s %d"):format(name, num)
+					mask, arg = "%s %d", num
 				elseif rankstyle == "full" then
-					text = ("%s (%s)"):format(name, rank)
+					mask, arg = "%s (%s)", rank
 				elseif rankstyle == "roman" then
-					text = ("%s %s"):format(name, numerals[num])
+					mask, arg = "%s %s", numerals[num]
 				else -- full roman
-					text = ("%s (%s)"):format(name, L["Rank %s"]:format(numerals[num]))
+					mask, arg = "%s (%s)", L["Rank %s"]:format(numerals[num])
 				end
 			end
 		end
 
 		if db.targetname and Player.targetName and (Player.targetName ~= "") then
-			text = text .. " -> " .. Player.targetName
+			if mask then
+				mask = mask .. " -> " .. Player.targetName
+			else
+				name = name .. " -> " .. Player.targetName
+			end
 		end
-		castBarText:SetText(text)
+		if mask then
+			castBarText:SetFormattedText(mask, name, arg)
+		else
+			castBarText:SetText(name)
+		end
 	end
 end
 
@@ -992,9 +1001,9 @@ do
 			
 			local temptext = castBarTimeText:GetText()
 			if db.hidecasttime then
-				castBarTimeText:SetText(timenum(10))
+				castBarTimeText:SetFormattedText(timenum(10))
 			else
-				castBarTimeText:SetFormattedText("%s / %s", timenum(10), timenum(10, true))
+				castBarTimeText:SetFormattedText("%s / %s", format(timenum(10)), format(timenum(10, true)))
 			end
 			local normaltimewidth = castBarTimeText:GetStringWidth()
 			castBarTimeText:SetText(temptext)

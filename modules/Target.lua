@@ -185,23 +185,28 @@ do
 		"XXI", "XXII", "XXIII", "XXIV", "XXV",
 	}
 	function setnametext(name, rank)
-		local text = name
+		local mask, arg = nil, nil
 		if db.spellrank and rank then
 			local num = tonumber(rank:match(L["Rank (%d+)"]))
 			if num and num > 0 then
 				local rankstyle = db.spellrankstyle
 				if rankstyle == "number" then
-					text = ("%s %d"):format(name, num)
+					mask, arg = "%s %d", num
 				elseif rankstyle == "full" then
-					text = ("%s (%s)"):format(name, rank)
+					mask, arg = "%s (%s)", rank
 				elseif rankstyle == "roman" then
-					text = ("%s %s"):format(name, numerals[num])
+					mask, arg = "%s %s", numerals[num]
 				else -- full roman
-					text = ("%s (%s)"):format(name, L["Rank %s"]:format(numerals[num]))
+					mask, arg = "%s (%s)", L["Rank %s"]:format(numerals[num])
 				end
 			end
 		end
-		castBarText:SetText(text)
+		
+		if mask then
+			castBarText:SetFormattedText(mask, name, arg)
+		else
+			castBarText:SetText(name)
+		end
 	end
 end
 

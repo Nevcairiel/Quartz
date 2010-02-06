@@ -120,11 +120,11 @@ do
 	local min = L["%dm"]
 	local function timenum(num)
 		if num <= 10 then
-			return ("%.1f"):format(num)
+			return "%.1f", num
 		elseif num <= 60 then
-			return ("%d"):format(num)
+			return "%d", num
 		else
-			return min:format(ceil(num / 60))
+			return min, ceil(num / 60)
 		end
 	end
 	
@@ -136,7 +136,7 @@ do
 		else
 			local remaining = (currentTime - frame.startTime)
 			frame:SetValue(endTime - remaining)
-			frame.timetext:SetText(timenum(endTime - currentTime))
+			frame.timetext:SetFormattedText(timenum(endTime - currentTime))
 		end
 	end
 end
