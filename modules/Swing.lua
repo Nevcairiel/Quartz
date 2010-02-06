@@ -334,6 +334,8 @@ do
 		type = "group",
 		name = L["Swing"],
 		desc = L["Swing"],
+		get = getOpt,
+		set = setOpt,
 		order = 600,
 		args = {
 			toggle = {

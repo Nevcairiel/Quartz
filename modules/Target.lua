@@ -401,7 +401,7 @@ do
 						disabled = hidenametextoptions,
 						order = 403,
 					},
-					namefontsize = {
+					fontsize = {
 						type = "range",
 						name = L["Spell Name Font Size"],
 						desc = L["Set the size of the spell name text"],
