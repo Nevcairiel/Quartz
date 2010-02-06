@@ -40,9 +40,11 @@ local UnitExists = _G.UnitExists
 local GetTime = _G.GetTime
 
 local castBar, castBarText, castBarTimeText, castBarIcon, castBarSpark, castBarParent
-local startTime, endTime, delay, fadeOut, stopTime, casting, channeling, db
+local startTime, endTime, delay, fadeOut, stopTime, casting, channeling
 
-local defaults = {	
+local db, getOptions
+
+local defaults = {
 	profile = {
 		--x =  -- applied automatically in :ApplySettings()
 		y = 250,
@@ -192,7 +194,6 @@ do
 	end
 end
 
-local getOptions
 do
 	local locked = true
 	local function dragstart()
@@ -331,7 +332,7 @@ do
 						min = 0.1, max = 1, bigStep = 0.025,
 						order = 202,
 					},
-					con = {
+					icon = {
 						type = "header",
 						name = L["Icon"],
 						order = 300,
@@ -454,14 +455,6 @@ do
 						disabled = hidetimetextoptions,
 						order = 412,
 					},
-					casttimeprecision = {
-						type = "range",
-						name = L["Cast Time Precision"],
-						desc = L["Set the precision (i.e. number of decimal places) for the cast time text"],
-						min = 1, max = 3, step = 1,
-						order = 413,
-						disabled = hidecasttimeprecision,
-					},
 					timefontsize = {
 						type = "range",
 						name = L["Time Font Size"],
@@ -544,10 +537,10 @@ do
 						get = false,
 						set = function(info, v)
 								local from = Quartz3:GetModule(v)
-								Quartz3:CopySettings(from.db.profile, Player.db.profile)
+								Quartz3:CopySettings(from.db.profile, Target.db.profile)
 								Target:ApplySettings()
 						end,
-						values = {["target"] = L["Target"], ["focus"] = L["Focus"], ["pet"] = L["Pet"]},
+						values = {["player"] = L["Player"], ["focus"] = L["Focus"], ["pet"] = L["Pet"]},
 						order = 504
 					},
 				},

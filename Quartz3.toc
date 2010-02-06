@@ -37,7 +37,7 @@ Config.lua
 
 modules\Player.lua
 modules\Target.lua
-#modules\Focus.lua
+modules\Focus.lua
 #modules\Pet.lua
 #modules\Latency.lua
 #modules\Tradeskill.lua
