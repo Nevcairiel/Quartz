@@ -21,11 +21,11 @@ local LibStub = _G.LibStub
 local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
-local MODNAME = L["Buff"]
-local Buff = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
-local Player = Quartz3:GetModule(L["Player"])
-local Focus = Quartz3:GetModule(L["Focus"])
-local Target = Quartz3:GetModule(L["Focus"])
+local MODNAME = "Buff"
+local Buff = Quartz3:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0", "AceTimer-3.0")
+local Player = Quartz3:GetModule("Player")
+local Focus = Quartz3:GetModule("Focus")
+local Target = Quartz3:GetModule("Target")
 
 local media = LibStub("LibSharedMedia-3.0")
 local lsmlist = _G.AceGUIWidgetLSMlists
@@ -45,8 +45,6 @@ local UnitDebuff = _G.UnitDebuff
 local targetlocked = true
 local focuslocked = true
 
-local new, del = Quartz3.new, Quartz3.del
-
 local OnUpdate
 local showicons
 
@@ -58,13 +56,13 @@ local defaults = {
 		targetbuffs = true,
 		targetdebuffs = true,
 		targeticons = true,
-		targeticonside = L["Right"],
+		targeticonside = "right",
 		
-		targetanchor = L["Player"],--L["Free"], L["Target"], L["Focus"]
+		targetanchor = "player",--L["Free"], L["Target"], L["Focus"]
 		targetx = 500,
 		targety = 350,
-		targetgrowdirection = L["Up"], --L["Down"]
-		targetposition = L["Top Right"],
+		targetgrowdirection = "up", --L["Down"]
+		targetposition = "topright",
 		
 		targetgap = 1,
 		targetspacing = 1,
@@ -77,13 +75,13 @@ local defaults = {
 		focusbuffs = true,
 		focusdebuffs = true,
 		focusicons = true,
-		focusiconside = L["Left"],
+		focusiconside = "left",
 		
-		focusanchor = L["Player"],--L["Free"], L["Target"], L["Focus"]
+		focusanchor = "player",--L["Free"], L["Target"], L["Focus"]
 		focusx = 400,
 		focusy = 350,
-		focusgrowdirection = L["Up"], --L["Down"]
-		focusposition = L["Bottom Left"],
+		focusgrowdirection = "up", --L["Down"]
+		focusposition = "bottomleft",
 		
 		focusgap = 1,
 		focusspacing = 1,
@@ -95,8 +93,8 @@ local defaults = {
 		buffnametext = true,
 		bufftimetext = true,
 		
-		bufftexture = 'LiteStep',
-		bufffont = 'Friz Quadrata TT',
+		bufftexture = "LiteStep",
+		bufffont = "Friz Quadrata TT",
 		bufffontsize = 9,
 		buffalpha = 1,
 		
@@ -119,13 +117,14 @@ do
 	local min = L["%dm"]
 	local function timenum(num)
 		if num <= 10 then
-			return ('%.1f'):format(num)
+			return ("%.1f"):format(num)
 		elseif num <= 60 then
-			return ('%d'):format(num)
+			return ("%d"):format(num)
 		else
 			return min:format(ceil(num / 60))
 		end
 	end
+	
 	function OnUpdate(frame)
 		local currentTime = GetTime()
 		local endTime = frame.endTime
@@ -136,33 +135,33 @@ do
 			frame:SetValue(endTime - remaining)
 			frame.timetext:SetText(timenum(endTime - currentTime))
 		end
-		
 	end
 end
 
 local function OnShow(frame)
-	frame:SetScript('OnUpdate', OnUpdate)
+	frame:SetScript("OnUpdate", OnUpdate)
 end
+
 local function OnHide(frame)
-	frame:SetScript('OnUpdate', nil)
+	frame:SetScript("OnUpdate", nil)
 end
 
 local framefactory = {
 	__index = function(t,k)
-		local bar = CreateFrame('StatusBar', nil, UIParent)
+		local bar = CreateFrame("StatusBar", nil, UIParent)
 		t[k] = bar
-		bar:SetFrameStrata('MEDIUM')
+		bar:SetFrameStrata("MEDIUM")
 		bar:Hide()
-		bar:SetScript('OnShow', OnShow)
-		bar:SetScript('OnHide', OnHide)
+		bar:SetScript("OnShow", OnShow)
+		bar:SetScript("OnHide", OnHide)
 		bar:SetBackdrop({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16})
 		bar:SetBackdropColor(0,0,0)
-		bar.text = bar:CreateFontString(nil, 'OVERLAY')
-		bar.timetext = bar:CreateFontString(nil, 'OVERLAY')
-		bar.icon = bar:CreateTexture(nil, 'DIALOG')
+		bar.text = bar:CreateFontString(nil, "OVERLAY")
+		bar.timetext = bar:CreateFontString(nil, "OVERLAY")
+		bar.icon = bar:CreateTexture(nil, "DIALOG")
 		if k == 1 then
 			bar:SetMovable(true)
-			bar:RegisterForDrag('LeftButton')
+			bar:RegisterForDrag("LeftButton")
 			bar:SetClampedToScreen(true)
 		end
 		Buff:ApplySettings()
@@ -174,18 +173,6 @@ local focusbars = setmetatable({}, framefactory)
 
 local getOptions
 do
-	local function set(field, value)
-		db.profile[field] = value
-	end
-	local function get(field)
-		return db.profile[field]
-	end
-	local function setcolor(field, ...)
-		db.profile[field] = {...}
-	end
-	local function getcolor(field)
-		return unpack(db.profile[field])
-	end
 	local positions = {
 		["bottom"] = L["Bottom"],
 		["top"] = L["Top"],
@@ -198,671 +185,570 @@ do
 		["rightup"] = L["Right (grow up)"],
 		["rightdown"] = L["Right (grow down)"],
 	}
-	local function hidefocusoptions()	
-		return not db.profile.focus
-	end
-	local function hidetargetoptions()
-		return not db.profile.target
-	end
+	
 	local function hidedebuffsbytype()
-		return not db.profile.debuffsbytype
+		return not db.debuffsbytype
 	end
+	
 	local function hidedebuffsnottype()
-		return db.profile.debuffsbytype
+		return db.debuffsbytype
 	end
+	
 	local function gettargetfreeoptionshidden()
-		return db.profile.targetanchor ~= L["Free"] or not db.profile.target
+		return db.targetanchor ~= "free"
 	end
+	
 	local function gettargetnotfreeoptionshidden()
-		return db.profile.targetanchor == L["Free"] or not db.profile.target
+		return db.targetanchor == "free"
 	end
+	
 	local function targetdragstart()
 		targetbars[1]:StartMoving()
 	end
+	
 	local function targetdragstop()
-		db.profile.targetx = targetbars[1]:GetLeft()
-		db.profile.targety = targetbars[1]:GetBottom()
+		db.targetx = targetbars[1]:GetLeft()
+		db.targety = targetbars[1]:GetBottom()
 		targetbars[1]:StopMovingOrSizing()
 	end
 	local function targetnothing()
-		targetbars[1]:SetAlpha(db.profile.buffalpha)
+		targetbars[1]:SetAlpha(db.buffalpha)
 	end
 	local function getfocusfreeoptionshidden()
-		return db.profile.focusanchor ~= L["Free"] or not db.profile.focus
+		return db.focusanchor ~= "free"
 	end
 	local function getfocusnotfreeoptionshidden()
-		return db.profile.focusanchor == L["Free"] or not db.profile.focus
+		return db.focusanchor == "free"
 	end
 	local function focusdragstart()
 		focusbars[1]:StartMoving()
 	end
 	local function focusdragstop()
-		db.profile.focusx = focusbars[1]:GetLeft()
-		db.profile.focusy = focusbars[1]:GetBottom()
+		db.focusx = focusbars[1]:GetLeft()
+		db.focusy = focusbars[1]:GetBottom()
 		focusbars[1]:StopMovingOrSizing()
 	end
 	local function focusnothing()
-		focusbars[1]:SetAlpha(db.profile.buffalpha)
+		focusbars[1]:SetAlpha(db.buffalpha)
+	end
+	
+	local function setOpt(info, value)
+		db[info.arg or info[#info]] = value
+		Buff:ApplySettings()
+	end
+
+	local function getOpt(info)
+		return db[info.arg or info[#info]]
+	end
+	
+	local function setOptFocus(info, value)
+		db["focus"..info[#info]] = value
+		Buff:ApplySettings()
+	end
+
+	local function getOptFocus(info)
+		return db["focus"..info[#info]]
+	end
+	
+	local function setOptTarget(info, value)
+		db[info.arg or ("target"..info[#info])] = value
+		Buff:ApplySettings()
+	end
+
+	local function getOptTarget(info)
+		return db[info.arg or ("target"..info[#info])]
+	end
+
+	function getColor(info)
+		return unpack(getOpt(info))
+	end
+
+	function setColor(info, r, g, b, a)
+		setOpt(info, {r, g, b, a})
 	end
 
 	local options
 	function getOptions()
-		if not options then options = {
-			toggle = {
-				type = 'toggle',
-				name = L["Enable"],
-				desc = L["Enable"],
-				get = function()
-					return Quartz3:GetModuleEnabled(MODNAME)
-				end,
-				set = function(v)
-					Quartz3:SetModuleEnabled(MODNAME, v)
-				end,
-				order = 100,
-			},
-			focus = {
-				type = 'group',
-				name = L["Focus"],
-				desc = L["Focus"],
-				order = 101,
+		if not options then 
+			options = {
+				type = "group",
+				name = L["Global Cooldown"],
+				order = 600,
+				get = getOpt,
+				set = setOpt,
+				childGroups = "tab",
 				args = {
-					show = {
-						type = 'toggle',
-						name = L["Enable %s"]:format(L["Focus"]),
-						desc = L["Show buffs/debuffs for your %s"]:format(L["Focus"]),
-						get = get,
-						set = set,
-						--passValue = 'focus',
-						order = 99,
-					},
-					buffs = {
-						type = 'toggle',
-						name = L["Enable Buffs"],
-						desc = L["Show buffs for your %s"]:format(L["Focus"]),
-						get = get,
-						set = set,
-						--passValue = 'focusbuffs',
-						hidden = hidefocusoptions,
-					},
-					debuffs = {
-						type = 'toggle',
-						name = L["Enable Debuffs"],
-						desc = L["Show debuffs for your %s"]:format(L["Focus"]),
-						get = get,
-						set = set,
-						--passValue = 'focusdebuffs',
-						hidden = hidefocusoptions,
-					},
-					buffwidth = {
-						type = 'range',
-						name = L["Buff Bar Width"],
-						desc = L["Set the width of the buff bars"],
-						min = 50,
-						max = 300,
-						step = 1,
-						get = get,
-						set = set,
-						--passValue = 'focuswidth',
-						order = 101,
-					},
-					buffheight = {
-						type = 'range',
-						name = L["Buff Bar Height"],
-						desc = L["Set the height of the buff bars"],
-						min = 4,
-						max = 25,
-						step = 1,
-						get = get,
-						set = set,
-						--passValue = 'focusheight',
-						order = 101,
-					},
-					focusanchor = {
-						type = 'select',
-						name = L["Anchor Frame"],
-						desc = L["Select where to anchor the %s bars"]:format(L["Focus"]),
-						get = get,
-						set = set,
-						values = {["player"] = L["Player"], ["free"] = L["Free"], ["target"] = L["Target"], ["focus"] = L["Focus"]},
-						hidden = hidefocusoptions,
-						--passValue = 'focusanchor',
-						order = 102,
-					},
-					-- free
-					focuslock = {
-						type = 'toggle',
-						name = L["Lock"],
-						desc = L["Toggle %s bar lock"]:format(L["Focus"]),
+					toggle = {
+						type = "toggle",
+						name = L["Enable"],
+						desc = L["Enable"],
 						get = function()
-							return focuslocked
+							return Quartz3:GetModuleEnabled(MODNAME)
 						end,
-						set = function(v)
-							local bar = focusbars[1]
-							if v then
-								bar.Hide = nil
-								bar:EnableMouse(false)
-								bar:SetScript('OnDragStart', nil)
-								bar:SetScript('OnDragStop', nil)
-								Buff:UpdateBars()
-							else
-								bar:Show()
-								bar:EnableMouse(true)
-								bar:SetScript('OnDragStart', focusdragstart)
-								bar:SetScript('OnDragStop', focusdragstop)
-								bar:SetAlpha(1)
-								bar.endTime = bar.endTime or 0
-								bar.Hide = focusnothing
-							end
-							focuslocked = v
+						set = function(info, v)
+							Quartz3:SetModuleEnabled(MODNAME, v)
 						end,
-						hidden = getfocusfreeoptionshidden,
-						order = 103,
+						order = 100,
 					},
-					x = {
-						type = 'range',
-						name = L["X"],
-						desc = L["Set an exact X value for this bar's position."],
-						min = 0,
-						max = 2560,
-						get = get,
-						set = set,
-						hidden = getfocusfreeoptionshidden,
-						--passValue = 'focusx',
-						order = 104,
-						values = function(v)
-							return tonumber(v) and true
-						end,
-						usage = L["Number"],
-					},
-					y = {
-						type = 'range',
-						name = L["Y"],
-						desc = L["Set an exact Y value for this bar's position."],
-						min = 0,
-						max = 1600,
-						get = get,
-						set = set,
-						hidden = getfocusfreeoptionshidden,
-						--passValue = 'focusy',
-						order = 104,
-						values = function(v)
-							return tonumber(v) and true
-						end,
-						usage = L["Number"],
-					},
-					focusgrowdirection = {
-						type = 'select',
-						name = L["Grow Direction"],
-						desc = L["Set the grow direction of the %s bars"]:format(L["Focus"]),
-						get = get,
-						set = set,
-						values = {["up"] = L["Up"], ["down"] = L["Down"]},
-						--passValue = 'focusgrowdirection',
-						hidden = getfocusfreeoptionshidden,
-						order = 105,
-					},
-					-- anchored to a cast bar
-					position = {
-						type = 'select',
-						name = L["Position"],
-						desc = L["Position the bars for your %s"]:format(L["Focus"]),
-						get = get,
-						set = set,
-						values = positions,
-						--passValue = 'focusposition',
-						hidden = getfocusnotfreeoptionshidden,
-						order = 103,
-					},
-					gap = {
-						type = 'range',
-						name = L["Gap"],
-						desc = L["Tweak the vertical position of the bars for your %s"]:format(L["Focus"]),
-						min = -35,
-						max = 35,
-						step = 1,
-						get = get,
-						set = set,
-						--passValue = 'focusgap',
+					focus = {
+						type = "group",
+						name = L["Focus"],
+						desc = L["Focus"],
 						order = 101,
-						hidden = getfocusnotfreeoptionshidden,
-						order = 104,
+						get = getOptFocus,
+						set = setOptFocus,
+						disabled = function()
+							return not db.focus
+						end,
+						args = {
+							show = {
+								type = "toggle",
+								name = L["Enable %s"]:format(L["Focus"]),
+								desc = L["Show buffs/debuffs for your %s"]:format(L["Focus"]),
+								arg = "focus",
+								order = 99,
+								width = "full",
+								disabled = false,
+							},
+							buffs = {
+								type = "toggle",
+								name = L["Enable Buffs"],
+								desc = L["Show buffs for your %s"]:format(L["Focus"]),
+							},
+							debuffs = {
+								type = "toggle",
+								name = L["Enable Debuffs"],
+								desc = L["Show debuffs for your %s"]:format(L["Focus"]),
+							},
+							width = {
+								type = "range",
+								name = L["Buff Bar Width"],
+								desc = L["Set the width of the buff bars"],
+								min = 50, max = 300, step = 1,
+								order = 101,
+							},
+							height = {
+								type = "range",
+								name = L["Buff Bar Height"],
+								desc = L["Set the height of the buff bars"],
+								min = 4, max = 25, step = 1,
+								order = 101,
+							},
+							anchor = {
+								type = "select",
+								name = L["Anchor Frame"],
+								desc = L["Select where to anchor the %s bars"]:format(L["Focus"]),
+								values = {["player"] = L["Player"], ["free"] = L["Free"], ["target"] = L["Target"], ["focus"] = L["Focus"]},
+								order = 102,
+							},
+							-- free
+							focuslock = {
+								type = "toggle",
+								name = L["Lock"],
+								desc = L["Toggle %s bar lock"]:format(L["Focus"]),
+								get = function()
+									return focuslocked
+								end,
+								set = function(info, v)
+									local bar = focusbars[1]
+									if v then
+										bar.Hide = nil
+										bar:EnableMouse(false)
+										bar:SetScript("OnDragStart", nil)
+										bar:SetScript("OnDragStop", nil)
+										Buff:UpdateBars()
+									else
+										bar:Show()
+										bar:EnableMouse(true)
+										bar:SetScript("OnDragStart", focusdragstart)
+										bar:SetScript("OnDragStop", focusdragstop)
+										bar:SetAlpha(1)
+										bar.endTime = bar.endTime or 0
+										bar.Hide = focusnothing
+									end
+									focuslocked = v
+								end,
+								hidden = getfocusfreeoptionshidden,
+								order = 103,
+							},
+							x = {
+								type = "range",
+								name = L["X"],
+								desc = L["Set an exact X value for this bar's position."],
+								min = 0, max = 2560, step = 1,
+								hidden = getfocusfreeoptionshidden,
+								order = 104,
+							},
+							y = {
+								type = "range",
+								name = L["Y"],
+								desc = L["Set an exact Y value for this bar's position."],
+								min = 0, max = 1600, step = 1,
+								hidden = getfocusfreeoptionshidden,
+								order = 104,
+							},
+							growdirection = {
+								type = "select",
+								name = L["Grow Direction"],
+								desc = L["Set the grow direction of the %s bars"]:format(L["Focus"]),
+								values = {["up"] = L["Up"], ["down"] = L["Down"]},
+								hidden = getfocusfreeoptionshidden,
+								order = 105,
+							},
+							-- anchored to a cast bar
+							position = {
+								type = "select",
+								name = L["Position"],
+								desc = L["Position the bars for your %s"]:format(L["Focus"]),
+								values = positions,
+								hidden = getfocusnotfreeoptionshidden,
+								order = 103,
+							},
+							gap = {
+								type = "range",
+								name = L["Gap"],
+								desc = L["Tweak the vertical position of the bars for your %s"]:format(L["Focus"]),
+								min = -35, max = 35, step = 1,
+								hidden = getfocusnotfreeoptionshidden,
+								order = 104,
+							},
+							offset = {
+								type = "range",
+								name = L["Offset"],
+								desc = L["Tweak the horizontal position of the bars for your %s"]:format(L["Focus"]),
+								min = -35, max = 35,step = 1,
+								hidden = getfocusnotfreeoptionshidden,
+								order = 106,
+							},
+							spacing = {
+								type = "range",
+								name = L["Spacing"],
+								desc = L["Tweak the space between bars for your %s"]:format(L["Focus"]),
+								min = -35, max = 35, step = 1,
+								order = 107,
+							},
+							nli = {
+								type = "description",
+								name = "",
+								order = 108,
+							},
+							icons = {
+								type = "toggle",
+								name = L["Show Icons"],
+								desc = L["Show icons on buffs and debuffs for your %s"]:format(L["Focus"]),
+								order = 109,
+							},
+							iconside = {
+								type = "select",
+								name = L["Icon Position"],
+								desc = L["Set the side of the buff bar that the icon appears on"],
+								values = {["left"] = L["Left"], ["right"] = L["Right"]},
+								order = 110,
+							},
+						},
 					},
-					offset = {
-						type = 'range',
-						name = L["Offset"],
-						desc = L["Tweak the horizontal position of the bars for your %s"]:format(L["Focus"]),
-						min = -35,
-						max = 35,
-						step = 1,
-						get = get,
-						set = set,
-						--passValue = 'focusoffset',
-						hidden = getfocusnotfreeoptionshidden,
-						order = 106,
-					},
-					spacing = {
-						type = 'range',
-						name = L["Spacing"],
-						desc = L["Tweak the space between bars for your %s"]:format(L["Focus"]),
-						min = -35,
-						max = 35,
-						step = 1,
-						get = get,
-						set = set,
-						--passValue = 'focusspacing',
-						order = 107,
-						hidden = hidefocusoptions,
-					},
-					showicons = {
-						type = 'toggle',
-						name = L["Show Icons"],
-						desc = L["Show icons on buffs and debuffs for your %s"]:format(L["Focus"]),
-						get = get,
-						set = set,
-						--passValue = 'focusicons',
-						order = 108,
-						hidden = hidefocusoptions,
-					},
-					iconside = {
-						type = 'select',
-						name = L["Icon Position"],
-						desc = L["Set the side of the buff bar that the icon appears on"],
-						get = get,
-						set = set,
-						values = {["left"] = L["Left"], ["right"] = L["Right"]},
-						--passValue = 'focusiconside',
-						order = 109,
-						hidden = hidefocusoptions,
-					},
-				},
-			},
-			target = {
-				type = 'group',
-				name = L["Target"],
-				desc = L["Target"],
-				order = 102,
-				args = {
-					show = {
-						type = 'toggle',
-						name = L["Enable %s"]:format(L["Target"]),
-						desc = L["Show buffs/debuffs for your %s"]:format(L["Target"]),
-						get = get,
-						set = set,
-						--passValue = 'target',
-						order = 99,
-					},
-					buffs = {
-						type = 'toggle',
-						name = L["Enable Buffs"],
-						desc = L["Show buffs for your %s"]:format(L["Target"]),
-						get = get,
-						set = set,
-						--passValue = 'targetbuffs',
-						hidden = hidetargetoptions,
-					},
-					debuffs = {
-						type = 'toggle',
-						name = L["Enable Debuffs"],
-						desc = L["Show debuffs for your %s"]:format(L["Target"]),
-						get = get,
-						set = set,
-						--passValue = 'targetdebuffs',
-						hidden = hidetargetoptions,
-					},
-					buffwidth = {
-						type = 'range',
-						name = L["Buff Bar Width"],
-						desc = L["Set the width of the buff bars"],
-						min = 50,
-						max = 300,
-						step = 1,
-						get = get,
-						set = set,
-						--passValue = 'targetwidth',
-						order = 101,
-					},
-					buffheight = {
-						type = 'range',
-						name = L["Buff Bar Height"],
-						desc = L["Set the height of the buff bars"],
-						min = 4,
-						max = 25,
-						step = 1,
-						get = get,
-						set = set,
-						--passValue = 'targetheight',
-						order = 101,
-					},
-					targetanchor = {
-						type = 'select',
-						name = L["Anchor Frame"],
-						desc = L["Select where to anchor the %s bars"]:format(L["Target"]),
-						get = get,
-						set = set,
-						values = {["player"] = L["Player"], ["free"] = L["Free"], ["target"] = L["Target"], ["focus"] = L["Focus"]},
-						hidden = hidetargetoptions,
-						--passValue = 'targetanchor',
+					target = {
+						type = "group",
+						name = L["Target"],
+						desc = L["Target"],
 						order = 102,
-					},
-					-- free
-					targetlock = {
-						type = 'toggle',
-						name = L["Lock"],
-						desc = L["Toggle %s bar lock"]:format(L["Target"]),
-						get = function()
-							return targetlocked
+						get = getOptTarget,
+						set = setOptTarget,
+						disabled = function()
+							return not db.target
 						end,
-						set = function(v)
-							local bar = targetbars[1]
-							if v then
-								bar.Hide = nil
-								bar:EnableMouse(false)
-								bar:SetScript('OnDragStart', nil)
-								bar:SetScript('OnDragStop', nil)
-								Buff:UpdateBars()
-							else
-								bar:Show()
-								bar:EnableMouse(true)
-								bar:SetScript('OnDragStart', targetdragstart)
-								bar:SetScript('OnDragStop', targetdragstop)
-								bar:SetAlpha(1)
-								bar.endTime = bar.endTime or 0
-								bar.Hide = targetnothing
-							end
-							targetlocked = v
-						end,
-						hidden = gettargetfreeoptionshidden,
-						order = 103,
+						args = {
+							show = {
+								type = "toggle",
+								name = L["Enable %s"]:format(L["Target"]),
+								desc = L["Show buffs/debuffs for your %s"]:format(L["Target"]),
+								arg = "target",
+								disabled = false,
+								width = "full",
+								order = 99,
+							},
+							buffs = {
+								type = "toggle",
+								name = L["Enable Buffs"],
+								desc = L["Show buffs for your %s"]:format(L["Target"]),
+							},
+							debuffs = {
+								type = "toggle",
+								name = L["Enable Debuffs"],
+								desc = L["Show debuffs for your %s"]:format(L["Target"]),
+							},
+							width = {
+								type = "range",
+								name = L["Buff Bar Width"],
+								desc = L["Set the width of the buff bars"],
+								min = 50, max = 300, step = 1,
+								order = 101,
+							},
+							height = {
+								type = "range",
+								name = L["Buff Bar Height"],
+								desc = L["Set the height of the buff bars"],
+								min = 4, max = 25, step = 1,
+								order = 101,
+							},
+							anchor = {
+								type = "select",
+								name = L["Anchor Frame"],
+								desc = L["Select where to anchor the %s bars"]:format(L["Target"]),
+								values = {["player"] = L["Player"], ["free"] = L["Free"], ["target"] = L["Target"], ["focus"] = L["Focus"]},
+								order = 102,
+							},
+							-- free
+							targetlock = {
+								type = "toggle",
+								name = L["Lock"],
+								desc = L["Toggle %s bar lock"]:format(L["Target"]),
+								get = function()
+									return targetlocked
+								end,
+								set = function(info, v)
+									local bar = targetbars[1]
+									if v then
+										bar.Hide = nil
+										bar:EnableMouse(false)
+										bar:SetScript("OnDragStart", nil)
+										bar:SetScript("OnDragStop", nil)
+										Buff:UpdateBars()
+									else
+										bar:Show()
+										bar:EnableMouse(true)
+										bar:SetScript("OnDragStart", targetdragstart)
+										bar:SetScript("OnDragStop", targetdragstop)
+										bar:SetAlpha(1)
+										bar.endTime = bar.endTime or 0
+										bar.Hide = targetnothing
+									end
+									targetlocked = v
+								end,
+								hidden = gettargetfreeoptionshidden,
+								order = 103,
+							},
+							x = {
+								type = "range",
+								name = L["X"],
+								desc = L["Set an exact X value for this bar's position."],
+								min = 0, max = 2560, bigStep = 1,
+								hidden = gettargetfreeoptionshidden,
+								order = 104,
+							},
+							y = {
+								type = "range",
+								name = L["Y"],
+								desc = L["Set an exact Y value for this bar's position."],
+								min = 0, max = 1600, bigStep = 1,
+								hidden = gettargetfreeoptionshidden,
+								order = 104,
+							},
+							growdirection = {
+								type = "select",
+								name = L["Grow Direction"],
+								desc = L["Set the grow direction of the %s bars"]:format(L["Target"]),
+								values = {["up"] = L["Up"], ["down"] = L["Down"]},
+								hidden =  gettargetfreeoptionshidden,
+								order = 105,
+							},
+							-- anchored to a cast bar
+							position = {
+								type = "select",
+								name = L["Position"],
+								desc = L["Position the bars for your %s"]:format(L["Target"]),
+								values = positions,
+								hidden = gettargetnotfreeoptionshidden,
+								order = 103,
+							},
+							gap = {
+								type = "range",
+								name = L["Gap"],
+								desc = L["Tweak the vertical position of the bars for your %s"]:format(L["Target"]),
+								min = -35, max = 35, step = 1,
+								order = 101,
+								hidden = gettargetnotfreeoptionshidden,
+								order = 104,
+							},
+							offset = {
+								type = "range",
+								name = L["Offset"],
+								desc = L["Tweak the horizontal position of the bars for your %s"]:format(L["Target"]),
+								min = -35, max = 35, step = 1,
+								hidden = gettargetnotfreeoptionshidden,
+								order = 106,
+							},
+							spacing = {
+								type = "range",
+								name = L["Spacing"],
+								desc = L["Tweak the space between bars for your %s"]:format(L["Target"]),
+								min = -35, max = 35, step = 1,
+								order = 107,
+							},
+							nli = {
+								type = "description",
+								name = "",
+								order = 108,
+							},
+							icons = {
+								type = "toggle",
+								name = L["Show Icons"],
+								desc = L["Show icons on buffs and debuffs for your %s"]:format(L["Target"]),
+								order = 109,
+							},
+							iconside = {
+								type = "select",
+								name = L["Icon Position"],
+								desc = L["Set the side of the buff bar that the icon appears on"],
+								values = {["left"] = L["Left"], ["right"] = L["Right"]},
+								order = 110,
+							},
+						},
 					},
-					x = {
-						type = 'range',
-						name = L["X"],
-						desc = L["Set an exact X value for this bar's position."],
-						min = 0,
-						max = 2560,
-						get = get,
-						set = set,
-						hidden = gettargetfreeoptionshidden,
-						--passValue = 'targetx',
-						order = 104,
-						values = function(v)
-							return tonumber(v) and true
-						end,
-						usage = L["Number"],
+					settings = {
+						type = "group",
+						name = L["Settings"],
+						order = 1,
+						args = {
+							timesort = {
+								type = "toggle",
+								name = L["Sort by Remaining Time"],
+								desc = L["Sort the buffs and debuffs by time remaining.  If unchecked, they will be sorted alphabetically."],
+								order = 103,
+								width = "full",
+							},
+							buffnametext = {
+								type = "toggle",
+								name = L["Buff Name Text"],
+								desc = L["Display the names of buffs/debuffs on their bars"],
+								order = 106,
+							},
+							bufftimetext = {
+								type = "toggle",
+								name = L["Buff Time Text"],
+								desc = L["Display the time remaining on buffs/debuffs on their bars"],
+								order = 107,
+							},
+							bufffont = {
+								type = "select",
+								dialogControl = "LSM30_Font",
+								name = L["Font"],
+								desc = L["Set the font used in the buff bars"],
+								values = lsmlist.statusbar,
+								order = 108,
+							},
+							bufftexture = {
+								type = "select",
+								dialogControl = "LSM30_Statusbar", 
+								name = L["Texture"],
+								desc = L["Set the buff bar Texture"],
+								values = lsmlist.statusbar,
+								order = 109,
+							},
+							bufftextcolor = {
+								type = "color",
+								name = L["Text Color"],
+								desc = L["Set the color of the text for the buff bars"],
+								order = 110,
+								width = "full",
+							},
+							bufffontsize = {
+								type = "range",
+								name = L["Font Size"],
+								desc = L["Set the font size for the buff bars"],
+								min = 3, max = 15, step = 1,
+								order = 111,
+							},
+							buffalpha = {
+								type = "range",
+								name = L["Alpha"],
+								desc = L["Set the alpha of the buff bars"],
+								min = 0.05, max = 1, step = 0.05,
+								isPercent = true,
+								order = 112,
+							},
+						},
 					},
-					y = {
-						type = 'range',
-						name = L["Y"],
-						desc = L["Set an exact Y value for this bar's position."],
-						min = 0,
-						max = 1600,
-						get = get,
-						set = set,
-						hidden = gettargetfreeoptionshidden,
-						--passValue = 'targety',
-						order = 104,
-						values = function(v)
-							return tonumber(v) and true
-						end,
-						usage = L["Number"],
+					colors = {
+						type = "group",
+						name = L["Colors"],
+						desc = L["Colors"],
+						order = -1,
+						args = {
+							buffcolor = {
+								type = "color",
+								name = L["Buff Color"],
+								desc = L["Set the color of the bars for buffs"],
+								get = getColor,
+								set = setColor,
+							},
+							debuffsbytype = {
+								type = "toggle",
+								name = L["Debuffs by Type"],
+								desc = L["Color debuff bars according to their dispel type"],
+								order = 101,
+							},
+							debuffcolor = {
+								type = "color",
+								name = L["Debuff Color"],
+								desc = L["Set the color of the bars for debuffs"],
+								get = getColor,
+								set = setColor,
+								disabled = hidedebuffsnottype,
+								order = 102,
+							},
+							physcolor = {
+								type = "color",
+								name = L["Undispellable Color"],
+								desc = L["Set the color of the bars for undispellable debuffs"],
+								get = getColor,
+								set = setColor,
+								arg = "debuffcolor",
+								disabled = hidedebuffsbytype,
+								order = 102,
+							},
+							Curse = {
+								type = "color",
+								name = L["Curse Color"],
+								desc = L["Set the color of the bars for curses"],
+								get = getColor,
+								set = setColor,
+								disabled = hidedebuffsbytype,
+								order = 103,
+							},
+							Disease = {
+								type = "color",
+								name = L["Disease Color"],
+								desc = L["Set the color of the bars for diseases"],
+								get = getColor,
+								set = setColor,
+								disabled = hidedebuffsbytype,
+								order = 104,
+							},
+							Magic = {
+								type = "color",
+								name = L["Magic Color"],
+								desc = L["Set the color of the bars for magic"],
+								get = getColor,
+								set = setColor,
+								disabled = hidedebuffsbytype,
+								order = 105,
+							},
+							Poison = {
+								type = "color",
+								name = L["Poison Color"],
+								desc = L["Set the color of the bars for poisons"],
+								get = getColor,
+								set = setColor,
+								disabled = hidedebuffsbytype,
+								order = 106,
+							},
+						},
 					},
-					targetgrowdirection = {
-						type = 'select',
-						name = L["Grow Direction"],
-						desc = L["Set the grow direction of the %s bars"]:format(L["Target"]),
-						get = get,
-						set = set,
-						values = {["up"] = L["Up"], ["down"] = L["Down"]},
-						--passValue = 'targetgrowdirection',
-						hidden =  gettargetfreeoptionshidden,
-						order = 105,
-					},
-					-- anchored to a cast bar
-					position = {
-						type = 'select',
-						name = L["Position"],
-						desc = L["Position the bars for your %s"]:format(L["Target"]),
-						get = get,
-						set = set,
-						values = positions,
-						--passValue = 'targetposition',
-						hidden = gettargetnotfreeoptionshidden,
-						order = 103,
-					},
-					gap = {
-						type = 'range',
-						name = L["Gap"],
-						desc = L["Tweak the vertical position of the bars for your %s"]:format(L["Target"]),
-						min = -35,
-						max = 35,
-						step = 1,
-						get = get,
-						set = set,
-						--passValue = 'targetgap',
-						order = 101,
-						hidden = gettargetnotfreeoptionshidden,
-						order = 104,
-					},
-					offset = {
-						type = 'range',
-						name = L["Offset"],
-						desc = L["Tweak the horizontal position of the bars for your %s"]:format(L["Target"]),
-						min = -35,
-						max = 35,
-						step = 1,
-						get = get,
-						set = set,
-						--passValue = 'targetoffset',
-						hidden = gettargetnotfreeoptionshidden,
-						order = 106,
-					},
-					spacing = {
-						type = 'range',
-						name = L["Spacing"],
-						desc = L["Tweak the space between bars for your %s"]:format(L["Target"]),
-						min = -35,
-						max = 35,
-						step = 1,
-						get = get,
-						set = set,
-						--passValue = 'targetspacing',
-						order = 107,
-						hidden = hidetargetoptions,
-					},
-					showicons = {
-						type = 'toggle',
-						name = L["Show Icons"],
-						desc = L["Show icons on buffs and debuffs for your %s"]:format(L["Target"]),
-						get = get,
-						set = set,
-						--passValue = 'targeticons',
-						order = 108,
-						hidden = hidetargetoptions,
-					},
-					iconside = {
-						type = 'select',
-						name = L["Icon Position"],
-						desc = L["Set the side of the buff bar that the icon appears on"],
-						get = get,
-						set = set,
-						values = {Left = L["Left"], Right = L["Right"]},
-						--passValue = 'targeticonside',
-						order = 109,
-						hidden = hidetargetoptions,
-					},
-				},
-			},
-			timesort = {
-				type = 'toggle',
-				name = L["Sort by Remaining Time"],
-				desc = L["Sort the buffs and debuffs by time remaining.  If unchecked, they will be sorted alphabetically."],
-				get = get,
-				set = set,
-				order = 103,
-				--passValue = 'timesort',
-			},
-			bufftexture = {
-				type = 'select',
-				dialogControl = "LSM30_Statusbar", 
-				name = L["Texture"],
-				desc = L["Set the buff bar Texture"],
-				values = lsmlist.statusbar,
-				order = 103,
-				get = get,
-				set = set,
-				--passValue = 'bufftexture',
-			},
-			buffnametext = {
-				type = 'toggle',
-				name = L["Buff Name Text"],
-				desc = L["Display the names of buffs/debuffs on their bars"],
-				get = get,
-				set = set,
-				--passValue = 'buffnametext',
-				order = 106,
-			},
-			bufftimetext = {
-				type = 'toggle',
-				name = L["Buff Time Text"],
-				desc = L["Display the time remaining on buffs/debuffs on their bars"],
-				get = get,
-				set = set,
-				--passValue = 'bufftimetext',
-				order = 107,
-			},
-			bufffont = {
-				type = 'select',
-				dialogControl = "LSM30_Font",
-				name = L["Font"],
-				desc = L["Set the font used in the buff bars"],
-				values = lsmlist.statusbar,
-				get = get,
-				set = set,
-				--passValue = 'bufffont',
-				order = 108,
-			},
-			bufftextcolor = {
-				type = 'color',
-				name = L["Text Color"],
-				desc = L["Set the color of the text for the buff bars"],
-				get = getcolor,
-				set = setcolor,
-				--passValue = 'bufftextcolor',
-				order = 109,
-			},
-			bufffontsize = {
-				type = 'range',
-				name = L["Font Size"],
-				desc = L["Set the font size for the buff bars"],
-				min = 3,
-				max = 15,
-				step = 1,
-				get = get,
-				set = set,
-				--passValue = 'bufffontsize',
-				order = 110,
-			},
-			buffalpha = {
-				type = 'range',
-				name = L["Alpha"],
-				desc = L["Set the alpha of the buff bars"],
-				min = 0.05,
-				max = 1,
-				step = 0.05,
-				isPercent = true,
-				get = get,
-				set = set,
-				--passValue = 'buffalpha',
-				order = 111,
-			},
-			colors = {
-				type = 'group',
-				name = L["Colors"],
-				desc = L["Colors"],
-				order = -1,
-				args = {
-					buffcolor = {
-						type = 'color',
-						name = L["Buff Color"],
-						desc = L["Set the color of the bars for buffs"],
-						get = getcolor,
-						set = setcolor,
-						--passValue = 'buffcolor',
-					},
-					debuffsbytype = {
-						type = 'toggle',
-						name = L["Debuffs by Type"],
-						desc = L["Color debuff bars according to their dispel type"],
-						get = get,
-						set = set,
-						--passValue = 'debuffsbytype',
-						order = 101,
-					},
-					debuffcolor = {
-						type = 'color',
-						name = L["Debuff Color"],
-						desc = L["Set the color of the bars for debuffs"],
-						get = getcolor,
-						set = setcolor,
-						--passValue = 'debuffcolor',
-						hidden = hidedebuffsnottype,
-						order = 102,
-					},
-					physcolor = {
-						type = 'color',
-						name = L["Undispellable Color"],
-						desc = L["Set the color of the bars for undispellable debuffs"],
-						get = getcolor,
-						set = setcolor,
-						--passValue = 'debuffcolor',
-						hidden = hidedebuffsbytype,
-						order = 102,
-					},
-					cursecolor = {
-						type = 'color',
-						name = L["Curse Color"],
-						desc = L["Set the color of the bars for curses"],
-						get = getcolor,
-						set = setcolor,
-						--passValue = 'Curse',
-						hidden = hidedebuffsbytype,
-						order = 103,
-					},
-					diseasecolor = {
-						type = 'color',
-						name = L["Disease Color"],
-						desc = L["Set the color of the bars for diseases"],
-						get = getcolor,
-						set = setcolor,
-						--passValue = 'Disease',
-						hidden = hidedebuffsbytype,
-						order = 104,
-					},
-					magiccolor = {
-						type = 'color',
-						name = L["Magic Color"],
-						desc = L["Set the color of the bars for magic"],
-						get = getcolor,
-						set = setcolor,
-						--passValue = 'Magic',
-						hidden = hidedebuffsbytype,
-						order = 105,
-					},
-					poisoncolor = {
-						type = 'color',
-						name = L["Poison Color"],
-						desc = L["Set the color of the bars for poisons"],
-						get = getcolor,
-						set = setcolor,
-						--passValue = 'Poison',
-						hidden = hidedebuffsbytype,
-						order = 106,
-					},
-				},
-			},
-		}
-		return options
+				}
+			}
 		end
+		return options
 	end
 end
 
@@ -871,7 +757,7 @@ function Buff:OnInitialize()
 	db = self.db.profile
 	
 	self:SetEnabledState(Quartz3:GetModuleEnabled(MODNAME))
-	Quartz3:RegisterModuleOptions(MODNAME, getOptions, MODNAME)
+	Quartz3:RegisterModuleOptions(MODNAME, getOptions, L["Buff"])
 end
 
 function Buff:OnEnable()
@@ -888,34 +774,37 @@ function Buff:OnEnable()
 			end
 		end
 	end)
-	Quartz3.ApplySettings()
+	self:ApplySettings()
 end
+
 function Buff:OnDisable()
 	targetbars[1].Hide = nil
 	targetbars[1]:EnableMouse(false)
-	targetbars[1]:SetScript('OnDragStart', nil)
-	targetbars[1]:SetScript('OnDragStop', nil)
+	targetbars[1]:SetScript("OnDragStart", nil)
+	targetbars[1]:SetScript("OnDragStop", nil)
 	for _, v in pairs(targetbars) do
 		v:Hide()
 	end
 	focusbars[1].Hide = nil
 	focusbars[1]:EnableMouse(false)
-	focusbars[1]:SetScript('OnDragStart', nil)
-	focusbars[1]:SetScript('OnDragStop', nil)
+	focusbars[1]:SetScript("OnDragStart", nil)
+	focusbars[1]:SetScript("OnDragStop", nil)
 	for _, v in pairs(focusbars) do
 		v:Hide()
 	end
 end
+
 function Buff:UNIT_AURA(units)
 	for unit in pairs(units) do
-		if unit == 'target' then
+		if unit == "target" then
 			self:UpdateTargetBars()
 		end
-		if unit == 'focus' or UnitIsUnit('focus', unit) then
+		if unit == "focus" or UnitIsUnit("focus", unit) then
 			self:UpdateFocusBars()
 		end
 	end
 end
+
 function Buff:CheckForUpdate()
 	if targetbars[1]:IsShown() then
 		self:UpdateTargetBars()
@@ -924,13 +813,27 @@ function Buff:CheckForUpdate()
 		self:UpdateFocusBars()
 	end
 end
+
 function Buff:UpdateBars()
 	self:UpdateTargetBars()
 	self:UpdateFocusBars()
 end
+
 do
-	local function sort(a,b)
-		if db.profile.timesort then
+	local tblCache = setmetatable({}, {__mode="k"})
+	local function new()
+		local entry = next(tblCache)
+		if entry then tblCache[entry] = nil else entry = {} end
+		return entry
+	end
+	local function del(tbl)
+		-- these 2 values are not in every table, clear them
+		tbl.isbuff, tbl.dispeltype = nil, nil
+		tblCache[tbl] = true
+	end
+	
+	local function mysort(a,b)
+		if db.timesort then
 			if a.isbuff == b.isbuff then
 				return a.remaining < b.remaining
 			else
@@ -944,6 +847,7 @@ do
 			end
 		end
 	end
+	
 	local tmp = {}
 	local called = false -- prevent recursive calls when new bars are created.
 	function Buff:UpdateTargetBars()
@@ -951,7 +855,6 @@ do
 			return
 		end
 		called = true
-		local db = db.profile
 		if db.target then
 			local currentTime = GetTime()
 			for k in pairs(tmp) do
@@ -959,7 +862,7 @@ do
 			end
 			if db.targetbuffs then
 				for i = 1, 32 do
-					local name, rank, texture, applications, _, duration, expirationTime, caster = UnitBuff('target', i)
+					local name, rank, texture, applications, _, duration, expirationTime, caster = UnitBuff("target", i)
 					local remaining = expirationTime and (expirationTime - GetTime()) or nil
 					if not name then
 						break
@@ -978,7 +881,7 @@ do
 			end
 			if db.targetdebuffs then
 				for i = 1, 40 do
-					local name, rank, texture, applications, dispeltype, duration, expirationTime, caster = UnitDebuff('target', i)
+					local name, rank, texture, applications, dispeltype, duration, expirationTime, caster = UnitDebuff("target", i)
 					local remaining =  expirationTime and (expirationTime - GetTime()) or nil
 					if not name then
 						break
@@ -995,13 +898,13 @@ do
 					end
 				end
 			end
-			sort(tmp, sort)
+			sort(tmp, mysort)
 			local maxindex = 0
 			for k,v in ipairs(tmp) do
 				maxindex = k
 				local bar = targetbars[k]
 				if v.applications > 1 then
-					bar.text:SetText(('%s (%s)'):format(v.name, v.applications))
+					bar.text:SetText(("%s (%s)"):format(v.name, v.applications))
 				else
 					bar.text:SetText(v.name)
 				end
@@ -1033,19 +936,20 @@ do
 		else
 			targetbars[1].Hide = nil
 			targetbars[1]:EnableMouse(false)
-			targetbars[1]:SetScript('OnDragStart', nil)
-			targetbars[1]:SetScript('OnDragStop', nil)
+			targetbars[1]:SetScript("OnDragStart", nil)
+			targetbars[1]:SetScript("OnDragStop", nil)
 			for _, v in ipairs(targetbars) do
 				v:Hide()
 			end
 		end
 		if targetbars[1]:IsShown() then
-			if not self:IsEventScheduled('Quartz3_Buff-AutoUpdate') then
-				self:ScheduleRepeatingEvent('Quartz3_Buff-AutoUpdate', self.CheckForUpdate, 3, self)
+			if not self.autoUpdateTimer then
+				self.autoUpdateTimer = self:ScheduleRepeatingTimer("CheckForUpdate", 3)
 			end
 		elseif not focusbars[1]:IsShown() then
-			if self:IsEventScheduled('Quartz3_Buff-AutoUpdate') then
-				self:CancelScheduledEvent('Quartz3_Buff-AutoUpdate')
+			if self.autoUpdateTimer then
+				self:CancelTimer(self.autoUpdateTimer)
+				self.autoUpdateTimer = nil
 			end
 		end
 		called = false
@@ -1055,7 +959,6 @@ do
 			return
 		end
 		called = true
-		local db = db.profile
 		if db.focus then
 			local currentTime = GetTime()
 			for k in pairs(tmp) do
@@ -1063,7 +966,7 @@ do
 			end
 			if db.focusbuffs then
 				for i = 1, 32 do
-					local name, rank, texture, applications, dispeltype, duration, expirationTime, caster = UnitBuff('focus', i)
+					local name, rank, texture, applications, dispeltype, duration, expirationTime, caster = UnitBuff("focus", i)
 					local remaining =  expirationTime and (expirationTime - GetTime()) or nil
 					if not name then
 						break
@@ -1082,7 +985,7 @@ do
 			end
 			if db.focusdebuffs then
 				for i = 1, 40 do
-					local name, rank, texture, applications, dispeltype, duration, expirationTime, caster = UnitDebuff('focus', i)
+					local name, rank, texture, applications, dispeltype, duration, expirationTime, caster = UnitDebuff("focus", i)
 					local remaining =  expirationTime and (expirationTime - GetTime()) or nil
 					if not name then
 						break
@@ -1105,7 +1008,7 @@ do
 				maxindex = k
 				local bar = focusbars[k]
 				if v.applications > 1 then
-					bar.text:SetText(('%s (%s)'):format(v.name, v.applications))
+					bar.text:SetText(("%s (%s)"):format(v.name, v.applications))
 				else
 					bar.text:SetText(v.name)
 				end
@@ -1137,19 +1040,20 @@ do
 		else
 			focusbars[1].Hide = nil
 			focusbars[1]:EnableMouse(false)
-			focusbars[1]:SetScript('OnDragStart', nil)
-			focusbars[1]:SetScript('OnDragStop', nil)
+			focusbars[1]:SetScript("OnDragStart", nil)
+			focusbars[1]:SetScript("OnDragStop", nil)
 			for _, v in ipairs(focusbars) do
 				v:Hide()
 			end
 		end
 		if focusbars[1]:IsShown() then
-			if not self:IsEventScheduled('Quartz_Buff-AutoUpdate') then
-				self:ScheduleRepeatingEvent('Quartz_Buff-AutoUpdate', self.CheckForUpdate, 3, self)
+			if not self.autoUpdateTimer then
+				self.autoUpdateTimer = self:ScheduleRepeatingTimer("CheckForUpdate", 3)
 			end
 		elseif not targetbars[1]:IsShown() then
-			if self:IsEventScheduled('Quartz_Buff-AutoUpdate') then
-				self:CancelScheduledEvent('Quartz_Buff-AutoUpdate')
+			if self.autoUpdateTimer then
+				self:CancelTimer(self.autoUpdateTimer)
+				self.autoUpdateTimer = nil
 			end
 		end
 		called = false
@@ -1159,7 +1063,7 @@ do
 	local function apply(unit, i, bar, db, direction)
 		local bars, position, icons, iconside, gap, spacing, offset, anchor, x, y, grow, height, width
 		local qpdb = Player.db.profile
-		if unit == 'target' then
+		if unit == "target" then
 			bars = targetbars
 			position = db.targetposition
 			icons = db.targeticons
@@ -1189,98 +1093,98 @@ do
 			height = db.focusheight
 		end
 		bar:ClearAllPoints()
-		bar:SetStatusBarTexture(media:Fetch('statusbar', db.bufftexture))
+		bar:SetStatusBarTexture(media:Fetch("statusbar", db.bufftexture))
 		bar:SetWidth(width)
 		bar:SetHeight(height)
 		bar:SetScale(qpdb.scale)
 		bar:SetAlpha(db.buffalpha)
 		
-		if anchor == L["Free"] then
+		if anchor == "free" then
 			if i == 1 then
-				bar:SetPoint('BOTTOMLEFT', UIParent, 'BOTTOMLEFT', x, y)
-				if grow == L["Up"] then
+				bar:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", x, y)
+				if grow == "up" then
 					direction = 1
 				else --L["Down"]
 					direction = -1
 				end
 			else
 				if direction == 1 then
-					bar:SetPoint('BOTTOMRIGHT', bars[i-1], 'TOPRIGHT', 0, spacing)
+					bar:SetPoint("BOTTOMRIGHT", bars[i-1], "TOPRIGHT", 0, spacing)
 				else -- -1
-					bar:SetPoint('TOPRIGHT', bars[i-1], 'BOTTOMRIGHT', 0, -1 * spacing)
+					bar:SetPoint("TOPRIGHT", bars[i-1], "BOTTOMRIGHT", 0, -1 * spacing)
 				end
 			end
 		else
 			if i == 1 then
 				local anchorframe
-				if anchor == L["Focus"] and Focus.Bar then
+				if anchor == "focus" and Focus.Bar then
 					anchorframe = Focus.Bar
-				elseif anchor == L["Target"] and Target.Bar then
+				elseif anchor == "target" and Target.Bar then
 					anchorframe = Target.Bar
 				else -- L["Player"]
 					anchorframe = Player.Bar
 				end
 				
-				if position == L["Top"] then
+				if position == "top" then
 					direction = 1
-					bar:SetPoint('BOTTOM', anchorframe, 'TOP', 0, gap)
-				elseif position == L["Bottom"] then
+					bar:SetPoint("BOTTOM", anchorframe, "TOP", 0, gap)
+				elseif position == "bottom" then
 					direction = -1
-					bar:SetPoint('TOP', anchorframe, 'BOTTOM', 0, -1 * gap)
-				elseif position == L["Top Right"] then
+					bar:SetPoint("TOP", anchorframe, "BOTTOM", 0, -1 * gap)
+				elseif position == "topright" then
 					direction = 1
-					bar:SetPoint('BOTTOMRIGHT', anchorframe, 'TOPRIGHT', -1 * offset, gap)
-				elseif position == L["Bottom Right"] then
+					bar:SetPoint("BOTTOMRIGHT", anchorframe, "TOPRIGHT", -1 * offset, gap)
+				elseif position == "bottomright" then
 					direction = -1
-					bar:SetPoint('TOPRIGHT', anchorframe, 'BOTTOMRIGHT', -1 * offset, -1 * gap)
-				elseif position == L["Top Left"] then
+					bar:SetPoint("TOPRIGHT", anchorframe, "BOTTOMRIGHT", -1 * offset, -1 * gap)
+				elseif position == "topleft" then
 					direction = 1
-					bar:SetPoint('BOTTOMLEFT', anchorframe, 'TOPLEFT', offset, gap)
-				elseif position == L["Bottom Left"] then
+					bar:SetPoint("BOTTOMLEFT", anchorframe, "TOPLEFT", offset, gap)
+				elseif position == "bottomleft" then
 					direction = -1
-					bar:SetPoint('TOPLEFT', anchorframe, 'BOTTOMLEFT', offset, -1 * gap)
-				elseif position == L["Left (grow up)"] then
-					if iconside == L["Right"] and showicons then
+					bar:SetPoint("TOPLEFT", anchorframe, "BOTTOMLEFT", offset, -1 * gap)
+				elseif position == "leftup" then
+					if iconside == "right" and showicons then
 						offset = offset + height
 					end
-					if qpdb.iconposition == L["Left"] and not qpdb.hideicon then
+					if qpdb.iconposition == "left" and not qpdb.hideicon then
 						offset = offset + qpdb.h
 					end
 					direction = 1
-					bar:SetPoint('BOTTOMRIGHT', anchorframe, 'BOTTOMLEFT', -1 * offset, gap)
-				elseif position == L["Left (grow down)"] then
-					if iconside == L["Right"] and showicons then
+					bar:SetPoint("BOTTOMRIGHT", anchorframe, "BOTTOMLEFT", -1 * offset, gap)
+				elseif position == "leftdown" then
+					if iconside == "right" and showicons then
 						offset = offset + height
 					end
-					if qpdb.iconposition == L["Left"] and not qpdb.hideicon then
+					if qpdb.iconposition == "left" and not qpdb.hideicon then
 						offset = offset + qpdb.h
 					end
 					direction = -1
-					bar:SetPoint('TOPRIGHT', anchorframe, 'TOPLEFT', -3 * offset, -1 * gap)
-				elseif position == L["Right (grow up)"] then
-					if iconside == L["Left"] and showicons then
+					bar:SetPoint("TOPRIGHT", anchorframe, "TOPLEFT", -3 * offset, -1 * gap)
+				elseif position == "rightup" then
+					if iconside == "left" and showicons then
 						offset = offset + height
 					end
-					if qpdb.iconposition == L["Right"] and not qpdb.hideicon then
+					if qpdb.iconposition == "right" and not qpdb.hideicon then
 						offset = offset + qpdb.h
 					end
 					direction = 1
-					bar:SetPoint('BOTTOMLEFT', anchorframe, 'BOTTOMRIGHT', offset, gap)
-				elseif position == L["Right (grow down)"] then
-					if iconside == L["Left"] and showicons then
+					bar:SetPoint("BOTTOMLEFT", anchorframe, "BOTTOMRIGHT", offset, gap)
+				elseif position == "rightdown" then
+					if iconside == "left" and showicons then
 						offset = offset + height
 					end
-					if qpdb.iconposition == L["Right"] and not qpdb.hideicon then
+					if qpdb.iconposition == "right" and not qpdb.hideicon then
 						offset = offset + qpdb.h
 					end
 					direction = -1
-					bar:SetPoint('TOPLEFT', anchorframe, 'TOPRIGHT', offset, -1 * gap)
+					bar:SetPoint("TOPLEFT", anchorframe, "TOPRIGHT", offset, -1 * gap)
 				end
 			else
 				if direction == 1 then
-					bar:SetPoint('BOTTOMRIGHT', bars[i-1], 'TOPRIGHT', 0, spacing)
+					bar:SetPoint("BOTTOMRIGHT", bars[i-1], "TOPRIGHT", 0, spacing)
 				else -- -1
-					bar:SetPoint('TOPRIGHT', bars[i-1], 'BOTTOMRIGHT', 0, -1 * spacing)
+					bar:SetPoint("TOPRIGHT", bars[i-1], "BOTTOMRIGHT", 0, -1 * spacing)
 				end
 			end
 		end
@@ -1295,7 +1199,7 @@ do
 		else
 			timetext:Hide()
 		end
-		timetext:SetFont(media:Fetch('font', db.bufffont), db.bufffontsize)
+		timetext:SetFont(media:Fetch("font", db.bufffont), db.bufffontsize)
 		timetext:SetShadowColor( 0, 0, 0, 1)
 		timetext:SetShadowOffset( 0.8, -0.8 )
 		timetext:SetTextColor(unpack(db.bufftextcolor))
@@ -1303,7 +1207,7 @@ do
 		timetext:SetHeight(height)
 		
 		local temptext = timetext:GetText()
-		timetext:SetText('10.0')
+		timetext:SetText("10.0")
 		local normaltimewidth = timetext:GetStringWidth()
 		timetext:SetText(temptext)
 		
@@ -1321,7 +1225,7 @@ do
 		else
 			text:Hide()
 		end
-		text:SetFont(media:Fetch('font', db.bufffont), db.bufffontsize)
+		text:SetFont(media:Fetch("font", db.bufffont), db.bufffontsize)
 		text:SetShadowColor( 0, 0, 0, 1)
 		text:SetShadowOffset( 0.8, -0.8 )
 		text:SetTextColor(unpack(db.bufftextcolor))
@@ -1335,10 +1239,10 @@ do
 			icon:SetHeight(height-1)
 			icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
 			icon:ClearAllPoints()
-			if iconside == L["Left"] then
-				icon:SetPoint('RIGHT', bar, "LEFT", -1, 0)
+			if iconside == "left" then
+				icon:SetPoint("RIGHT", bar, "LEFT", -1, 0)
 			else
-				icon:SetPoint('LEFT', bar, "RIGHT", 1, 0)
+				icon:SetPoint("LEFT", bar, "RIGHT", 1, 0)
 			end
 		else
 			icon:Hide()
@@ -1347,27 +1251,27 @@ do
 		return direction
 	end
 	function Buff:ApplySettings()
-		if Quartz3:GetModuleEnabled(MODNAME) and db then
-			local db = db.profile
+		if Quartz3:GetModuleEnabled(MODNAME) then
+			db = self.db.profile
 			local direction
-			if db.targetanchor ~= L["Free"] then
+			if db.targetanchor ~= "free" then
 				targetbars[1].Hide = nil
 				targetbars[1]:EnableMouse(false)
-				targetbars[1]:SetScript('OnDragStart', nil)
-				targetbars[1]:SetScript('OnDragStop', nil)
+				targetbars[1]:SetScript("OnDragStart", nil)
+				targetbars[1]:SetScript("OnDragStop", nil)
 			end
-			if db.focusanchor ~= L["Free"] then
+			if db.focusanchor ~= "free" then
 				focusbars[1].Hide = nil
 				focusbars[1]:EnableMouse(false)
-				focusbars[1]:SetScript('OnDragStart', nil)
-				focusbars[1]:SetScript('OnDragStop', nil)
+				focusbars[1]:SetScript("OnDragStart", nil)
+				focusbars[1]:SetScript("OnDragStop", nil)
 			end
 			for i, v in pairs(targetbars) do
-				direction = apply('target', i, v, db, direction)
+				direction = apply("target", i, v, db, direction)
 			end
 			direction = nil
 			for i, v in pairs(focusbars) do
-				direction = apply('focus', i, v, db, direction)
+				direction = apply("focus", i, v, db, direction)
 			end
 			self:UpdateBars()
 		end
