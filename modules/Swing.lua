@@ -63,7 +63,7 @@ local resetautoshotspells = {
 	--[GetSpellInfo(19434)] = true, -- Aimed Shot
 }
 
-local swingbar, swingbar_width, swingstatusbar, remainingtext, durationtext, db
+local swingbar, swingbar_width, swingstatusbar, remainingtext, durationtext
 local swingmode -- nil is none, 0 is meleeing, 1 is autoshooting
 local starttime, duration
 local slamstart

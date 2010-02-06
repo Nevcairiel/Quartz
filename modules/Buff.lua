@@ -1042,7 +1042,7 @@ do
 				maxindex = k
 				local bar = focusbars[k]
 				if v.applications > 1 then
-					bar.text:SetText(("%s (%s)"):format(v.name, v.applications))
+					bar.text:SetFormattedText("%s (%s)", v.name, v.applications)
 				else
 					bar.text:SetText(v.name)
 				end

@@ -161,7 +161,7 @@ function Latency:UNIT_SPELLCAST_START(object, event, unit)
 				lagtext:SetPoint(point.."RIGHT", lagbox, relpoint.."RIGHT", -1, 0)
 			end
 		end
-		lagtext:SetText(L["%dms"]:format(timeDiff*1000))
+		lagtext:SetText(L["%dms"], timeDiff*1000)
 		lagtext:Show()
 	else
 		lagtext:Hide()
@@ -240,7 +240,7 @@ function Latency:UNIT_SPELLCAST_CHANNEL_START(object, event, unit)
 				lagtext:SetPoint(point.."RIGHT", lagbox, relpoint.."RIGHT", -1, 0)
 			end
 		end
-		lagtext:SetText(L["%dms"]:format(timeDiff*1000))
+		lagtext:SetText(L["%dms"], timeDiff*1000)
 		lagtext:Show()
 	else
 		lagtext:Hide()

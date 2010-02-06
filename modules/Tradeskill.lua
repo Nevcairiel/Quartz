@@ -131,7 +131,7 @@ function Tradeskill:UNIT_SPELLCAST_START(object, event, unit)
 		if numleft <= 1 then
 			castBarText:SetText(displayName)
 		else
-			castBarText:SetText(displayName.." ("..numleft..")")
+			castBarText:SetFormattedText("%s (%s)", displayName, numleft)
 		end
 		castBarSpark:Show()
 		castBarIcon:SetTexture(icon)
