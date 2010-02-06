@@ -21,9 +21,9 @@ local LibStub = _G.LibStub
 local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
-local MODNAME = L["GCD"]
+local MODNAME = "GCD"
 local GCD = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
-local Player = Quartz3:GetModule(L["Player"])
+local Player = Quartz3:GetModule("Player")
 
 local tonumber = _G.tonumber
 local unpack = _G.unpack
@@ -31,17 +31,17 @@ local GetSpellCooldown = _G.GetSpellCooldown
 local GetTime = _G.GetTime
 local BOOKTYPE_SPELL = _G.BOOKTYPE_SPELL
 
-local gcdbar, gcdbar_width, gcdspark, db
+local gcdbar, gcdbar_width, gcdspark
 local starttime, duration, warned
 
-local getOptions
+local db, getOptions
 
 local defaults = {
 	profile = {
 		sparkcolor = {1, 1, 1},
 		gcdalpha = 0.9,
 		gcdheight = 4,
-		gcdposition = L["Bottom"],
+		gcdposition = "bottom",
 		gcdgap = -4,
 		
 		deplete = false,
@@ -57,20 +57,20 @@ local function OnUpdate()
 	if perc > 1 then
 		return gcdbar:Hide()
 	else
-		if db.profile.deplete then
-			gcdspark:SetPoint('CENTER', gcdbar, 'LEFT', gcdbar_width * (1-perc), 0)
+		if db.deplete then
+			gcdspark:SetPoint("CENTER", gcdbar, "LEFT", gcdbar_width * (1-perc), 0)
 		else
-			gcdspark:SetPoint('CENTER', gcdbar, 'LEFT', gcdbar_width * perc, 0)
+			gcdspark:SetPoint("CENTER", gcdbar, "LEFT", gcdbar_width * perc, 0)
 		end
 	end
 end
 
 local function OnHide()
-	gcdbar:SetScript('OnUpdate', nil)
+	gcdbar:SetScript("OnUpdate", nil)
 end
 
 local function OnShow()
-	gcdbar:SetScript('OnUpdate', OnUpdate)
+	gcdbar:SetScript("OnUpdate", OnUpdate)
 end
 
 function GCD:OnInitialize()
@@ -78,26 +78,26 @@ function GCD:OnInitialize()
 	db = self.db.profile
 	
 	self:SetEnabledState(Quartz3:GetModuleEnabled(MODNAME))
-	Quartz3:RegisterModuleOptions(MODNAME, getOptions, MODNAME)
-
+	Quartz3:RegisterModuleOptions(MODNAME, getOptions, L["GCD"])
 end
 
 function GCD:OnEnable()
+	--self:RegisterEvent("UNIT_SPELLCAST_SENT","CheckGCD")
 	self:RegisterEvent("UNIT_SPELLCAST_START","CheckGCD")
 	self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED","CheckGCD")
 	if not gcdbar then
-		gcdbar = CreateFrame('Frame', 'Quartz3GCDBar', UIParent)
-		gcdbar:SetFrameStrata('HIGH')
-		gcdbar:SetScript('OnShow', OnShow)
-		gcdbar:SetScript('OnHide', OnHide)
+		gcdbar = CreateFrame("Frame", "Quartz3GCDBar", UIParent)
+		gcdbar:SetFrameStrata("HIGH")
+		gcdbar:SetScript("OnShow", OnShow)
+		gcdbar:SetScript("OnHide", OnHide)
 		gcdbar:SetMovable(true)
-		gcdbar:RegisterForDrag('LeftButton')
+		gcdbar:RegisterForDrag("LeftButton")
 		gcdbar:SetClampedToScreen(true)
 		
-		gcdspark = gcdbar:CreateTexture(nil, 'DIALOG')
+		gcdspark = gcdbar:CreateTexture(nil, "DIALOG")
 		gcdbar:Hide()
 	end
-	Quartz3.ApplySettings()
+	self:ApplySettings()
 end
 function GCD:OnDisable()
 	gcdbar:Hide()
@@ -117,210 +117,176 @@ end
 
 function GCD:ApplySettings()
 	if gcdbar and Quartz3:GetModuleEnabled(MODNAME) then
-		local ldb = db.profile
+		db = self.db.profile
 		gcdbar:ClearAllPoints()
-		gcdbar:SetHeight(ldb.gcdheight)
+		gcdbar:SetHeight(db.gcdheight)
 		gcdbar_width = Player.Bar:GetWidth() - 8
 		gcdbar:SetWidth(gcdbar_width)
 		gcdbar:SetBackdrop({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16})
 		gcdbar:SetBackdropColor(0,0,0)
-		gcdbar:SetAlpha(ldb.gcdalpha)
+		gcdbar:SetAlpha(db.gcdalpha)
 		gcdbar:SetScale(Player.db.profile.scale)
-		if ldb.gcdposition == L["Bottom"] then
-			gcdbar:SetPoint("TOP", Player.Bar, "BOTTOM", 0, -1 * ldb.gcdgap)
-		elseif ldb.gcdposition == L["Top"] then
-			gcdbar:SetPoint("BOTTOM", Player.Bar, "TOP", 0, ldb.gcdgap)
+		if db.gcdposition == "bottom" then
+			gcdbar:SetPoint("TOP", Player.Bar, "BOTTOM", 0, -1 * db.gcdgap)
+		elseif db.gcdposition == "top" then
+			gcdbar:SetPoint("BOTTOM", Player.Bar, "TOP", 0, db.gcdgap)
 		else -- L["Free"]
-			gcdbar:SetPoint('BOTTOMLEFT', UIParent, 'BOTTOMLEFT', ldb.x, ldb.y)
+			gcdbar:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", db.x, db.y)
 		end
 		
 		gcdspark:SetTexture("Interface\\CastingBar\\UI-CastingBar-Spark")
-		gcdspark:SetVertexColor(unpack(ldb.sparkcolor))
-		gcdspark:SetBlendMode('ADD')
+		gcdspark:SetVertexColor(unpack(db.sparkcolor))
+		gcdspark:SetBlendMode("ADD")
 		gcdspark:SetWidth(25)
-		gcdspark:SetHeight(ldb.gcdheight*2.5)
+		gcdspark:SetHeight(db.gcdheight*2.5)
 	end
 end
 
 do
 	local locked = true
-	local function set(field, value)
-		db.profile[field] = value
-		Quartz3.ApplySettings()
-	end
-	local function get(field)
-		return db.profile[field]
-	end
-	local function setcolor(field, ...)
-		db.profile[field] = {...}
-		Quartz3.ApplySettings()
-	end
-	local function getcolor(field)
-		return unpack(db.profile[field])
-	end
 	local function nothing()
 	end
 	local function dragstart()
 		gcdbar:StartMoving()
 	end
 	local function dragstop()
-		db.profile.x = gcdbar:GetLeft()
-		db.profile.y = gcdbar:GetBottom()
+		db.x = gcdbar:GetLeft()
+		db.y = gcdbar:GetBottom()
 		gcdbar:StopMovingOrSizing()
+	end
+	
+	local function hiddennofree()
+		return db.gcdposition ~= "free"
+	end
+	
+	local function setOpt(info, value)
+		db[info[#info]] = value
+		GCD:ApplySettings()
+	end
+
+	local function getOpt(info)
+		return db[info[#info]]
+	end
+
+	function getColor(info)
+		return unpack(getOpt(info))
+	end
+
+	function setColor(info, r, g, b, a)
+		setOpt(info, {r, g, b, a})
 	end
 
 	local options
 	function getOptions()
-	options = options or {
-		type = 'group',
-		name = L["Global Cooldown"],
-		desc = L["Global Cooldown"],
-		order = 600,
-		args = {
-			toggle = {
-				type = 'toggle',
-				name = L["Enable"],
-				desc = L["Enable"],
-				get = function()
-					return Quartz3:GetModuleEnabled(MODNAME)
-				end,
-				set = function(v)
-					Quartz3:SetModuleEnabled(MODNAME, v)
-				end,
-				order = 100,
-			},
-			gcdcolor = {
-				type = 'color',
-				name = L["Spark Color"],
-				desc = L["Set the color of the GCD bar spark"],
-				get = getcolor,
-				set = setcolor,
-				--passValue = 'sparkcolor',
-				order = 103,
-			},
-			gcdheight = {
-				type = 'range',
-				name = L["Height"],
-				desc = L["Set the height of the GCD bar"],
-				min = 1,
-				max = 30,
-				step = 1,
-				get = get,
-				set = set,
-				--passValue = 'gcdheight',
-				order = 104,
-			},
-			gcdalpha = {
-				type = 'range',
-				name = L["Alpha"],
-				desc = L["Set the alpha of the GCD bar"],
-				min = 0.05,
-				max = 1,
-				step = 0.05,
-				isPercent = true,
-				get = get,
-				set = set,
-				--passValue = 'gcdalpha',
-				order = 105,
-			},
-			gcdposition = {
-				type = 'select',
-				name = L["Bar Position"],
-				desc = L["Set the position of the GCD bar"],
-				get = get,
-				set = set,
-				--passValue = 'gcdposition',
-				values = {["top"] = L["Top"], ["bottom"] = L["Bottom"], ["free"] = L["Free"]},
-				order = 106,
-			},
-			lock = {
-				type = 'toggle',
-				name = L["Lock"],
-				desc = L["Toggle Cast Bar lock"],
-				get = function()
-					return locked
-				end,
-				set = function(v)
-					if v then
-						gcdbar.Hide = nil
-						gcdbar:EnableMouse(false)
-						gcdbar:SetScript('OnDragStart', nil)
-						gcdbar:SetScript('OnDragStop', nil)
-						gcdbar:Hide()
-					else
-						gcdbar:Show()
-						gcdbar:EnableMouse(true)
-						gcdbar:SetScript('OnDragStart', dragstart)
-						gcdbar:SetScript('OnDragStop', dragstop)
-						gcdbar:SetAlpha(1)
-						gcdbar.Hide = nothing
-					end
-					locked = v
-				end,
-				hidden = function()
-					return db.profile.gcdposition ~= L["Free"]
-				end,
-				order = 107,
-			},
-			x = {
-				type = 'range',
-				name = L["X"],
-				desc = L["Set an exact X value for this bar's position."],
-				min = 0,
-				max = 2560,
-				get = get,
-				set = set,
-				--passValue = 'x',
-				order = 108,
-				values = function(v)
-					return tonumber(v) and true
-				end,
-				hidden = function()
-					return db.profile.gcdposition ~= L["Free"]
-				end,
-				usage = L["Number"],
-			},
-			y = {
-				type = 'range',
-				name = L["Y"],
-				desc = L["Set an exact Y value for this bar's position."],
-				min = 0,
-				max = 1600,
-				get = get,
-				set = set,
-				--passValue = 'y',
-				order = 108,
-				values = function(v)
-					return tonumber(v) and true
-				end,
-				hidden = function()
-					return db.profile.gcdposition ~= L["Free"]
-				end,
-				usage = L["Number"],
-			},
-			gcdgap = {
-				type = 'range',
-				name = L["Gap"],
-				desc = L["Tweak the distance of the GCD bar from the cast bar"],
-				min = -35,
-				max = 35,
-				step = 1,
-				get = get,
-				set = set,
-				--passValue = 'gcdgap',
-				order = 109,
-			},
-			deplete = {
-				type = 'toggle',
-				name = L["Deplete"],
-				desc = L["Reverses the direction of the GCD spark, causing it to move right-to-left"],
-				get = get,
-				set = set,
-				--passValue = 'deplete',
-				order = 110,
-			},
-		},
-	}
-	return options
+		if not options then
+			options = {
+				type = "group",
+				name = L["Global Cooldown"],
+				order = 600,
+				get = getOpt,
+				set = setOpt,
+				args = {
+					toggle = {
+						type = "toggle",
+						name = L["Enable"],
+						desc = L["Enable"],
+						get = function()
+							return Quartz3:GetModuleEnabled(MODNAME)
+						end,
+						set = function(v)
+							Quartz3:SetModuleEnabled(MODNAME, v)
+						end,
+						order = 100,
+					},
+					sparkcolor = {
+						type = "color",
+						name = L["Spark Color"],
+						desc = L["Set the color of the GCD bar spark"],
+						get = getColor,
+						set = setColor,
+						order = 103,
+					},
+					gcdheight = {
+						type = "range",
+						name = L["Height"],
+						desc = L["Set the height of the GCD bar"],
+						min = 1, max = 30, step = 1,
+						order = 104,
+					},
+					gcdalpha = {
+						type = "range",
+						name = L["Alpha"],
+						desc = L["Set the alpha of the GCD bar"],
+						min = 0.05, max = 1, bigStep = 0.05,
+						isPercent = true,
+						order = 105,
+					},
+					gcdposition = {
+						type = "select",
+						name = L["Bar Position"],
+						desc = L["Set the position of the GCD bar"],
+						values = {["top"] = L["Top"], ["bottom"] = L["Bottom"], ["free"] = L["Free"]},
+						order = 106,
+					},
+					lock = {
+						type = "toggle",
+						name = L["Lock"],
+						desc = L["Toggle Cast Bar lock"],
+						get = function()
+							return locked
+						end,
+						set = function(info, v)
+							if v then
+								gcdbar.Hide = nil
+								gcdbar:EnableMouse(false)
+								gcdbar:SetScript("OnDragStart", nil)
+								gcdbar:SetScript("OnDragStop", nil)
+								gcdbar:Hide()
+							else
+								gcdbar:Show()
+								gcdbar:EnableMouse(true)
+								gcdbar:SetScript("OnDragStart", dragstart)
+								gcdbar:SetScript("OnDragStop", dragstop)
+								gcdbar:SetAlpha(1)
+								gcdbar.Hide = nothing
+							end
+							locked = v
+						end,
+						hidden = hiddennofree,
+						order = 107,
+					},
+					x = {
+						type = "range",
+						name = L["X"],
+						desc = L["Set an exact X value for this bar's position."],
+						min = 0, max = 2560, step = 1,
+						order = 108,
+						hidden = hiddennofree,
+					},
+					y = {
+						type = "range",
+						name = L["Y"],
+						desc = L["Set an exact Y value for this bar's position."],
+						min = 0, max = 1600, step = 1,
+						order = 108,
+						hidden = hiddennofree,
+					},
+					gcdgap = {
+						type = "range",
+						name = L["Gap"],
+						desc = L["Tweak the distance of the GCD bar from the cast bar"],
+						min = -35, max = 35, step = 1,
+						order = 109,
+					},
+					deplete = {
+						type = "toggle",
+						name = L["Deplete"],
+						desc = L["Reverses the direction of the GCD spark, causing it to move right-to-left"],
+						order = 110,
+					},
+				},
+			}
+		end
+		return options
 	end
 end

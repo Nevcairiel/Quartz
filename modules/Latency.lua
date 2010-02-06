@@ -211,7 +211,7 @@ function Latency:UNIT_SPELLCAST_CHANNEL_START(object, event, unit)
 	end
 	lagbox:SetDrawLayer(side == "LEFT" and "OVERLAY" or "BACKGROUND")
 	lagbox:SetPoint(side, castBar, side)
-	lagbox:SetWidth(Player.db.w * perc)
+	lagbox:SetWidth(Player.db.profile.w * perc)
 	lagbox:Show()
 	
 	if db.lagtext then
@@ -273,7 +273,7 @@ function Latency:ApplySettings()
 		
 		db = self.db.profile
 		lagbox:SetHeight(castBar:GetHeight())
-		lagbox:SetTexture(media:Fetch("statusbar", Player.db.texture))
+		lagbox:SetTexture(media:Fetch("statusbar", Player.db.profile.texture))
 		lagbox:SetAlpha(db.lagalpha)
 		lagbox:SetVertexColor(unpack(db.lagcolor))
 		
