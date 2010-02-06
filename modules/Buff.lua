@@ -56,6 +56,7 @@ local defaults = {
 		target = true,
 		targetbuffs = true,
 		targetdebuffs = true,
+		targetfixedduration = 0,
 		targeticons = true,
 		targeticonside = "right",
 		
@@ -75,6 +76,7 @@ local defaults = {
 		focus = true,
 		focusbuffs = true,
 		focusdebuffs = true,
+		focusfixedduration = 0,
 		focusicons = true,
 		focusiconside = "left",
 		
@@ -307,7 +309,7 @@ do
 								name = L["Enable %s"]:format(L["Focus"]),
 								desc = L["Show buffs/debuffs for your %s"]:format(L["Focus"]),
 								arg = "focus",
-								order = 99,
+								order = 90,
 								width = "full",
 								disabled = false,
 							},
@@ -315,11 +317,25 @@ do
 								type = "toggle",
 								name = L["Enable Buffs"],
 								desc = L["Show buffs for your %s"]:format(L["Focus"]),
+								order = 91,
 							},
 							debuffs = {
 								type = "toggle",
 								name = L["Enable Debuffs"],
 								desc = L["Show debuffs for your %s"]:format(L["Focus"]),
+								order = 92,
+							},
+							fixedduration = {
+								type = "range",
+								name = L["Fixed Duration"],
+								desc = L["Fix bars to a specified duration"],
+								min = 0, max = 60, step = 1,
+								order = 93,
+							},
+							nlf = {
+								type = "description",
+								name = "",
+								order = 100,
 							},
 							width = {
 								type = "range",
@@ -466,17 +482,31 @@ do
 								arg = "target",
 								disabled = false,
 								width = "full",
-								order = 99,
+								order = 90,
 							},
 							buffs = {
 								type = "toggle",
 								name = L["Enable Buffs"],
 								desc = L["Show buffs for your %s"]:format(L["Target"]),
+								order = 91,
 							},
 							debuffs = {
 								type = "toggle",
 								name = L["Enable Debuffs"],
 								desc = L["Show debuffs for your %s"]:format(L["Target"]),
+								order = 92,
+							},
+							fixedduration = {
+								type = "range",
+								name = L["Fixed Duration"],
+								desc = L["Fix bars to a specified duration"],
+								min = 0, max = 60, step = 1,
+								order = 93,
+							},
+							nlf = {
+								type = "description",
+								name = "",
+								order = 100,
 							},
 							width = {
 								type = "range",
@@ -905,13 +935,16 @@ do
 				maxindex = k
 				local bar = targetbars[k]
 				if v.applications > 1 then
-					bar.text:SetText(("%s (%s)"):format(v.name, v.applications))
+					bar.text:SetFormattedText("%s (%s)", v.name, v.applications)
 				else
 					bar.text:SetText(v.name)
 				end
 				bar.icon:SetTexture(v.texture)
 				local elapsed = (v.duration - v.remaining)
 				local startTime, endTime = (currentTime - elapsed), (currentTime + v.remaining)
+				if db.targetfixedduration > 0 then
+					startTime = endTime - db.targetfixedduration
+				end
 				bar.startTime = startTime
 				bar.endTime = endTime
 				bar:SetMinMaxValues(startTime, endTime)
@@ -1016,6 +1049,9 @@ do
 				bar.icon:SetTexture(v.texture)
 				local elapsed = (v.duration - v.remaining)
 				local startTime, endTime = (currentTime - elapsed), (currentTime + v.remaining)
+				if db.focusfixedduration > 0 then
+					startTime = endTime - db.focusfixedduration
+				end
 				bar.startTime = startTime
 				bar.endTime = endTime
 				bar:SetMinMaxValues(startTime, endTime)

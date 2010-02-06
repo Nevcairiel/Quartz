@@ -45,6 +45,7 @@ local db, getOptions
 local defaults = {
 	profile = {
 		hideblizz = true,
+		showticks = true,
 		--x =  -- applied automatically in applySettings()
 		y = 180,
 		h = 25,
@@ -75,6 +76,39 @@ local defaults = {
 		timetexty = 0,
 	}
 }
+
+
+local sparkfactory = {
+	__index = function(t,k)
+		local spark = castBar:CreateTexture(nil, 'OVERLAY')
+		t[k] = 	spark
+		spark:SetTexture("Interface\\CastingBar\\UI-CastingBar-Spark")
+		spark:SetVertexColor(unpack(Quartz3.db.profile.sparkcolor))
+		spark:SetBlendMode('ADD')
+		spark:SetWidth(20)
+		spark:SetHeight(db.h*2.2)
+		return spark
+	end
+}
+local barticks = setmetatable({}, sparkfactory)
+
+local function setBarTicks(ticknum)
+	if( ticknum and ticknum > 0) then
+		local delta = ( db.w / ticknum )
+		for k = 1,ticknum do
+			local t = barticks[k]
+			t:ClearAllPoints()
+			t:SetPoint("CENTER", castBar, "LEFT", delta * k, 0 )
+			t:Show()
+		end
+	else
+		barticks[1].Hide = nil
+		for _, v in ipairs(barticks) do
+			v:Hide()
+		end
+	end
+end
+Player.setBarTicks = setBarTicks
 
 do 
 	local function dragstart()
@@ -159,7 +193,12 @@ do
 						name = L["Disable Blizzard Cast Bar"],
 						desc = L["Disable and hide the default UI's casting bar"],
 						order = 101,
-						width = "full",
+					},
+					showticks = {
+						type = "toggle",
+						name = L["Show channeling ticks"],
+						desc = L["Show damage / mana ticks while channeling spells like Drain Life or Blizzard"],
+						order = 102,
 					},
 					h = {
 						type = "range",
@@ -678,6 +717,8 @@ function Player:UNIT_SPELLCAST_START(event, unit)
 
 	castBar:SetStatusBarColor(unpack(Quartz3.db.profile.castingcolor))
 	
+	setBarTicks(0)
+	
 	castBar:SetValue(0)
 	castBarParent:Show()
 	castBarParent:SetAlpha(db.alpha)
@@ -701,6 +742,39 @@ function Player:UNIT_SPELLCAST_START(event, unit)
 	end
 end
 
+local channelData, channelingTicks = {
+	-- warlock
+	[1120] = 5, -- drain soul
+	[689] = 5, -- drain life
+	[5138] = 5, -- drain mana
+	[5740] = 4, -- rain of fire
+	-- druid
+	[740] = 4, -- Tranquility
+	[16914] = 10, -- Hurricane
+	-- priest
+	[15407] = 3, -- mind flay
+	[48045] = 5, -- mind sear
+	[47540] = 2, -- penance
+	-- mage
+	[5143] = 5, -- arcane missiles
+	[10] = 5, -- blizzard
+}
+
+local function getChannelingTicks(spell)
+	if not db.showticks then
+		return 0
+	end
+
+	if not channelingTicks then
+		channelingTicks = {}
+		for k,v in pairs(channelData) do
+			channelingTicks[(GetSpellInfo(k))] = v
+		end
+	end
+
+	return channelingTicks[spell] or 0
+end
+
 function Player:UNIT_SPELLCAST_CHANNEL_START(event, unit)
 	if unit ~= "player" then
 		return
@@ -714,7 +788,11 @@ function Player:UNIT_SPELLCAST_CHANNEL_START(event, unit)
 	self.delay = 0
 	self.casting = nil
 	self.channeling = true
+	--FixMe: How do we work this out?
+	self.channelingTicks = getChannelingTicks( spell )
 	self.fadeOut = nil
+	
+	setBarTicks(self.channelingTicks)
 
 	castBar:SetStatusBarColor(unpack(Quartz3.db.profile.channelingcolor))
 	
@@ -750,6 +828,7 @@ function Player:UNIT_SPELLCAST_STOP(event, unit)
 		self.fadeOut = true
 		self.stopTime = GetTime()
 		
+		setBarTicks(0)
 		castBar:SetValue(1.0)
 		castBar:SetStatusBarColor(unpack(Quartz3.db.profile.completecolor))
 		
@@ -766,6 +845,7 @@ function Player:UNIT_SPELLCAST_CHANNEL_STOP(event, unit)
 		self.fadeOut = true
 		self.stopTime = GetTime()
 		
+		setBarTicks(0)
 		castBar:SetValue(0)
 		castBar:SetStatusBarColor(unpack(Quartz3.db.profile.completecolor))
 		
@@ -784,6 +864,7 @@ function Player:UNIT_SPELLCAST_FAILED(event, unit)
 	if not self.stopTime then
 		self.stopTime = GetTime()
 	end
+	setBarTicks(0)
 	castBar:SetValue(1.0)
 	castBar:SetStatusBarColor(unpack(Quartz3.db.profile.failcolor))
 	
@@ -801,6 +882,7 @@ function Player:UNIT_SPELLCAST_INTERRUPTED(event, unit)
 	if not self.stopTime then
 		self.stopTime = GetTime()
 	end
+	setBarTicks(0)
 	castBar:SetValue(1.0)
 	castBar:SetStatusBarColor(unpack(Quartz3.db.profile.failcolor))
 	
