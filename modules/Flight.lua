@@ -51,7 +51,7 @@ do
 				get = function()
 					return Quartz3:GetModuleEnabled(MODNAME)
 				end,
-				set = function(v)
+				set = function(info, v)
 					Quartz3:SetModuleEnabled(MODNAME, v)
 				end,
 				order = 100,
@@ -146,10 +146,10 @@ function Flight:BeginFlight(duration, destination)
 	Player.castBarText:SetText(destination)
 	
 	local position = Player.db.profile.timetextposition
-	if position == L["Cast Start Side"] then
+	if position == "caststart" then
 		Player.castBarTimeText:SetPoint("LEFT", Player.castBar, "LEFT", Player.db.profile.timetextx, Player.db.profile.timetexty)
 		Player.castBarTimeText:SetJustifyH("LEFT")
-	elseif position == L["Cast End Side"] then
+	elseif position == "castend" then
 		Player.castBarTimeText:SetPoint("RIGHT", Player.castBar, "RIGHT", -1 * Player.db.profile.timetextx, Player.db.profile.timetexty)
 		Player.castBarTimeText:SetJustifyH("RIGHT")
 	end
