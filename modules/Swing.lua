@@ -49,12 +49,13 @@ local COMBATLOG_OBJECT_REACTION_FRIENDLY = _G.COMBATLOG_OBJECT_REACTION_FRIENDLY
 local COMBATLOG_OBJECT_TYPE_PLAYER = _G.COMBATLOG_OBJECT_TYPE_PLAYER
 
 local autoshotname = GetSpellInfo(75)
+local slam = GetSpellInfo(1464)
+local swordprocname = GetSpellInfo(12281)
 local resetspells = {
 	[GetSpellInfo(845)] = true, -- Cleave
 	[GetSpellInfo(78)] = true, -- Heroic Strike
 	[GetSpellInfo(6807)] = true, -- Maul
 	[GetSpellInfo(2973)] = true, -- Raptor Strike
-	[GetSpellInfo(1464)] = true, -- Slam
 	[GetSpellInfo(56815)] = true, -- Rune Strike
 }
 
@@ -65,7 +66,7 @@ local resetautoshotspells = {
 local swingbar, swingbar_width, swingstatusbar, remainingtext, durationtext, db
 local swingmode -- nil is none, 0 is meleeing, 1 is autoshooting
 local starttime, duration
-local swordprocname
+local slamstart
 
 local db, getOptions
 
@@ -86,6 +87,7 @@ local defaults = {
 }
 
 local function OnUpdate()
+	if slamstart then return end
 	if starttime then
 		local spent = GetTime() - starttime
 		remainingtext:SetFormattedText("%.1f", duration - spent)
@@ -116,7 +118,6 @@ function Swing:OnInitialize()
 end
 
 function Swing:OnEnable()
-	swordprocname = GetSpellInfo(12281)
 	local _, c = UnitClass("player")
 	playerclass = playerclass or c
 	-- fired when autoattack is enabled/disabled.
@@ -129,6 +130,11 @@ function Swing:OnEnable()
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 	
 	self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+	-- slam stuff
+	if playerclass == "WARRIOR" then
+		self:RegisterEvent("UNIT_SPELLCAST_START")
+		self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
+	end
 	
 	self:RegisterEvent("UNIT_ATTACK")
 	if not swingbar then
@@ -195,14 +201,20 @@ do
 			else
 				self:MeleeSwing()
 			end
+		elseif (combatevent == "SWING_MISSED") and  (bit_band(dstFlags, COMBATLOG_FILTER_ME) == COMBATLOG_FILTER_ME) and swingmode == 0  and spellID == "PARRY" then
+			duration = duration * 0.6
 		end
 	end
 end
 
 function Swing:UNIT_SPELLCAST_SUCCEEDED(event, unit, spell)
+	if unit ~= "player" then return end
 	if swingmode == 0 then
 		if resetspells[spell] then
 			self:MeleeSwing()
+		elseif spell == slam and slamstart then
+			starttime = starttime + GetTime() - slamstart
+			slamstart = nil
 		end
 	elseif swingmode == 1 then
 		if spell == autoshotname then
@@ -214,6 +226,18 @@ function Swing:UNIT_SPELLCAST_SUCCEEDED(event, unit, spell)
 		self:Shoot()
 	end
 end
+
+function Swing:UNIT_SPELLCAST_START(event, unit, spell) 
+	if unit == "player" and spell == slam then
+		slamstart = GetTime()
+	end
+end 
+
+function Swing:UNIT_SPELLCAST_INTERRUPTED(event, unit, spell) 
+	if unit == "player" and spell == slam and slamstart then 
+		slamstart = nil
+	end 
+end 
 
 function Swing:UNIT_ATTACK(event, unit)
 	if unit == "player" then

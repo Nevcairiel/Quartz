@@ -172,7 +172,7 @@ end
 function Quartz3:SetupOptions()
 	self.optFrames = {}
 	LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("Quartz3", getOptions)
-	self.optFrames.Quartz3 = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Quartz3", nil, nil, "general")
+	self.optFrames.Quartz3 = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Quartz3", "Quartz 3", nil, "general")
 	self:RegisterModuleOptions("Profiles", LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db), "Profiles")
 	LibStub("AceConsole-3.0"):RegisterChatCommand("quartz3", openOptions)
 	LibStub("AceConsole-3.0"):RegisterChatCommand("q3", openOptions)
