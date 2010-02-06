@@ -903,7 +903,7 @@ do
 			db.x = (UIParent:GetWidth() / 2) / db.scale + 5
 		end
 		castBarParent:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", db.x, db.y)
-		castBarParent:SetWidth(db.w+9)
+		castBarParent:SetWidth(db.w+10)
 		castBarParent:SetHeight(db.h+10)
 		castBarParent:SetAlpha(db.alpha)
 		castBarParent:SetScale(db.scale)
