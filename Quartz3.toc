@@ -1,19 +1,19 @@
 ## Title: Quartz
 ## Interface: 30300
 ## Notes: Modular casting bar.
-## Author: Nymbia, Nevcairiel
+## Author: Nevcairiel, Nymbia
+## Version: @project-version@
 ## X-License: GPL v2
-## OptionalDeps: Ace3, LibSharedMedia-3.0, AceGUI-3.0-SharedMediaWidgets, SharedMedia, FlightMap, InFlight
-## SavedVariables: Quartz3DB
-
 ## X-Credits: Ammo (some code based on PitBull_CastBar), kergoth (Tradeskill Merge module idea), Roartindon (Lag Embed mode for Latency module)
 
-## Title-ruRU: Кварц 
+## Title-ruRU: Кварц
 ## Notes-ruRU: Модульная полоса применений.
-
 ## Notes-frFR: Barres d'incantation modulaires.
 ## Notes-zhTW: 模組化施法條。
 ## Notes-zhCN: 模块化施法条
+
+## SavedVariables: Quartz3DB
+## OptionalDeps: Ace3, LibSharedMedia-3.0, AceGUI-3.0-SharedMediaWidgets, SharedMedia, FlightMap, InFlight
 
 #@no-lib-strip@
 libs\LibStub\LibStub.lua
