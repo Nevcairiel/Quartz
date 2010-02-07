@@ -245,12 +245,12 @@ do
 	end
 	
 	local function setOptFocus(info, value)
-		db["focus"..info[#info]] = value
+		db[info.arg or ("focus"..info[#info])] = value
 		Buff:ApplySettings()
 	end
 
 	local function getOptFocus(info)
-		return db["focus"..info[#info]]
+		return db[info.arg or ("focus"..info[#info])]
 	end
 	
 	local function setOptTarget(info, value)
@@ -1036,7 +1036,7 @@ do
 					end
 				end
 			end
-			sort(tmp, sort)
+			sort(tmp, mysort)
 			local maxindex = 0
 			for k,v in ipairs(tmp) do
 				maxindex = k

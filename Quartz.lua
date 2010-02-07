@@ -16,7 +16,7 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
-local Quartz3 = LibStub("AceAddon-3.0"):NewAddon("Quartz3", "AceEvent-3.0", "AceConsole-3.0", "AceHook-3.0", "AceTimer-3.0")
+local Quartz3 = LibStub("AceAddon-3.0"):NewAddon("Quartz3", "AceEvent-3.0", "AceConsole-3.0")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 local media = LibStub("LibSharedMedia-3.0")
 local db
@@ -72,6 +72,19 @@ function Quartz3:ApplySettings()
 		end
 		if type(v.ApplySettings) == "function" then
 			v:ApplySettings()
+		end
+	end
+end
+
+local copyExclude = {
+	x = true,
+	y = true,
+}
+
+function Quartz3:CopySettings(from, to)
+	for k,v in pairs(from) do
+		if to[k] and not copyExclude[k] and type(v) ~= "table" then
+			to[k] = v
 		end
 	end
 end
