@@ -591,7 +591,7 @@ do
 
 	local function setOpt(info, value)
 		db[info[#info]] = value
-		Focus:ApplySettings()
+		Pet:ApplySettings()
 	end
 
 	local function getOpt(info)
