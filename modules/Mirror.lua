@@ -629,8 +629,8 @@ do
 		return direction
 	end
 	function Mirror:ApplySettings()
+		db = self.db.profile
 		if self:IsEnabled() then
-			db = self.db.profile
 			local direction
 			if db.mirroranchor ~= "free" then
 				mirrorbars[1].Hide = nil

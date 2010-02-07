@@ -52,13 +52,17 @@ function Quartz3:OnInitialize()
 	db = self.db.profile
 
 	self:SetupOptions()
+end
 
+function Quartz3:OnEnable()
 	self.db.RegisterCallback(self, "OnProfileChanged", "ApplySettings")
 	self.db.RegisterCallback(self, "OnProfileCopied", "ApplySettings")
 	self.db.RegisterCallback(self, "OnProfileReset", "ApplySettings")
 
 	media.RegisterCallback(self, "LibSharedMedia_Registered", "ApplySettings")
 	media.RegisterCallback(self, "LibSharedMedia_SetGlobal", "ApplySettings")
+	
+	self:ApplySettings()
 end
 
 function Quartz3:ApplySettings()

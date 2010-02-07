@@ -269,10 +269,9 @@ function Latency:UNIT_SPELLCAST_INTERRUPTED(event, unit)
 end
 
 function Latency:ApplySettings()
+	db = self.db.profile
 	if lagbox and self:IsEnabled() then
 		castBar = Player.castBar
-		
-		db = self.db.profile
 		lagbox:SetHeight(castBar:GetHeight())
 		lagbox:SetTexture(media:Fetch("statusbar", Player.db.profile.texture))
 		lagbox:SetAlpha(db.lagalpha)

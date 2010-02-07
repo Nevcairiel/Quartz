@@ -52,9 +52,7 @@ function Interrupt:OnEnable()
 end
 
 function Interrupt:ApplySettings()
-	if self:IsEnabled() then
-		db = self.db.profile
-	end
+	db = self.db.profile
 end
 
 function Interrupt:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, combatEvent, _, sourceName, _, _, _, destFlags)

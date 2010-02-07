@@ -611,8 +611,8 @@ end
 
 do
 	function Focus:ApplySettings()
-		if not castBarParent or not self:IsEnabled() then return end
 		db = self.db.profile
+		if not castBarParent or not self:IsEnabled() then return end
 
 		castBarParent:ClearAllPoints()
 		if not db.x then

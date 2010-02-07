@@ -1288,8 +1288,8 @@ do
 		return direction
 	end
 	function Buff:ApplySettings()
+		db = self.db.profile
 		if self:IsEnabled() then
-			db = self.db.profile
 			local direction
 			if db.targetanchor ~= "free" then
 				targetbars[1].Hide = nil

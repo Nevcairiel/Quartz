@@ -89,9 +89,7 @@ function Flight:OnInitialize()
 end
 
 function Flight:ApplySettings()
-	if self:IsEnabled() then
-		db = self.db.profile
-	end
+	db = self.db.profile
 end
 
 if InFlight then

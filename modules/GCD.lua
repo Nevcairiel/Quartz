@@ -117,8 +117,8 @@ function GCD:CheckGCD(event, unit, spell)
 end
 
 function GCD:ApplySettings()
+	db = self.db.profile
 	if gcdbar and self:IsEnabled() then
-		db = self.db.profile
 		gcdbar:ClearAllPoints()
 		gcdbar:SetHeight(db.gcdheight)
 		gcdbar_width = Player.Bar:GetWidth() - 8

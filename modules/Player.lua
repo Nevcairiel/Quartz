@@ -931,8 +931,8 @@ do
 	local backdrop_insets = backdrop.insets
 	
 	function Player:ApplySettings()
-		if castBarParent and self:IsEnabled() then
-			db = self.db.profile
+		db = self.db.profile
+		if castBarParent then
 			
 			castBarParent = self.castBarParent
 			castBar = self.castBar

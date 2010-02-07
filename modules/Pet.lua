@@ -420,8 +420,8 @@ do
 	local backdrop_insets = backdrop.insets
 	
 	function Pet:ApplySettings()
-		if not castBarParent or not self:IsEnabled() then return end
 		db = self.db.profile
+		if not castBarParent or not self:IsEnabled() then return end
 		local qdb = Quartz3.db.profile
 		castBarParent:ClearAllPoints()
 		if not db.x then

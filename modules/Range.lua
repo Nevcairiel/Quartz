@@ -80,9 +80,7 @@ function Range:OnEnable()
 end
 
 function Range:ApplySettings()
-	if self:IsEnabled() then
-		db = self.db.profile
-	end
+	db = self.db.profile
 end
 
 function Range:UNIT_SPELLCAST_START(event, unit)
