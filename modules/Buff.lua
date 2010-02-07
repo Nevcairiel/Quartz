@@ -665,7 +665,7 @@ do
 								dialogControl = "LSM30_Font",
 								name = L["Font"],
 								desc = L["Set the font used in the buff bars"],
-								values = lsmlist.statusbar,
+								values = lsmlist.font,
 								order = 108,
 							},
 							bufftexture = {
