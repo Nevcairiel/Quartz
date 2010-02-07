@@ -57,9 +57,9 @@ end
 
 function Interrupt:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, combatEvent, _, sourceName, _, _, _, destFlags)
 	if combatEvent == "SPELL_INTERRUPT" and destFlags == 0x511 then
-		Player.Bar.castBarText:SetFormattedText(L["INTERRUPTED (%s)"], (sourceName or UNKNOWN):upper())
-		Player.Bar.castBar:SetStatusBarColor(unpack(db.interruptcolor))
-		Player.Bar.stopTime = GetTime()
+		Player.castBarText:SetFormattedText(L["INTERRUPTED (%s)"], (sourceName or UNKNOWN):upper())
+		Player.castBar:SetStatusBarColor(unpack(db.interruptcolor))
+		Player.stopTime = GetTime()
 	end
 end
 
