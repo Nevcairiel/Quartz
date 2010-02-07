@@ -53,6 +53,7 @@ local defaults = {
 }
 
 local function OnUpdate()
+	if not starttime then return gcdbar:Hide() end
 	gcdspark:ClearAllPoints()
 	local perc = (GetTime() - starttime) / duration
 	if perc > 1 then
