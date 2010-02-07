@@ -61,7 +61,7 @@ function Quartz3:OnEnable()
 
 	media.RegisterCallback(self, "LibSharedMedia_Registered", "ApplySettings")
 	media.RegisterCallback(self, "LibSharedMedia_SetGlobal", "ApplySettings")
-	
+
 	self:ApplySettings()
 end
 
