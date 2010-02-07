@@ -269,6 +269,7 @@ end
 
 function Swing:ApplySettings()
 	if swingbar and self:IsEnabled() then
+		db = self.db.profile
 		swingbar:ClearAllPoints()
 		swingbar:SetHeight(db.swingheight)
 		swingbar_width = Player.Bar:GetWidth() - 8

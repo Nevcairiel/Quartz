@@ -986,9 +986,7 @@ end
 
 do
 	function Target:ApplySettings()
-		if not castBarParent then
-			return
-		end
+		if not castBarParent or not self:IsEnabled() then return end
 		db = self.db.profile
 		local qdb = Quartz3.db.profile
 
