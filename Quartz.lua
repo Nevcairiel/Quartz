@@ -39,13 +39,13 @@ local defaults = {
 	},
 }
 
-media:Register("statusbar", "Frost", "Interface\\AddOns\\Quartz3\\textures\\Frost")
-media:Register("statusbar", "Healbot", "Interface\\AddOns\\Quartz3\\textures\\Healbot")
-media:Register("statusbar", "LiteStep", "Interface\\AddOns\\Quartz3\\textures\\LiteStep")
-media:Register("statusbar", "Rocks", "Interface\\AddOns\\Quartz3\\textures\\Rocks")
-media:Register("statusbar", "Runes", "Interface\\AddOns\\Quartz3\\textures\\Runes")
-media:Register("statusbar", "Xeon", "Interface\\AddOns\\Quartz3\\textures\\Xeon")
-media:Register("border", "Tooltip enlarged", "Interface\\AddOns\\Quartz3\\textures\\Tooltip-BigBorder")
+media:Register("statusbar", "Frost", "Interface\\AddOns\\Quartz\\textures\\Frost")
+media:Register("statusbar", "Healbot", "Interface\\AddOns\\Quartz\\textures\\Healbot")
+media:Register("statusbar", "LiteStep", "Interface\\AddOns\\Quartz\\textures\\LiteStep")
+media:Register("statusbar", "Rocks", "Interface\\AddOns\\Quartz\\textures\\Rocks")
+media:Register("statusbar", "Runes", "Interface\\AddOns\\Quartz\\textures\\Runes")
+media:Register("statusbar", "Xeon", "Interface\\AddOns\\Quartz\\textures\\Xeon")
+media:Register("border", "Tooltip enlarged", "Interface\\AddOns\\Quartz\\textures\\Tooltip-BigBorder")
 
 function Quartz3:OnInitialize()
 	self.db = LibStub("AceDB-3.0"):New("Quartz3DB", defaults, true)
