@@ -766,6 +766,8 @@ local channelingTicks = {
 	-- mage
 	[GetSpellInfo(5143)] = 5, -- arcane missiles
 	[GetSpellInfo(10)] = 5, -- blizzard
+	-- hunter
+	[GetSpellInfo(1510)] = 6, -- volley
 }
 
 local function getChannelingTicks(spell)
