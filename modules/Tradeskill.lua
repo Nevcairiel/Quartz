@@ -30,6 +30,7 @@ local GetTime = _G.GetTime
 local UnitCastingInfo = _G.UnitCastingInfo
 local tonumber = _G.tonumber
 local unpack = _G.unpack
+local format = _G.format
 
 local getOptions
 
@@ -41,11 +42,11 @@ local restartdelay = 1
 
 local function timenum(num)
 	if num <= 10 then
-		return ("%.1f"):format(num)
+		return "%.1f", num
 	elseif num <= 60 then
-		return ("%d"):format(num)
+		return "%d", num
 	else
-		return ("%d:%02d"):format(num / 60, num % 60)
+		return "%d:%02d", num / 60, num % 60
 	end
 end
 
@@ -60,9 +61,9 @@ local function tradeskillOnUpdate()
 		castBarSpark:SetPoint("CENTER", castBar, "LEFT", perc * Player.db.profile.w, 0)
 		
 		if Player.db.profile.hidecasttime then
-			castBarTimeText:SetText(timenum(totaltime - elapsed))
+			castBarTimeText:SetFormattedText(timenum(totaltime - elapsed))
 		else
-			castBarTimeText:SetFormattedText("%s / %s", timenum(totaltime - elapsed), timenum(totaltime))
+			castBarTimeText:SetFormattedText("%s / %s", format(timenum(totaltime - elapsed)), format(timenum(totaltime)))
 		end
 	else
 		if (starttime + duration + restartdelay < currentTime) or (completedcasts >= repeattimes) or bail or completedcasts == 0 then
@@ -81,9 +82,9 @@ local function tradeskillOnUpdate()
 			castBarSpark:SetPoint("CENTER", castBar, "LEFT", Player.db.profile.w, 0)
 			
 			if Player.db.profile.hidecasttime then
-				castBarTimeText:SetText(timenum(totaltime - elapsed))
+				castBarTimeText:SetFormattedText(timenum(totaltime - elapsed))
 			else
-				castBarTimeText:SetFormattedText("%s / %s", timenum(totaltime - elapsed), timenum(totaltime))
+				castBarTimeText:SetFormattedText("%s / %s", format(timenum(totaltime - elapsed)), format(timenum(totaltime)))
 			end
 		end
 	end

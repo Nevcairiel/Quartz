@@ -160,13 +160,13 @@ local mirrorOnUpdate, fakeOnUpdate
 do
 	local function timenum(num)
 		if num <= 10 then
-			return ("%.1f"):format(num)
+			return "%.1f", num
 		elseif num <= 60 then
-			return ("%d"):format(num)
+			return "%d", num
 		elseif num <= 3600 then
-			return ("%d:%02d"):format(num / 60, num % 60)
+			return "%d:%02d", num / 60, num % 60
 		else
-			return ("%d:%02d"):format(num / 3600, (num % 3600) / 60)
+			return "%d:%02d", num / 3600, (num % 3600) / 60
 		end
 	end
 	function mirrorOnUpdate(frame)
@@ -174,7 +174,7 @@ do
 		local duration = frame.duration
 		progress = progress > duration and duration or progress
 		frame:SetValue(progress)
-		frame.timetext:SetText(timenum(progress))
+		frame.timetext:SetFormattedText(timenum(progress))
 	end
 	function fakeOnUpdate(frame)
 		local currentTime = GetTime()
@@ -193,7 +193,7 @@ do
 		else
 			local remaining = (currentTime - frame.startTime)
 			frame:SetValue(endTime - remaining)
-			frame.timetext:SetText(timenum(endTime - currentTime))
+			frame.timetext:SetFormattedText(timenum(endTime - currentTime))
 		end
 	end
 end
