@@ -9,8 +9,8 @@
 ## Title-ruRU: Кварц
 ## Notes-ruRU: Модульная полоса применений.
 ## Notes-frFR: Barres d'incantation modulaires.
+## Notes-zhCN: 模块化施法条。
 ## Notes-zhTW: 模組化施法條。
-## Notes-zhCN: 模块化施法条
 
 ## SavedVariables: Quartz3DB
 ## OptionalDeps: Ace3, LibSharedMedia-3.0, AceGUI-3.0-SharedMediaWidgets, SharedMedia, FlightMap, InFlight
