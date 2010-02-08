@@ -55,6 +55,14 @@ function Quartz3:OnInitialize()
 end
 
 function Quartz3:OnEnable()
+	if QuartzDB then
+		QuartzDB = nil
+		LibStub("AceTimer-3.0").ScheduleTimer(self, function()
+			self:Print(L["Congratulations! You've just upgraded Quartz from the old Ace2-based version to the new Ace3 version!"])
+			self:Print(L["Sadly, this also means your configuration was lost. You'll have to reconfigure Quartz using the new options integrated into the Interface Options Panel, quickly accessible with /quartz"])
+			self:Print(L["Sorry for the inconvenience, and thanks for using Quartz!"])
+		end, 1)
+	end
 	self.db.RegisterCallback(self, "OnProfileChanged", "ApplySettings")
 	self.db.RegisterCallback(self, "OnProfileCopied", "ApplySettings")
 	self.db.RegisterCallback(self, "OnProfileReset", "ApplySettings")
