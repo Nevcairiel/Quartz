@@ -421,6 +421,26 @@ do
 	
 	function Pet:ApplySettings()
 		db = self.db.profile
+		
+		-- obey the hideblizz setting no matter if disabled or not
+		if db.hideblizz then
+			PetCastingBarFrame.RegisterEvent = function() end
+			PetCastingBarFrame:UnregisterAllEvents()
+			PetCastingBarFrame:Hide()
+		else
+			PetCastingBarFrame.RegisterEvent = nil
+			PetCastingBarFrame:UnregisterAllEvents()
+			PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_START")
+			PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_STOP")
+			PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_FAILED")
+			PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
+			PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_DELAYED")
+			PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
+			PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
+			PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
+			PetCastingBarFrame:RegisterEvent("UNIT_PET")
+		end
+		
 		if not castBarParent or not self:IsEnabled() then return end
 		local qdb = Quartz3.db.profile
 		castBarParent:ClearAllPoints()
@@ -545,24 +565,6 @@ do
 		castBarSpark:SetBlendMode("ADD")
 		castBarSpark:SetWidth(20)
 		castBarSpark:SetHeight(db.h*2.2)
-		
-		if db.hideblizz then
-			PetCastingBarFrame.RegisterEvent = function() end
-			PetCastingBarFrame:UnregisterAllEvents()
-			PetCastingBarFrame:Hide()
-		else
-			PetCastingBarFrame.RegisterEvent = nil
-			PetCastingBarFrame:UnregisterAllEvents()
-			PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_START")
-			PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_STOP")
-			PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_FAILED")
-			PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
-			PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_DELAYED")
-			PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
-			PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
-			PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
-			PetCastingBarFrame:RegisterEvent("UNIT_PET")
-		end
 	end
 end
 
