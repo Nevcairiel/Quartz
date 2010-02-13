@@ -767,6 +767,7 @@ local channelingTicks = {
 	-- mage
 	[GetSpellInfo(5143)] = 5, -- arcane missiles
 	[GetSpellInfo(10)] = 5, -- blizzard
+	[GetSpellInfo(12051)] = 4, -- evocation
 	-- hunter
 	[GetSpellInfo(1510)] = 6, -- volley
 }
