@@ -704,6 +704,7 @@ function Player:UNIT_SPELLCAST_SENT(event, unit, spell, rank, target)
 	if target then
 		self.targetName = target
 	else
+		-- auto selfcast? is this needed, even?
 		self.targetName = self.playerName
 	end
 end
@@ -826,7 +827,7 @@ function Player:UNIT_SPELLCAST_STOP(event, unit)
 		return
 	end
 	if self.casting then
-		self.targetName = nil
+		--self.targetName = nil
 		self.casting = nil
 		self.fadeOut = true
 		self.stopTime = GetTime()
@@ -860,7 +861,7 @@ function Player:UNIT_SPELLCAST_FAILED(event, unit)
 	if (unit ~= "player" and unit ~= "vehicle") or self.channeling or self.casting then 
 		return
 	end
-	self.targetName = nil
+	--self.targetName = nil
 	self.casting = nil
 	self.channeling = nil
 	self.fadeOut = true
@@ -878,7 +879,7 @@ function Player:UNIT_SPELLCAST_INTERRUPTED(event, unit)
 	if unit ~= "player" and unit ~= "vehicle" then
 		return
 	end
-	self.targetName = nil
+	--self.targetName = nil
 	self.casting = nil
 	self.channeling = nil
 	self.fadeOut = true
