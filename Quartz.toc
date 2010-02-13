@@ -29,8 +29,9 @@ libs\AceTimer-3.0\AceTimer-3.0.xml
 libs\AceBucket-3.0\AceBucket-3.0.xml
 libs\AceLocale-3.0\AceLocale-3.0.xml
 libs\AceHook-3.0\AceHook-3.0.xml
-libs\AceGUI-3.0-SharedMediaWidgets\widget.xml
+
 libs\LibSharedMedia-3.0\lib.xml
+libs\AceGUI-3.0-SharedMediaWidgets\widget.xml
 #@end-no-lib-strip@
 
 locale\locale.xml

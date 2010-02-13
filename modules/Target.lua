@@ -550,9 +550,9 @@ do
 						order = 452,
 					},
 					noInterruptGroup = {
+						type = "group",
 						name = L["No interrupt cast bars"],
 						dialogInline = true,
-						type = "group",
 						order = 455,
 						args = {
 							noInterruptChangeBorder = {
