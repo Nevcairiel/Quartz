@@ -670,7 +670,7 @@ local function setCastNotInterruptable(notInterruptible)
 	local r,g,b = unpack(Quartz3.db.profile.backgroundcolor)
 	castBarParent:SetBackdropColor(r, g, b, Quartz3.db.profile.backgroundalpha)
 	
-	if notInterruptible and db.noInterruptShield then
+	if notInterruptible and db.noInterruptShield and not db.hideicon then
 		castBarShield:Show()
 	else
 		castBarShield:Hide()
