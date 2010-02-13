@@ -39,7 +39,7 @@ local UnitIsEnemy = _G.UnitIsEnemy
 local UnitExists = _G.UnitExists
 local GetTime = _G.GetTime
 
-local castBar, castBarText, castBarTimeText, castBarIcon, castBarSpark, castBarParent
+local castBar, castBarText, castBarTimeText, castBarIcon, castBarSpark, castBarParent, castBarShield
 local startTime, endTime, delay, fadeOut, stopTime, casting, channeling
 local startTime, endTime, delay, fadeOut, stopTime, casting, channeling, lastNotInterruptible
 
@@ -87,9 +87,13 @@ local defaults = {
 		showfriendly = true,
 		showhostile = true,
 		
+		noInterruptBorderChange = false,
 		noInterruptBorder = "Tooltip enlarged",
 		noInterruptBorderColor = {0.71, 0.73, 0.71}, -- Default color chosen by playing around with settings, rounded to 2 significant digits
 		noInterruptBorderAlpha = 1,
+		noInterruptColorChange = false,
+		noInterruptColor = {1.0, 0.49, 0},
+		noInterruptShield = true,
 	}
 }
 
@@ -215,22 +219,35 @@ do
 	local function dragstart()
 		castBarParent:StartMoving()
 	end
+	
 	local function dragstop()
 		db.x = castBarParent:GetLeft()
 		db.y = castBarParent:GetBottom()
 		castBarParent:StopMovingOrSizing()
 	end
+	
 	local function nothing()
 		castBarParent:SetAlpha(db.alpha)
 	end
+	
 	local function hideiconoptions()
 		return db.hideicon
 	end
+	
 	local function hidetimetextoptions()
 		return db.hidetimetext
 	end
+	
 	local function hidenametextoptions()
 		return db.hidenametext
+	end
+	
+	local function noInterruptChangeBorder()
+		return not db.noInterruptChangeBorder
+	end
+	
+	local function noInterruptChangeColor()
+		return not db.noInterruptChangeColor
 	end
 	
 	local function setOpt(info, value)
@@ -538,13 +555,20 @@ do
 						type = "group",
 						order = 455,
 						args = {
+							noInterruptChangeBorder = {
+								type = "toggle",
+								name = L["Change Border Style"],
+								desc = L["Adjust the Border Style for non-interruptible Cast Bars"],
+								order = 1,
+							},
 							noInterruptBorder = {
 								type = "select",
 								name = L["Border"],
 								desc = L["Set the border style for no interrupt casting bars"],
 								dialogControl = "LSM30_Border",
 								values = lsmlist.border,
-								order = 1,
+								order = 2,
+								disabled = noInterruptChangeBorder,
 							},
 							noInterruptBorderColor = {
 								type = "color",
@@ -552,7 +576,8 @@ do
 								desc = L["Set the color of the no interrupt casting bar border"],
 								get = getColor,
 								set = setColor,
-								order = 2,
+								order = 3,
+								disabled = noInterruptChangeBorder,
 							},
 							noInterruptBorderAlpha = {
 								type = "range",
@@ -560,7 +585,29 @@ do
 								desc = L["Set the alpha of the no interrupt casting bar border"],
 								isPercent = true,
 								min = 0, max = 1, bigStep = 0.025,
-								order = 3,
+								order = 4,
+								disabled = noInterruptChangeBorder,
+							},
+							noInterruptChangeColor = {
+								type = "toggle",
+								name = L["Change Color"],
+								desc = L["Change the color of non-interruptible Cast Bars"],
+								order = 10,
+							},
+							noInterruptColor = {
+								type = "color",
+								name = L["Cast Bar Color"],
+								desc = L["Configure the color of the cast bar."],
+								disabled = noInterruptChangeColor,
+								set = setColor,
+								get = getColor,
+								order = 11,
+							},
+							noInterruptShield = {
+								type = "toggle",
+								name = L["Show Shield Icon"],
+								desc = L["Show the Shield Icon on non-interruptible Cast Bars"],
+								disabled = function() return db.hideicon end,
 							},
 						},
 					},
@@ -607,16 +654,29 @@ do
 end
 
 local function setCastNotInterruptable(notInterruptible)
-	if notInterruptible then
+	if notInterruptible and db.noInterruptChangeColor then
+		castBar:SetStatusBarColor(unpack(db.noInterruptColor))
+	else
+		castBar:SetStatusBarColor(unpack(Quartz3.db.profile.castingcolor))
+	end
+	
+	if notInterruptible and db.noInterruptChangeBorder then
 		castBarParent:SetBackdrop(noInterruptBackdrop)
 		castBarParent:SetBackdropBorderColor(noInterruptBorderColor.r, noInterruptBorderColor.g, noInterruptBorderColor.b, noInterruptBorderAlpha)
 	else
 		castBarParent:SetBackdrop(interruptBackdrop)
 		castBarParent:SetBackdropBorderColor(interruptBorderColor.r, interruptBorderColor.g, interruptBorderColor.b, interruptBorderAlpha)
 	end
-	lastNotInterruptible = notInterruptible
 	local r,g,b = unpack(Quartz3.db.profile.backgroundcolor)
 	castBarParent:SetBackdropColor(r, g, b, Quartz3.db.profile.backgroundalpha)
+	
+	if notInterruptible and db.noInterruptShield then
+		castBarShield:Show()
+	else
+		castBarShield:Hide()
+	end
+	
+	lastNotInterruptible = notInterruptible
 end
 
 function Target:OnInitialize()
@@ -661,6 +721,13 @@ function Target:OnEnable()
 		castBarTimeText = castBar:CreateFontString(nil, "OVERLAY")
 		castBarIcon = castBar:CreateTexture(nil, "DIALOG")
 		castBarSpark = castBar:CreateTexture(nil, "OVERLAY")
+		castBarShield = castBar:CreateTexture(nil, "ARTWORK")
+		castBarShield:SetTexture("Interface\\CastingBar\\UI-CastingBar-Small-Shield")
+		castBarShield:SetTexCoord(0, 36/256, 0, 1)
+		castBarShield:SetWidth(36)
+		castBarShield:SetHeight(64)
+		castBarShield:SetPoint("CENTER", castBarIcon, "CENTER", -2, -1)
+		castBarShield:Hide()
 		
 		castBarParent:Hide()
 	end
@@ -908,8 +975,6 @@ function Target:PLAYER_TARGET_CHANGED()
 		channeling = nil
 		fadeOut = nil
 		
-		castBar:SetStatusBarColor(unpack(Quartz3.db.profile.castingcolor))
-		
 		castBar:SetValue(0)
 		castBarParent:Show()
 		castBarParent:SetAlpha(db.alpha)
@@ -1030,16 +1095,8 @@ do
 		noInterruptBorderColor.g = g
 		noInterruptBorderColor.b = b
 		noInterruptBorderAlpha = db.noInterruptBorderAlpha
-
-		if lastNotInterruptible then
-			castBarParent:SetBackdrop(noInterruptBackdrop)
-			castBarParent:SetBackdropBorderColor(noInterruptBorderColor.r,noInterruptBorderColor.g,noInterruptBorderColor.b, noInterruptBorderAlpha)
-		else
-			castBarParent:SetBackdrop(interruptBackdrop)
-			castBarParent:SetBackdropBorderColor(interruptBorderColor.r,interruptBorderColor.g,interruptBorderColor.b, interruptBorderAlpha)
-		end
-		r,g,b = unpack(qdb.backgroundcolor)
-		castBarParent:SetBackdropColor(r,g,b, qdb.backgroundalpha)
+		
+		setCastNotInterruptable(lastNotInterruptible)
 		
 		castBar:ClearAllPoints()
 		castBar:SetPoint("CENTER",castBarParent,"CENTER")
@@ -1122,8 +1179,10 @@ do
 			castBarIcon:Show()
 			castBarIcon:ClearAllPoints()
 			if db.iconposition == "left" then
+				castBarShield:SetTexCoord(0, 36/256, 0, 1)
 				castBarIcon:SetPoint("RIGHT", castBar, "LEFT", -1 * db.icongap, 0)
 			else --L["Right"]
+				castBarShield:SetTexCoord(36/256, 0, 0, 1)
 				castBarIcon:SetPoint("LEFT", castBar, "RIGHT", db.icongap, 0)
 			end
 			castBarIcon:SetWidth(db.h)
