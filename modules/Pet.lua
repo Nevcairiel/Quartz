@@ -240,6 +240,7 @@ end
 function Pet:OnDisable()
 	castBarParent:Hide()
 end
+
 function Pet:UNIT_SPELLCAST_START(event, unit)
 	if unit ~= "pet" then
 		return
@@ -438,6 +439,9 @@ do
 			PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
 			PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
 			PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
+			PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTIBLE")
+			PetCastingBarFrame:RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE")
+			PetCastingBarFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 			PetCastingBarFrame:RegisterEvent("UNIT_PET")
 		end
 		

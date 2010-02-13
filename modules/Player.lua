@@ -707,6 +707,9 @@ function Player:OnDisable()
 	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
 	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
 	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
+	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTIBLE")
+	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE")
+	CastingBarFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 end
 
 function Player:UNIT_SPELLCAST_SENT(event, unit, spell, rank, target)
@@ -947,23 +950,6 @@ do
 	function Player:ApplySettings()
 		db = self.db.profile
 		
-		if db.hideblizz then
-			CastingBarFrame.RegisterEvent = function() end
-			CastingBarFrame:UnregisterAllEvents()
-			CastingBarFrame:Hide()
-		else
-			CastingBarFrame.RegisterEvent = nil
-			CastingBarFrame:UnregisterAllEvents()
-			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_START")
-			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_STOP")
-			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_FAILED")
-			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
-			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_DELAYED")
-			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
-			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
-			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
-		end
-		
 		if castBarParent and self:IsEnabled() then
 			
 			castBarParent = self.castBarParent
@@ -1090,6 +1076,26 @@ do
 				castBarIcon:SetHeight(db.h)
 				castBarIcon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
 				castBarIcon:SetAlpha(db.iconalpha)
+			end
+			
+			if db.hideblizz then
+				CastingBarFrame.RegisterEvent = function() end
+				CastingBarFrame:UnregisterAllEvents()
+				CastingBarFrame:Hide()
+			else
+				CastingBarFrame.RegisterEvent = nil
+				CastingBarFrame:UnregisterAllEvents()
+				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_START")
+				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_STOP")
+				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_FAILED")
+				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
+				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_DELAYED")
+				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
+				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
+				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
+				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTIBLE")
+				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE")
+				CastingBarFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 			end
 			
 			castBarSpark:SetTexture("Interface\\CastingBar\\UI-CastingBar-Spark")
