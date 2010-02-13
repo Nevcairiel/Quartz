@@ -159,6 +159,18 @@ do
 				get = getOpt,
 				set = setOpt,
 				args = {
+					toggle = {
+						type = "toggle",
+						name = L["Enable"],
+						desc = L["Enable"],
+						get = function()
+							return Quartz3:GetModuleEnabled(MODNAME)
+						end,
+						set = function(info, v)
+							Quartz3:SetModuleEnabled(MODNAME, v)
+						end,
+						order = 99,
+					},
 					lock = {
 						type = "toggle",
 						name = L["Lock"],
@@ -934,7 +946,25 @@ do
 	
 	function Player:ApplySettings()
 		db = self.db.profile
-		if castBarParent then
+		
+		if db.hideblizz then
+			CastingBarFrame.RegisterEvent = function() end
+			CastingBarFrame:UnregisterAllEvents()
+			CastingBarFrame:Hide()
+		else
+			CastingBarFrame.RegisterEvent = nil
+			CastingBarFrame:UnregisterAllEvents()
+			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_START")
+			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_STOP")
+			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_FAILED")
+			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
+			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_DELAYED")
+			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
+			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
+			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
+		end
+		
+		if castBarParent and self:IsEnabled() then
 			
 			castBarParent = self.castBarParent
 			castBar = self.castBar
@@ -1067,23 +1097,6 @@ do
 			castBarSpark:SetBlendMode("ADD")
 			castBarSpark:SetWidth(20)
 			castBarSpark:SetHeight(db.h*2.2)
-			
-			if db.hideblizz then
-				CastingBarFrame.RegisterEvent = function() end
-				CastingBarFrame:UnregisterAllEvents()
-				CastingBarFrame:Hide()
-			else
-				CastingBarFrame.RegisterEvent = nil
-				CastingBarFrame:UnregisterAllEvents()
-				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_START")
-				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_STOP")
-				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_FAILED")
-				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
-				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_DELAYED")
-				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
-				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
-				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
-			end
 		end
 	end
 end
