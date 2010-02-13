@@ -163,10 +163,13 @@ local function getOptions()
 	return options
 end
 
-local function openOptions() 
-	-- open the profiles tab before, so the menu expands
-	InterfaceOptionsFrame_OpenToCategory(Quartz3.optFrames.Profiles)
-	InterfaceOptionsFrame_OpenToCategory(Quartz3.optFrames.Quartz3)
+function Quartz3:ChatCommand(input)
+	if not input or input:trim() == "" then
+		InterfaceOptionsFrame_OpenToCategory(Quartz3.optFrames.Profiles)
+		InterfaceOptionsFrame_OpenToCategory(Quartz3.optFrames.Quartz3)
+	else
+		LibStub("AceConfigCmd-3.0").HandleCommand(Quartz3, "quartz", "Quartz3", input)
+	end
 end
 
 function Quartz3:SetupOptions()
@@ -174,8 +177,8 @@ function Quartz3:SetupOptions()
 	LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("Quartz3", getOptions)
 	self.optFrames.Quartz3 = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Quartz3", "Quartz 3", nil, "general")
 	self:RegisterModuleOptions("Profiles", LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db), "Profiles")
-	LibStub("AceConsole-3.0"):RegisterChatCommand("quartz", openOptions)
-	LibStub("AceConsole-3.0"):RegisterChatCommand("q3", openOptions)
+	self:RegisterChatCommand("quartz", "ChatCommand")
+	self:RegisterChatCommand("q3", "ChatCommand")
 end
 
 function Quartz3:RegisterModuleOptions(name, optTable, displayName)
