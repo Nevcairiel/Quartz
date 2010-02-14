@@ -37,7 +37,6 @@ local defaults = {
 		w = 200,
 		texture = "LiteStep",
 		iconposition = "right",
-		timefontsize = 12,
 		
 		showfriendly = true,
 		showhostile = true,
@@ -48,7 +47,7 @@ do
 	local options
 	function getOptions()
 		if not options then
-			options = Player.Bar:CreateOptions()
+			options = Target.Bar:CreateOptions()
 			options.args.showfriendly = {
 				type = "toggle",
 				name = L["Show for Friends"],
@@ -69,15 +68,14 @@ end
 function Target:OnInitialize()
 	self.db = Quartz3.db:RegisterNamespace(MODNAME, defaults)
 	db = self.db.profile
-	
+
 	self:SetEnabledState(Quartz3:GetModuleEnabled(MODNAME))
 	Quartz3:RegisterModuleOptions(MODNAME, getOptions, L["Target"])
+
+	self.Bar = Quartz3.CastBarTemplate:new(self, "target", MODNAME, L["Target"], db)
 end
 
 function Target:OnEnable()
-	if not self.Bar then
-		self.Bar = Quartz3.CastBarTemplate:new(self, "target", MODNAME, L["Target"], db)
-	end
 	self.Bar:RegisterEvents()
 	self.Bar:RegisterEvent("PLAYER_TARGET_CHANGED")
 	self.Bar.PLAYER_TARGET_CHANGED = self.Bar.UpdateUnit
