@@ -118,6 +118,18 @@ function Quartz3:SetModuleEnabled(module, value)
 	end
 end
 
+function Quartz3:Merge(source, target)
+	if type(target) ~= "table" then target = {} end
+	for k,v in pairs(source) do
+		if type(v) == "table" then
+			target[k] = self:Merge(target[k], v)
+		elseif not target[k] then
+			target[k] = v
+		end
+	end
+	return target
+end
+
 Quartz3.Util = {}
 function Quartz3.Util.TimeFormat(num, isCastTime)
 	if num <= 10 or isCastTime then

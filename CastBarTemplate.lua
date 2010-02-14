@@ -834,6 +834,35 @@ do
 end
 
 Quartz3.CastBarTemplate = {}
+Quartz3.CastBarTemplate.defaults = {
+	--x =  -- applied automatically in applySettings()
+	y = 180,
+	h = 25,
+	w = 250,
+	scale = 1,
+	texture = "Blizzard",
+	hideicon = false,
+	alpha = 1,
+	iconalpha = 0.9,
+	iconposition = "left",
+	icongap = 4,
+	hidenametext = false,
+	nametextposition = "left",
+	timetextposition = "right",
+	font = "Friz Quadrata TT",
+	fontsize = 14,
+	hidetimetext = false,
+	hidecasttime = false,
+	timefontsize = 12,
+	targetname = false,
+	spellrank = false,
+	spellrankstyle = "roman",
+	border = "Blizzard Tooltip",
+	nametextx = 3,
+	nametexty = 0,
+	timetextx = 3,
+	timetexty = 0,
+}
 Quartz3.CastBarTemplate.template = CastBarTemplate
 Quartz3.CastBarTemplate.bars = {}
 function Quartz3.CastBarTemplate:new(parent, unit, name, localizedName, config)

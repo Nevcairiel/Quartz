@@ -28,38 +28,11 @@ local Player = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
 local db, getOptions
 
 local defaults = {
-	profile = {
+	profile = Quartz3:Merge(Quartz3.CastBarTemplate.defaults,
+	{
 		hideblizz = true,
 		showticks = true,
-		--x =  -- applied automatically in applySettings()
-		y = 180,
-		h = 25,
-		w = 250,
-		scale = 1,
-		texture = "Blizzard",
-		hideicon = false,
-		alpha = 1,
-		iconalpha = 0.9,
-		iconposition = "left",
-		icongap = 4,
-		hidenametext = false,
-		nametextposition = "left",
-		timetextposition = "right", 
-		font = "Friz Quadrata TT",
-		fontsize = 14,
-		hidetimetext = false,
-		hidecasttime = false,
-		casttimeprecision = 1,
-		timefontsize = 12,
-		targetname = false,
-		spellrank = false,
-		spellrankstyle = "roman", 
-		border = "Blizzard Tooltip",
-		nametextx = 3,
-		nametexty = 0,
-		timetextx = 3,
-		timetexty = 0,
-	}
+	})
 }
 
 
