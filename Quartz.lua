@@ -139,17 +139,18 @@ do
 		"XVI", "XVII", "XVIII", "XIX", "XX",
 		"XXI", "XXII", "XXIII", "XXIV", "XXV",
 	}
-	function Quartz3.Util.ConvertToRomanNumeral(number, style)
+	function Quartz3.Util.ConvertRankToRomanNumeral(rank, style)
 		local mask, arg = "", nil
+		local number = tonumber(rank:match(L["Rank (%d+)"]))
 		if number and number > 0 then
 			if style == "number" then
-				mask, arg = "%s %d", num
+				mask, arg = "%s %d", number
 			elseif style == "full" then
 				mask, arg = "%s (%s)", rank
 			elseif style == "roman" then
-				mask, arg = "%s %s", numerals[num]
+				mask, arg = "%s %s", numerals[number]
 			else -- full roman
-				mask, arg = "%s (%s)", L["Rank %s"]:format(numerals[num])
+				mask, arg = "%s (%s)", L["Rank %s"]:format(numerals[number])
 			end
 		end
 		return mask, arg
