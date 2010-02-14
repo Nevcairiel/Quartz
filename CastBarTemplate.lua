@@ -424,7 +424,9 @@ function CastBarTemplate:ApplySettings(config)
 end
 
 function CastBarTemplate:RegisterEvents()
-	self:RegisterEvent("UNIT_SPELLCAST_SENT")
+	if self.unit == "player" then
+		self:RegisterEvent("UNIT_SPELLCAST_SENT")
+	end
 	self:RegisterEvent("UNIT_SPELLCAST_START")
 	self:RegisterEvent("UNIT_SPELLCAST_STOP")
 	self:RegisterEvent("UNIT_SPELLCAST_FAILED")
