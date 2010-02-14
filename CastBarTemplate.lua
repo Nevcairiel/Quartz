@@ -974,7 +974,7 @@ do
 					desc = L["Select a bar from which to copy settings"],
 					get = false,
 					set = copySettings,
-					values = {["Target"] = L["Target"], ["Focus"] = L["Focus"], ["Pet"] = L["Pet"]},
+					values = {["Target"] = L["Target"], ["Focus"] = L["Focus"], ["Pet"] = L["Pet"], ["Player"] = L["Player"]},
 					order = 504
 				}
 			}

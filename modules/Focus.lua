@@ -77,7 +77,7 @@ function Focus:OnInitialize()
 	self:SetEnabledState(Quartz3:GetModuleEnabled(MODNAME))
 	Quartz3:RegisterModuleOptions(MODNAME, getOptions, L["Focus"])
 	
-	self.Bar = Quartz3.CastBarTemplate:new(self, "target", MODNAME, L["Target"], db)
+	self.Bar = Quartz3.CastBarTemplate:new(self, "focus", MODNAME, L["Focus"], db)
 end
 
 function Focus:OnEnable()

@@ -24,7 +24,6 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
 local MODNAME = "Target"
 local Target = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
-local Player = Quartz3:GetModule("Player")
 
 local db, getOptions
 
