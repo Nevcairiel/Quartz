@@ -92,10 +92,12 @@ function Flight:ApplySettings()
 	db = self.db.profile
 end
 
+--[[
 if InFlight then
 	function Flight:OnEnable()
 		self:RawHook(InFlight, "StartTimer")
 	end
+
 	function Flight:StartTimer(object, ...)
 		self.hooks[object].StartTimer(object, ...)
 		
@@ -106,10 +108,12 @@ if InFlight then
 
 		self:BeginFlight(duration, destination)
 	end
-elseif FlightMapTimes_BeginFlight then
+else ]]
+if FlightMapTimes_BeginFlight then
 	function Flight:OnEnable()
 		self:RawHook("FlightMapTimes_BeginFlight")
 	end
+
 	function Flight:FlightMapTimes_BeginFlight(duration, destination)
 		if duration and duration > 0 then
 			self:BeginFlight(duration, destination)
