@@ -58,6 +58,7 @@ do
 				desc = L["Show damage / mana ticks while channeling spells like Drain Life or Blizzard"],
 				order = 102,
 			}
+			options.args.noInterruptGroup = nil
 		end
 		return options
 	end

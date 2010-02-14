@@ -143,6 +143,43 @@ local function SetNameText(self, name, rank)
 		self.Text:SetText(name)
 	end
 end
+CastBarTemplate.SetNameText = SetNameText
+
+local function ToggleCastNotInterruptible(self, notInterruptible, init)
+	if self.unit == "player" and not init then return end
+	local db = self.config
+
+	if notInterruptible and db.noInterruptChangeColor then
+		self.Bar:SetStatusBarColor(unpack(db.noInterruptColor))
+	end
+
+	local r, g, b, a
+	if notInterruptible and db.noInterruptChangeBorder then
+		self.backdrop.edgeFile = media:Fetch("border", db.noInterruptBorder)
+		r,g,b = unpack(db.noInterruptBorderColor)
+		a = db.noInterruptBorderAlpha
+	else
+		self.backdrop.edgeFile = media:Fetch("border", db.border)
+		r,g,b = unpack(Quartz3.db.profile.bordercolor)
+		a = Quartz3.db.profile.borderalpha
+	end
+	self:SetBackdrop(self.backdrop)
+	self:SetBackdropBorderColor(r, g, b, a)
+
+	r, g, b = unpack(Quartz3.db.profile.backgroundcolor)
+	self:SetBackdropColor(r, g, b, Quartz3.db.profile.backgroundalpha)
+
+	if self.Shield then
+		if notInterruptible and db.noInterruptShield and not db.hideicon then
+			self.Shield:Show()
+		else
+			self.Shield:Hide()
+		end
+	end
+
+	self.lastNotInterruptible = notInterruptible
+end
+CastBarTemplate.ToggleCastNotInterruptible = ToggleCastNotInterruptible
 
 ----------------------------
 -- Event Handlers
@@ -172,11 +209,11 @@ function CastBarTemplate:UNIT_SPELLCAST_START(event, unit)
 		self.casting, self.channeling = nil, true
 	end
 
-	local spell, rank, displayName, icon, startTime, endTime
+	local spell, rank, displayName, icon, startTime, endTime, isTradeSkill, castID, notInterruptible
 	if self.casting then
-		spell, rank, displayName, icon, startTime, endTime = UnitCastingInfo(unit)
+		spell, rank, displayName, icon, startTime, endTime, isTradeSkill, castID, notInterruptible = UnitCastingInfo(unit)
 	else -- self.channeling
-		spell, rank, displayName, icon, startTime, endTime = UnitChannelInfo(unit)
+		spell, rank, displayName, icon, startTime, endTime, isTradeSkill, notInterruptible = UnitChannelInfo(unit)
 	end
 
 	startTime = startTime / 1000
@@ -211,6 +248,8 @@ function CastBarTemplate:UNIT_SPELLCAST_START(event, unit)
 			self.TimeText:SetJustifyH("RIGHT")
 		end
 	end
+
+	ToggleCastNotInterruptible(self, notInterruptible)
 
 	call(self, "UNIT_SPELLCAST_START", unit)
 end
@@ -300,6 +339,30 @@ end
 CastBarTemplate.UNIT_SPELLCAST_CHANNEL_UPDATE = CastBarTemplate.UNIT_SPELLCAST_DELAYED
 
 
+function CastBarTemplate:UNIT_SPELLCAST_INTERRUPTIBLE(event, unit)
+	if unit ~= self.unit then
+		return
+	end
+	ToggleCastNotInterruptible(self, false)
+end
+
+function CastBarTemplate:UNIT_SPELLCAST_NOT_INTERRUPTIBLE(event, unit)
+	if unit ~= self.unit then
+		return
+	end
+	ToggleCastNotInterruptible(self, true)
+end
+
+function CastBarTemplate:UpdateUnit()
+	if UnitCastingInfo(self.unit) then
+		self:UNIT_SPELLCAST_START("UNIT_SPELLCAST_START", self.unit)
+	elseif UnitChannelInfo(self.unit) then
+		self:UNIT_SPELLCAST_START("UNIT_SPELLCAST_CHANNEL_START", self.unit)
+	else
+		self:Hide()
+	end
+end
+
 function CastBarTemplate:ApplySettings(config)
 	if config then
 		self.config = config
@@ -316,14 +379,7 @@ function CastBarTemplate:ApplySettings(config)
 	self:SetAlpha(db.alpha)
 	self:SetScale(db.scale)
 
-	self.backdrop.edgeFile = media:Fetch("border", db.border)
-	self:SetBackdrop(self.backdrop)
-
-	local r,g,b = unpack(Quartz3.db.profile.backgroundcolor)
-	self:SetBackdropColor(r,g,b, Quartz3.db.profile.backgroundalpha)
-
-	r,g,b = unpack(Quartz3.db.profile.bordercolor)
-	self:SetBackdropBorderColor(r, g, b, Quartz3.db.profile.borderalpha)
+	ToggleCastNotInterruptible(self, self.lastNotInterruptible, true)
 
 	self.Bar:ClearAllPoints()
 	self.Bar:SetPoint("CENTER",self,"CENTER")
@@ -436,6 +492,10 @@ function CastBarTemplate:RegisterEvents()
 	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
 	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
 	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_INTERRUPTED")
+	if self.unit ~= "player" then
+		self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTIBLE")
+		self:RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE")
+	end
 
 	media.RegisterCallback(self, "LibSharedMedia_SetGlobal", function(mtype, override)
 		if mtype == "statusbar" then
@@ -456,6 +516,7 @@ do
 	local function getBar(info)
 		return Quartz3.CastBarTemplate.bars[info[1]]
 	end
+
 	local function dragstart(self)
 		self:StartMoving()
 	end
@@ -489,16 +550,31 @@ do
 		local db = getBar(info).config
 		return db.hidenametext
 	end
-	
+
 	local function hidespellrankstyle(info)
 		local db = getBar(info).config
 		return db.hidenametext or not db.spellrank
 	end
+
+	local function noInterruptChangeBorder(info)
+		local db = getBar(info).config
+		return not db.noInterruptChangeBorder
+	end
+
+	local function noInterruptChangeColor(info)
+		local db = getBar(info).config
+		return not db.noInterruptChangeColor
+	end
 	
+	local function icondisabled(info)
+		local db = getBar(info).config
+		return db.hideicon
+	end
+
 	local function getMovable(info)
 		return getBar(info).locked
 	end
-	
+
 	local function setMovable(info, v)
 		local bar = getBar(info)
 		if v then
@@ -520,7 +596,7 @@ do
 		end
 		bar.locked = v
 	end
-	
+
 	local function snapToCenter(info, v)
 		local bar = getBar(info)
 		local scale = bar.config.scale
@@ -531,33 +607,41 @@ do
 		end
 		bar:ApplySettings()
 	end
-	
+
 	local function copySettings(info, v)
 		local bar = getBar(info)
 		local from = Quartz3:GetModule(v)
 		Quartz3:CopySettings(from.db.profile, bar.config)
 		bar:ApplySettings()
 	end
-	
+
 	local function getEnabled(info)
 		local bar = getBar(info)
 		return Quartz3:GetModuleEnabled(bar.modName)
 	end
-	
+
 	local function setEnabled(info, v)
 		local bar = getBar(info)
 		return Quartz3:SetModuleEnabled(bar.modName, v)
 	end
-	
+
 	local function getOpt(info)
 		local db = getBar(info).config
 		return db[info[#info]]
 	end
-	
+
 	local function setOpt(info, value)
 		local bar = getBar(info)
 		bar.config[info[#info]] = value
 		bar:ApplySettings()
+	end
+
+	local function getColor(info)
+		return unpack(getOpt(info))
+	end
+
+	local function setColor(info, ...)
+		setOpt(info, {...})
 	end
 
 	function CastBarTemplate:CreateOptions()
@@ -806,6 +890,68 @@ do
 					values = lsmlist.border,
 					order = 452,
 				},
+				noInterruptGroup = {
+					type = "group",
+					name = L["No interrupt cast bars"],
+					dialogInline = true,
+					order = 455,
+					args = {
+						noInterruptChangeBorder = {
+							type = "toggle",
+							name = L["Change Border Style"],
+							desc = L["Adjust the Border Style for non-interruptible Cast Bars"],
+							order = 1,
+						},
+						noInterruptBorder = {
+							type = "select",
+							name = L["Border"],
+							desc = L["Set the border style for no interrupt casting bars"],
+							dialogControl = "LSM30_Border",
+							values = lsmlist.border,
+							order = 2,
+							disabled = noInterruptChangeBorder,
+						},
+						noInterruptBorderColor = {
+							type = "color",
+							name = L["Border Color"],
+							desc = L["Set the color of the no interrupt casting bar border"],
+							get = getColor,
+							set = setColor,
+							order = 3,
+							disabled = noInterruptChangeBorder,
+						},
+						noInterruptBorderAlpha = {
+							type = "range",
+							name = L["Border Alpha"],
+							desc = L["Set the alpha of the no interrupt casting bar border"],
+							isPercent = true,
+							min = 0, max = 1, bigStep = 0.025,
+							order = 4,
+							disabled = noInterruptChangeBorder,
+						},
+						noInterruptChangeColor = {
+							type = "toggle",
+							name = L["Change Color"],
+							desc = L["Change the color of non-interruptible Cast Bars"],
+							order = 10,
+						},
+						noInterruptColor = {
+							type = "color",
+							name = L["Cast Bar Color"],
+							desc = L["Configure the color of the cast bar."],
+							disabled = noInterruptChangeColor,
+							set = setColor,
+							get = getColor,
+							order = 11,
+						},
+						noInterruptShield = {
+							type = "toggle",
+							name = L["Show Shield Icon"],
+							desc = L["Show the Shield Icon on non-interruptible Cast Bars"],
+							disabled = icondisabled,
+						},
+					},
+				},
 				toolheader = {
 					type = "header",
 					name = L["Tools"],
@@ -828,7 +974,7 @@ do
 					set = copySettings,
 					values = {["Target"] = L["Target"], ["Focus"] = L["Focus"], ["Pet"] = L["Pet"]},
 					order = 504
-				},
+				}
 			}
 		}
 		return options
@@ -864,6 +1010,14 @@ Quartz3.CastBarTemplate.defaults = {
 	nametexty = 0,
 	timetextx = 3,
 	timetexty = 0,
+
+	noInterruptBorderChange = false,
+	noInterruptBorder = "Tooltip enlarged",
+	noInterruptBorderColor = {0.71, 0.73, 0.71}, -- Default color chosen by playing around with settings, rounded to 2 significant digits
+	noInterruptBorderAlpha = 1,
+	noInterruptColorChange = false,
+	noInterruptColor = {1.0, 0.49, 0},
+	noInterruptShield = true,
 }
 Quartz3.CastBarTemplate.template = CastBarTemplate
 Quartz3.CastBarTemplate.bars = {}
@@ -875,7 +1029,7 @@ function Quartz3.CastBarTemplate:new(parent, unit, name, localizedName, config)
 	bar.config = config
 	bar.modName = name
 	bar.localizedName = localizedName
-	
+
 	Quartz3.CastBarTemplate.bars[name] = bar
 
 	bar:SetFrameStrata("MEDIUM")
@@ -892,6 +1046,17 @@ function Quartz3.CastBarTemplate:new(parent, unit, name, localizedName, config)
 	bar.TimeText = bar.Bar:CreateFontString(nil, "OVERLAY")
 	bar.Icon     = bar.Bar:CreateTexture(nil, "DIALOG")
 	bar.Spark    = bar.Bar:CreateTexture(nil, "OVERLAY")
+	if unit ~= "player" then
+		bar.Shield = bar.Bar:CreateTexture(nil, "ARTWORK")
+		bar.Shield:SetTexture("Interface\\CastingBar\\UI-CastingBar-Small-Shield")
+		bar.Shield:SetTexCoord(0, 36/256, 0, 1)
+		bar.Shield:SetWidth(36)
+		bar.Shield:SetHeight(64)
+		bar.Shield:SetPoint("CENTER", bar.Icon, "CENTER", -2, -1)
+		bar.Shield:Hide()
+	end
+
+	bar.lastNotInterruptible = false
 
 	bar.backdrop = { bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
 	                 tile = true, tileSize = 16, edgeSize = 16, --edgeFile = "", -- set by ApplySettings

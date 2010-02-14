@@ -122,7 +122,7 @@ function Quartz3:Merge(source, target)
 	if type(target) ~= "table" then target = {} end
 	for k,v in pairs(source) do
 		if type(v) == "table" then
-			target[k] = self:Merge(target[k], v)
+			target[k] = self:Merge(v, target[k])
 		elseif not target[k] then
 			target[k] = v
 		end
