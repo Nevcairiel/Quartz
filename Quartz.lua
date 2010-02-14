@@ -152,7 +152,7 @@ do
 		"XXI", "XXII", "XXIII", "XXIV", "XXV",
 	}
 	function Quartz3.Util.ConvertRankToRomanNumeral(rank, style)
-		local mask, arg = "", nil
+		local mask, arg = nil, nil
 		local number = tonumber(rank:match(L["Rank (%d+)"]))
 		if number and number > 0 then
 			if style == "number" then
