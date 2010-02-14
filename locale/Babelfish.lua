@@ -13,6 +13,7 @@ local filePrefix = "../"
 local files = {
 	"Quartz.lua",
 	"Config.lua",
+	"CastBarTemplate.lua",
 	"modules/Buff.lua",
 	"modules/Flight.lua",
 	"modules/Focus.lua",
