@@ -48,7 +48,7 @@ do
 	local options
 	function getOptions()
 		if not options then
-			options = Target.Bar:CreateOptions()
+			options = Pet.Bar:CreateOptions()
 			options.args.hideblizz = {
 				type = "toggle",
 				name = L["Disable Blizzard Cast Bar"],
