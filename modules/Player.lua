@@ -83,47 +83,36 @@ end
 
 function Player:OnDisable()
 	self.Bar:UnregisterEvents()
-	CastingBarFrame.RegisterEvent = nil
-	CastingBarFrame:UnregisterAllEvents()
-	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_START")
-	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_STOP")
-	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_FAILED")
-	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
-	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_DELAYED")
-	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
-	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
-	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
-	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTIBLE")
-	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE")
-	CastingBarFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+	self.Bar:Hide()
 end
 
 function Player:ApplySettings()
 	db = self.db.profile
 	
+	-- obey the hideblizz setting no matter if disabled or not
+	if db.hideblizz then
+		CastingBarFrame.RegisterEvent = function() end
+		CastingBarFrame:UnregisterAllEvents()
+		CastingBarFrame:Hide()
+	else
+		CastingBarFrame.RegisterEvent = nil
+		CastingBarFrame:UnregisterAllEvents()
+		CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_START")
+		CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_STOP")
+		CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_FAILED")
+		CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
+		CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_DELAYED")
+		CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
+		CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
+		CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
+		CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTIBLE")
+		CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE")
+		CastingBarFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+	end
+	
 	self.Bar:SetConfig(db)
 	if self:IsEnabled() then
 		self.Bar:ApplySettings()
-		
-		if db.hideblizz then
-			CastingBarFrame.RegisterEvent = function() end
-			CastingBarFrame:UnregisterAllEvents()
-			CastingBarFrame:Hide()
-		else
-			CastingBarFrame.RegisterEvent = nil
-			CastingBarFrame:UnregisterAllEvents()
-			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_START")
-			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_STOP")
-			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_FAILED")
-			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
-			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_DELAYED")
-			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
-			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
-			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
-			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTIBLE")
-			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE")
-			CastingBarFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
-		end
 	end
 end
 
