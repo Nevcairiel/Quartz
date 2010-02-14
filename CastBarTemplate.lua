@@ -32,7 +32,7 @@ local playerName = UnitName("player")
 
 local function call(obj, method, ...)
 	if type(obj.parent[method]) == "function" then
-		obj.parent[method](obj.parent, obj, ...)
+		return obj.parent[method](obj.parent, obj, ...)
 	end
 end
 
@@ -199,7 +199,7 @@ function CastBarTemplate:UNIT_SPELLCAST_SENT(event, unit, spell, rank, target)
 end
 
 function CastBarTemplate:UNIT_SPELLCAST_START(event, unit)
-	if unit ~= self.unit and not (self.unit == "player" and unit == "vehicle") then
+	if (unit ~= self.unit and not (self.unit == "player" and unit == "vehicle")) or call(self, "PreShowCondition", unit) then
 		return
 	end
 	local db = self.config
@@ -308,7 +308,7 @@ end
 CastBarTemplate.UNIT_SPELLCAST_CHANNEL_INTERRUPTED = CastBarTemplate.UNIT_SPELLCAST_INTERRUPTED
 
 function CastBarTemplate:UNIT_SPELLCAST_DELAYED(event, unit)
-	if unit ~= self.unit and not (self.unit == "player" and unit == "vehicle") then
+	if unit ~= self.unit and not (self.unit == "player" and unit == "vehicle") or call(self, "PreShowCondition", unit) then
 		return
 	end
 	local oldStart = self.startTime
