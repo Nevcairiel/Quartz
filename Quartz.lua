@@ -117,3 +117,41 @@ function Quartz3:SetModuleEnabled(module, value)
 		end
 	end
 end
+
+Quartz3.Util = {}
+function Quartz3.Util.TimeFormat(num, isCastTime)
+	if num <= 10 or isCastTime then
+		return "%.1f", num
+	elseif num <= 60 then
+		return "%d", num
+	elseif num <= 3600 then
+		return "%d:%02d", num / 60, num % 60
+	else
+		return "%d:%02d", num / 3600, (num % 3600) / 60
+	end
+end
+
+do
+	local numerals = { -- 25"s enough for now, I think?
+		"I", "II", "III", "IV", "V",
+		"VI", "VII", "VIII", "IX", "X",
+		"XI", "XII", "XIII", "XIV", "XV",
+		"XVI", "XVII", "XVIII", "XIX", "XX",
+		"XXI", "XXII", "XXIII", "XXIV", "XXV",
+	}
+	function Quartz3.Util.ConvertToRomanNumeral(number, style)
+		local mask, arg = "", nil
+		if number and number > 0 then
+			if style == "number" then
+				mask, arg = "%s %d", num
+			elseif style == "full" then
+				mask, arg = "%s (%s)", rank
+			elseif style == "roman" then
+				mask, arg = "%s %s", numerals[num]
+			else -- full roman
+				mask, arg = "%s (%s)", L["Rank %s"]:format(numerals[num])
+			end
+		end
+		return mask, arg
+	end
+end

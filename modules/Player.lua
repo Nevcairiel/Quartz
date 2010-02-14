@@ -25,22 +25,6 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 local MODNAME = "Player"
 local Player = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
 
-local media = LibStub("LibSharedMedia-3.0")
-local lsmlist = _G.AceGUIWidgetLSMlists
-
-local math_min = _G.math.min
-local unpack = _G.unpack
-local tonumber = _G.tonumber
-local format = _G.string.format
-local UnitCastingInfo = _G.UnitCastingInfo
-local UnitChannelInfo = _G.UnitChannelInfo
-local UnitName = _G.UnitName
-local GetTime = _G.GetTime
-local castTimeFormatString
-
-local castBar, castBarText, castBarTimeText, castBarIcon, castBarSpark, castBarParent
-local locked = true
-
 local db, getOptions
 
 local defaults = {
@@ -487,155 +471,12 @@ do
 	end
 end
 
-local function timenum(num, isCastTime)
-	if num <= 60 then
-		if isCastTime then
-			return castTimeFormatString, num
-		else
-			return "%.1f", num
-		end
-	else
-		return "%d:%02d", num / 60, num % 60
-	end
-end
-
-local function OnUpdate()
-	local currentTime = GetTime()
-	local startTime = Player.startTime
-	local endTime = Player.endTime
-	local delay = Player.delay
-	if Player.casting then
-		if currentTime > endTime then
-			Player.casting = nil
-			Player.fadeOut = true
-			Player.stopTime = currentTime
-		end
-		
-		local showTime = math_min(currentTime, endTime)
-		
-		local perc = (showTime-startTime) / (endTime - startTime)
-		castBar:SetValue(perc)
-		castBarSpark:ClearAllPoints()
-		castBarSpark:SetPoint("CENTER", castBar, "LEFT", perc * db.w, 0)
-		
-		if delay and delay ~= 0 then
-			if db.hidecasttime then
-				castBarTimeText:SetFormattedText("|cffff0000+%.1f|cffffffff %s", delay, format(timenum(endTime - showTime)))
-			else
-				castBarTimeText:SetFormattedText("|cffff0000+%.1f|cffffffff %s / %s", delay, format(timenum(endTime - showTime)), format(timenum(endTime - startTime, true)))
-			end
-		else
-			if db.hidecasttime then
-				castBarTimeText:SetFormattedText(timenum(endTime - showTime))
-			else
-				castBarTimeText:SetFormattedText("%s / %s", format(timenum(endTime - showTime)), format(timenum(endTime - startTime, true)))
-			end
-		end
-	elseif Player.channeling then
-		if currentTime > endTime then
-			Player.channeling = nil
-			Player.fadeOut = true
-			Player.stopTime = currentTime
-		end
-		local remainingTime = endTime - currentTime
-		local perc = remainingTime / (endTime - startTime)
-		castBar:SetValue(perc)
-		castBarTimeText:SetFormattedText("%.1f", remainingTime)
-		castBarSpark:ClearAllPoints()
-		castBarSpark:SetPoint("CENTER", castBar, "LEFT", perc * db.w, 0)
-		
-		if delay and delay ~= 0 then
-			if db.hidecasttime then
-				castBarTimeText:SetFormattedText("|cffFF0000-%.1f|cffffffff %s", delay, format(timenum(remainingTime)))
-			else
-				castBarTimeText:SetFormattedText("|cffFF0000-%.1f|cffffffff %s / %s", delay, format(timenum(remainingTime)), format(timenum(endTime - startTime, true)))
-			end
-		else
-			if db.hidecasttime then
-				castBarTimeText:SetFormattedText(timenum(remainingTime))
-			else
-				castBarTimeText:SetFormattedText("%s / %s", format(timenum(remainingTime)), format(timenum(endTime - startTime, true)))
-			end
-		end
-	elseif Player.fadeOut then
-		castBarSpark:Hide()
-		local alpha
-		local stopTime = Player.stopTime
-		if stopTime then
-			alpha = stopTime - currentTime + 1
-		else
-			alpha = 0
-		end
-		if alpha >= 1 then
-			alpha = 1
-		end
-		if alpha <= 0 then
-			Player.stopTime = nil
-			castBarParent:Hide()
-		else
-			castBarParent:SetAlpha(alpha*db.alpha)
-		end
-	else
-		castBarParent:Hide()
-	end
-end
-
-Player.OnUpdate = OnUpdate
-
-local function OnHide()
+function Player:OnHide()
 	local Latency = Quartz3:GetModule(L["Latency"],true)
 	if Latency then
 		if Latency:IsEnabled() and Latency.lagbox then
 			Latency.lagbox:Hide()
 			Latency.lagtext:Hide()
-		end
-	end
-	castBarParent:SetScript("OnUpdate", nil)
-end
-
-local function OnShow()
-	castBarParent:SetScript("OnUpdate", OnUpdate)
-end
-
-local setnametext
-do
-	local numerals = { -- 25"s enough for now, I think?
-	"I", "II", "III", "IV", "V",
-	"VI", "VII", "VIII", "IX", "X",
-	"XI", "XII", "XIII", "XIV", "XV",
-	"XVI", "XVII", "XVIII", "XIX", "XX",
-	"XXI", "XXII", "XXIII", "XXIV", "XXV",
-	}
-
-	function setnametext(name, rank)
-		local mask, arg = nil, nil
-		if db.spellrank and rank then
-			local num = tonumber(rank:match(L["Rank (%d+)"]))
-			if num and num > 0 then
-				local rankstyle = db.spellrankstyle
-				if rankstyle == "number" then
-					mask, arg = "%s %d", num
-				elseif rankstyle == "full" then
-					mask, arg = "%s (%s)", rank
-				elseif rankstyle == "roman" then
-					mask, arg = "%s %s", numerals[num]
-				else -- full roman
-					mask, arg = "%s (%s)", L["Rank %s"]:format(numerals[num])
-				end
-			end
-		end
-
-		if db.targetname and Player.targetName and (Player.targetName ~= "") then
-			if mask then
-				mask = mask .. " -> " .. Player.targetName
-			else
-				name = name .. " -> " .. Player.targetName
-			end
-		end
-		if mask then
-			castBarText:SetFormattedText(mask, name, arg)
-		else
-			castBarText:SetText(name)
 		end
 	end
 end
@@ -647,56 +488,17 @@ function Player:OnInitialize()
 	self:SetEnabledState(Quartz3:GetModuleEnabled(MODNAME))
 	Quartz3:RegisterModuleOptions(MODNAME, getOptions, L["Player"])
 
-	castBarParent = CreateFrame("Frame", "Quartz3CastBar", UIParent)
-	castBarParent:SetFrameStrata("MEDIUM")
-	castBarParent:SetScript("OnShow", OnShow)
-	castBarParent:SetScript("OnHide", OnHide)
-	castBarParent:SetMovable(true)
-	castBarParent:RegisterForDrag("LeftButton")
-	castBarParent:SetClampedToScreen(true)
-
-	self.Bar = castBarParent
-
-	castBar = CreateFrame("StatusBar", nil, castBarParent)
-	castBarText = castBar:CreateFontString(nil, "OVERLAY")
-	castBarTimeText = castBar:CreateFontString(nil, "OVERLAY")
-	castBarIcon = castBar:CreateTexture(nil, "DIALOG")
-	castBarSpark = castBar:CreateTexture(nil, "OVERLAY")
-
-	castBarParent:Hide()
-
-	self.castBarParent = castBarParent
-	self.castBar = castBar
-	self.castBarText = castBarText
-	self.castBarTimeText = castBarTimeText
-	self.castBarIcon = castBarIcon
-	self.castBarSpark = castBarSpark
-
-	self.playerName = UnitName("player")
+	self.Bar = Quartz3.CastBarTemplate:new("Quart3CastBar", self, "player", db)
 end
 
 
 function Player:OnEnable()
-	Player:RegisterEvent("UNIT_SPELLCAST_SENT")
-	Player:RegisterEvent("UNIT_SPELLCAST_START")
-	Player:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
-	Player:RegisterEvent("UNIT_SPELLCAST_STOP")
-	Player:RegisterEvent("UNIT_SPELLCAST_FAILED")
-	Player:RegisterEvent("UNIT_SPELLCAST_DELAYED")
-	Player:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
-	Player:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
-	Player:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
-	Player:RegisterEvent("UNIT_SPELLCAST_CHANNEL_INTERRUPTED", "UNIT_SPELLCAST_INTERRUPTED")
-	media.RegisterCallback(self, "LibSharedMedia_SetGlobal", function(mtype, override)
-		if mtype == "statusbar" then
-			castBar:SetStatusBarTexture(media:Fetch("statusbar", override))
-		end
-	end)
-
-	Player:ApplySettings()
+	self.Bar:RegisterEvents()
+	self:ApplySettings()
 end
 
 function Player:OnDisable()
+	self.Bar:UnregisterEvents()
 	CastingBarFrame.RegisterEvent = nil
 	CastingBarFrame:UnregisterAllEvents()
 	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_START")
@@ -710,60 +512,6 @@ function Player:OnDisable()
 	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTIBLE")
 	CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE")
 	CastingBarFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
-end
-
-function Player:UNIT_SPELLCAST_SENT(event, unit, spell, rank, target)
-	if unit ~= "player" and unit ~= "vehicle" then
-		return
-	end
-	if target then
-		self.targetName = target
-	else
-		-- auto selfcast? is this needed, even?
-		self.targetName = self.playerName
-	end
-end
-
-function Player:UNIT_SPELLCAST_START(event, unit)
-	if unit ~= "player" and unit ~= "vehicle" then
-		return
-	end
-	local spell, rank, displayName, icon, startTime, endTime = UnitCastingInfo(unit)
-
-	startTime = startTime / 1000
-	endTime = endTime / 1000
-	self.startTime = startTime
-	self.endTime = endTime
-	self.delay = 0
-	self.casting = true
-	self.channeling = nil
-	self.fadeOut = nil
-
-	castBar:SetStatusBarColor(unpack(Quartz3.db.profile.castingcolor))
-	
-	setBarTicks(0)
-	
-	castBar:SetValue(0)
-	castBarParent:Show()
-	castBarParent:SetAlpha(db.alpha)
-	
-	setnametext(displayName, rank)
-	
-	castBarSpark:Show()
-	
-	if icon == "Interface\\Icons\\Temp" and Quartz3.db.profile.hidesamwise then
-		icon = nil
-	end
-	castBarIcon:SetTexture(icon)
-	
-	local position = db.timetextposition
-	if position == "caststart" then
-		castBarTimeText:SetPoint("LEFT", castBar, "LEFT", db.timetextx, db.timetexty)
-		castBarTimeText:SetJustifyH("LEFT")
-	elseif position == "castend" then
-		castBarTimeText:SetPoint("RIGHT", castBar, "RIGHT", -1 * db.timetextx, db.timetexty)
-		castBarTimeText:SetJustifyH("RIGHT")
-	end
 end
 
 local channelingTicks = {
@@ -795,314 +543,30 @@ local function getChannelingTicks(spell)
 	return channelingTicks[spell] or 0
 end
 
-function Player:UNIT_SPELLCAST_CHANNEL_START(event, unit)
-	if unit ~= "player" and unit ~= "vehicle" then
-		return
-	end
-	local spell, rank, displayName, icon, startTime, endTime = UnitChannelInfo(unit)
+function Player:ApplySettings()
+	db = self.db.profile
 	
-	startTime = startTime / 1000
-	endTime = endTime / 1000
-	self.startTime = startTime
-	self.endTime = endTime
-	self.delay = 0
-	self.casting = nil
-	self.channeling = true
-	--FixMe: How do we work this out?
-	self.channelingTicks = getChannelingTicks(spell)
-	self.fadeOut = nil
-	
-	setBarTicks(self.channelingTicks)
-
-	castBar:SetStatusBarColor(unpack(Quartz3.db.profile.channelingcolor))
-	
-	castBar:SetValue(1)
-	castBarParent:Show()
-	castBarParent:SetAlpha(db.alpha)
-
-	setnametext(spell, rank)
-	
-	castBarSpark:Show()
-	if icon == "Interface\\Icons\\Temp" and Quartz3.db.profile.hidesamwise then
-		icon = nil
-	end
-	castBarIcon:SetTexture(icon)
-	
-	local position = db.timetextposition
-	if position == "caststart" then
-		castBarTimeText:SetPoint("RIGHT", castBar, "RIGHT", -1 * db.timetextx, db.timetexty)
-		castBarTimeText:SetJustifyH("RIGHT")
-	elseif position == "castend" then
-		castBarTimeText:SetPoint("LEFT", castBar, "LEFT", db.timetextx, db.timetexty)
-		castBarTimeText:SetJustifyH("LEFT")
-	end
-end
-
-function Player:UNIT_SPELLCAST_STOP(event, unit)
-	if unit ~= "player" and unit ~= "vehicle" then
-		return
-	end
-	if self.casting then
-		--self.targetName = nil
-		self.casting = nil
-		self.fadeOut = true
-		self.stopTime = GetTime()
+	if self.Bar and self:IsEnabled() then
+		self.Bar:ApplySettings(db)
 		
-		setBarTicks(0)
-		castBar:SetValue(1.0)
-		castBar:SetStatusBarColor(unpack(Quartz3.db.profile.completecolor))
-		
-		castBarTimeText:SetText("")
-	end
-end
-
-function Player:UNIT_SPELLCAST_CHANNEL_STOP(event, unit)
-	if unit ~= "player" and unit ~= "vehicle" then
-		return
-	end
-	if self.channeling then
-		self.channeling = nil
-		self.fadeOut = true
-		self.stopTime = GetTime()
-		
-		setBarTicks(0)
-		castBar:SetValue(0)
-		castBar:SetStatusBarColor(unpack(Quartz3.db.profile.completecolor))
-		
-		castBarTimeText:SetText("")
-	end
-end
-
-function Player:UNIT_SPELLCAST_FAILED(event, unit)
-	if (unit ~= "player" and unit ~= "vehicle") or self.channeling or self.casting then 
-		return
-	end
-	--self.targetName = nil
-	self.casting = nil
-	self.channeling = nil
-	self.fadeOut = true
-	if not self.stopTime then
-		self.stopTime = GetTime()
-	end
-	setBarTicks(0)
-	castBar:SetValue(1.0)
-	castBar:SetStatusBarColor(unpack(Quartz3.db.profile.failcolor))
-	
-	castBarTimeText:SetText("")
-end
-
-function Player:UNIT_SPELLCAST_INTERRUPTED(event, unit)
-	if unit ~= "player" and unit ~= "vehicle" then
-		return
-	end
-	--self.targetName = nil
-	self.casting = nil
-	self.channeling = nil
-	self.fadeOut = true
-	if not self.stopTime then
-		self.stopTime = GetTime()
-	end
-	setBarTicks(0)
-	castBar:SetValue(1.0)
-	castBar:SetStatusBarColor(unpack(Quartz3.db.profile.failcolor))
-	
-	castBarTimeText:SetText("")
-end
-
-function Player:UNIT_SPELLCAST_DELAYED(event, unit)
-	if unit ~= "player" and unit ~= "vehicle" then
-		return
-	end
-	local oldStart = self.startTime
-	local spell, rank, displayName, icon, startTime, endTime = UnitCastingInfo(unit)
-	if not startTime then
-		return castBarParent:Hide()
-	end
-	startTime = startTime / 1000
-	endTime = endTime / 1000
-	self.startTime = startTime
-	self.endTime = endTime
-
-	self.delay = (self.delay or 0) + (startTime - (oldStart or startTime))
-end
-
-function Player:UNIT_SPELLCAST_CHANNEL_UPDATE(event, unit)
-	if unit ~= "player" and unit ~= "vehicle" then
-		return
-	end
-	local oldStart = self.startTime
-	local spell, rank, displayName, icon, startTime, endTime = UnitChannelInfo(unit)
-	if not startTime then
-		return castBarParent:Hide()
-	end
-	startTime = startTime / 1000
-	endTime = endTime / 1000
-	self.startTime = startTime
-	self.endTime = endTime
-	
-	self.delay = (self.delay or 0) + ((oldStart or startTime) - startTime)
-end
-
-do
-	local backdrop = { insets = {} }
-	local backdrop_insets = backdrop.insets
-	
-	function Player:ApplySettings()
-		db = self.db.profile
-		
-		if castBarParent and self:IsEnabled() then
-			
-			castBarParent = self.castBarParent
-			castBar = self.castBar
-			castBarText = self.castBarText
-			castBarTimeText = self.castBarTimeText
-			castBarIcon = self.castBarIcon
-			castBarSpark = self.castBarSpark
-			
-			castBarParent:ClearAllPoints()
-			if not db.x then
-				db.x = (UIParent:GetWidth() / 2 - (db.w * db.scale) / 2) / db.scale
-			end
-			castBarParent:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", db.x, db.y)
-			castBarParent:SetWidth(db.w+10)
-			castBarParent:SetHeight(db.h+10)
-			castBarParent:SetAlpha(db.alpha)
-			castBarParent:SetScale(db.scale)
-			
-			backdrop.bgFile = "Interface\\Tooltips\\UI-Tooltip-Background"
-			backdrop.tile = true
-			backdrop.tileSize = 16
-			backdrop.edgeFile = media:Fetch("border", db.border)
-			backdrop.edgeSize = 16
-			backdrop_insets.left = 4
-			backdrop_insets.right = 4
-			backdrop_insets.top = 4
-			backdrop_insets.bottom = 4
-			
-			castBarParent:SetBackdrop(backdrop)
-			local r,g,b = unpack(Quartz3.db.profile.bordercolor)
-			castBarParent:SetBackdropBorderColor(r,g,b, Quartz3.db.profile.borderalpha)
-			r,g,b = unpack(Quartz3.db.profile.backgroundcolor)
-			castBarParent:SetBackdropColor(r,g,b, Quartz3.db.profile.backgroundalpha)
-			
-			castBar:ClearAllPoints()
-			castBar:SetPoint("CENTER",castBarParent,"CENTER")
-			castBar:SetWidth(db.w)
-			castBar:SetHeight(db.h)
-			castBar:SetStatusBarTexture(media:Fetch("statusbar", db.texture))
-			castBar:SetMinMaxValues(0, 1)
-			
-			if db.hidetimetext then
-				castBarTimeText:Hide()
-			else
-				castBarTimeText:Show()
-				castBarTimeText:ClearAllPoints()
-				castBarTimeText:SetWidth(db.w)
-				local position = db.timetextposition
-				if position == "left" then
-					castBarTimeText:SetPoint("LEFT", castBar, "LEFT", db.timetextx, db.timetexty)
-					castBarTimeText:SetJustifyH("LEFT")
-				elseif position == "center" then
-					castBarTimeText:SetPoint("CENTER", castBar, "CENTER", db.timetextx, db.timetexty)
-					castBarTimeText:SetJustifyH("CENTER")
-				elseif position == "right" then
-					castBarTimeText:SetPoint("RIGHT", castBar, "RIGHT", -1 * db.timetextx, db.timetexty)
-					castBarTimeText:SetJustifyH("RIGHT")
-				end -- L["Cast Start Side"], L["Cast End Side"] --handled at runtime
-			end
-			castBarTimeText:SetFont(media:Fetch("font", db.font), db.timefontsize)
-			castBarTimeText:SetShadowColor( 0, 0, 0, 1)
-			castBarTimeText:SetShadowOffset( 0.8, -0.8 )
-			castBarTimeText:SetTextColor(unpack(Quartz3.db.profile.timetextcolor))
-			castBarTimeText:SetNonSpaceWrap(false)
-			castBarTimeText:SetHeight(db.h)
-			
-			castTimeFormatString = "%."..db.casttimeprecision.."f"
-			
-			local temptext = castBarTimeText:GetText()
-			if db.hidecasttime then
-				castBarTimeText:SetFormattedText(timenum(10))
-			else
-				castBarTimeText:SetFormattedText("%s / %s", format(timenum(10)), format(timenum(10, true)))
-			end
-			local normaltimewidth = castBarTimeText:GetStringWidth()
-			castBarTimeText:SetText(temptext)
-			
-			if db.hidenametext then
-				castBarText:Hide()
-			else
-				castBarText:Show()
-				castBarText:ClearAllPoints()
-				local position = db.nametextposition
-				if position == "left" then
-					castBarText:SetPoint("LEFT", castBar, "LEFT", db.nametextx, db.nametexty)
-					castBarText:SetJustifyH("LEFT")
-					if db.hidetimetext or db.timetextposition ~= "right" then
-						castBarText:SetWidth(db.w)
-					else
-						castBarText:SetWidth(db.w - normaltimewidth - 5)
-					end
-				elseif position == "center" then
-					castBarText:SetPoint("CENTER", castBar, "CENTER", db.nametextx, db.nametexty)
-					castBarText:SetJustifyH("CENTER")
-				else -- L["Right"]
-					castBarText:SetPoint("RIGHT", castBar, "RIGHT", -1 * db.nametextx, db.nametexty)
-					castBarText:SetJustifyH("RIGHT")
-					if db.hidetimetext or db.timetextposition ~= "left" then
-						castBarText:SetWidth(db.w)
-					else
-						castBarText:SetWidth(db.w - normaltimewidth - 5)
-					end
-				end
-			end
-			castBarText:SetFont(media:Fetch("font", db.font), db.fontsize)
-			castBarText:SetShadowColor( 0, 0, 0, 1)
-			castBarText:SetShadowOffset( 0.8, -0.8 )
-			castBarText:SetTextColor(unpack(Quartz3.db.profile.spelltextcolor))
-			castBarText:SetNonSpaceWrap(false)
-			castBarText:SetHeight(db.h)
-			
-			if db.hideicon then
-				castBarIcon:Hide()
-			else
-				castBarIcon:Show()
-				castBarIcon:ClearAllPoints()
-				if db.iconposition == "left" then
-					castBarIcon:SetPoint("RIGHT", castBar, "LEFT", -1 * db.icongap, 0)
-				else --L["Right"]
-					castBarIcon:SetPoint("LEFT", castBar, "RIGHT", db.icongap, 0)
-				end
-				castBarIcon:SetWidth(db.h)
-				castBarIcon:SetHeight(db.h)
-				castBarIcon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
-				castBarIcon:SetAlpha(db.iconalpha)
-			end
-			
-			if db.hideblizz then
-				CastingBarFrame.RegisterEvent = function() end
-				CastingBarFrame:UnregisterAllEvents()
-				CastingBarFrame:Hide()
-			else
-				CastingBarFrame.RegisterEvent = nil
-				CastingBarFrame:UnregisterAllEvents()
-				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_START")
-				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_STOP")
-				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_FAILED")
-				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
-				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_DELAYED")
-				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
-				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
-				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
-				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTIBLE")
-				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE")
-				CastingBarFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
-			end
-			
-			castBarSpark:SetTexture("Interface\\CastingBar\\UI-CastingBar-Spark")
-			castBarSpark:SetVertexColor(unpack(Quartz3.db.profile.sparkcolor))
-			castBarSpark:SetBlendMode("ADD")
-			castBarSpark:SetWidth(20)
-			castBarSpark:SetHeight(db.h*2.2)
+		if db.hideblizz then
+			CastingBarFrame.RegisterEvent = function() end
+			CastingBarFrame:UnregisterAllEvents()
+			CastingBarFrame:Hide()
+		else
+			CastingBarFrame.RegisterEvent = nil
+			CastingBarFrame:UnregisterAllEvents()
+			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_START")
+			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_STOP")
+			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_FAILED")
+			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
+			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_DELAYED")
+			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
+			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
+			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
+			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTIBLE")
+			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE")
+			CastingBarFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 		end
 	end
 end
