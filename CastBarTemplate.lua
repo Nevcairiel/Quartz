@@ -363,10 +363,11 @@ function CastBarTemplate:UpdateUnit()
 	end
 end
 
-function CastBarTemplate:ApplySettings(config)
-	if config then
-		self.config = config
-	end
+function CastBarTemplate:SetConfig(config)
+	self.config = config
+end
+
+function CastBarTemplate:ApplySettings()
 	local db = self.config
 
 	self:ClearAllPoints()

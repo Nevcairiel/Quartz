@@ -101,8 +101,9 @@ end
 function Player:ApplySettings()
 	db = self.db.profile
 	
-	if self.Bar and self:IsEnabled() then
-		self.Bar:ApplySettings(db)
+	self.Bar:SetConfig(db)
+	if self:IsEnabled() then
+		self.Bar:ApplySettings()
 		
 		if db.hideblizz then
 			CastingBarFrame.RegisterEvent = function() end

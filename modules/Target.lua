@@ -91,14 +91,17 @@ function Target:OnDisable()
 end
 
 function Target:PreShowCondition(bar, unit)
-	if (not db.showfriendly and UnitIsFriend("player", unit)) or (not db.showhostile and UnitIsEnemy("player", unit)) then
+	if (not db.showfriendly and UnitIsFriend("player", unit)) or
+	   (not db.showhostile and UnitIsEnemy("player", unit)) then
 		return true
 	end
 end
 
 function Target:ApplySettings()
 	db = self.db.profile
-	if self.Bar and self:IsEnabled() then
-		self.Bar:ApplySettings(db)
+
+	self.Bar:SetConfig(db)
+	if self:IsEnabled() then
+		self.Bar:ApplySettings()
 	end
 end
