@@ -32,7 +32,7 @@ local lsmlist = _G.AceGUIWidgetLSMlists
 local unpack = _G.unpack
 local GetTime = _G.GetTime
 
-local lagbox, lagtext, db, timeDiff, sendTime, castBar, alignoutside
+local lagbox, lagtext, db, timeDiff, sendTime, alignoutside
 
 local getOptions
 
@@ -76,9 +76,8 @@ function Latency:OnEnable()
 		end
 	end)
 	if not lagbox then
-		castBar = Player.Bar.Bar
-		lagbox = castBar:CreateTexture(nil, "BACKGROUND")
-		lagtext = castBar:CreateFontString(nil, "OVERLAY")
+		lagbox = Player.Bar.Bar:CreateTexture(nil, "BACKGROUND")
+		lagtext = Player.Bar.Bar:CreateFontString(nil, "OVERLAY")
 		self.lagbox = lagbox
 		self.lagtext = lagtext
 	end
@@ -134,7 +133,7 @@ function Latency:UNIT_SPELLCAST_START(object, bar, unit)
 		end
 	end
 	lagbox:SetDrawLayer(side == "LEFT" and "OVERLAY" or "BACKGROUND")
-	lagbox:SetPoint(side, castBar, side)
+	lagbox:SetPoint(side, Player.Bar.Bar, side)
 	lagbox:SetWidth(Player.db.profile.w * perc)
 	lagbox:Show()
 	
@@ -192,8 +191,7 @@ end
 function Latency:ApplySettings()
 	db = self.db.profile
 	if lagbox and self:IsEnabled() then
-		castBar = Player.Bar.Bar
-		lagbox:SetHeight(castBar:GetHeight())
+		lagbox:SetHeight(Player.Bar.Bar:GetHeight())
 		lagbox:SetTexture(media:Fetch("statusbar", Player.db.profile.texture))
 		lagbox:SetAlpha(db.lagalpha)
 		lagbox:SetVertexColor(unpack(db.lagcolor))

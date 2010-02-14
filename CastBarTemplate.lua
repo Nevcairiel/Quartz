@@ -114,6 +114,7 @@ local function OnUpdate(self)
 		self:Hide()
 	end
 end
+CastBarTemplate.OnUpdate = OnUpdate
 
 local function OnEvent(self, event, ...)
 	if self[event] then

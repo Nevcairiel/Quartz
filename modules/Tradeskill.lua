@@ -67,12 +67,12 @@ local function tradeskillOnUpdate()
 		end
 	else
 		if (starttime + duration + restartdelay < currentTime) or (completedcasts >= repeattimes) or bail or completedcasts == 0 then
-			Player.fadeOut = true
-			Player.stopTime = currentTime
+			Player.Bar.fadeOut = true
+			Player.Bar.stopTime = currentTime
 			castBar:SetValue(duration * repeattimes)
 			castBarTimeText:SetText("")
 			castBarSpark:Hide()
-			castBarParent:SetScript("OnUpdate", Player.OnUpdate)
+			castBarParent:SetScript("OnUpdate", Player.Bar.OnUpdate)
 			castBar:SetMinMaxValues(0, 1)
 		else
 			local elapsed = duration * completedcasts
@@ -115,10 +115,10 @@ function Tradeskill:UNIT_SPELLCAST_START(object, event, unit)
 		totaltime = duration * (repeattimes or 1)
 		starttime = GetTime()
 		casting = true
-		Player.fadeOut = nil
+		Player.Bar.fadeOut = nil
 		castname = spell
 		bail = nil
-		Player.endTime = nil
+		Player.Bar.endTime = nil
 		
 		castBar:SetStatusBarColor(unpack(Quartz3.db.profile.castingcolor))
 		castBar:SetMinMaxValues(0, totaltime)
@@ -171,12 +171,12 @@ function Tradeskill:DoTradeSkill(index, num)
 end
 
 function Tradeskill:ApplySettings()
-	castBarParent = Player.castBarParent
-	castBar = Player.castBar
-	castBarText = Player.castBarText
-	castBarTimeText = Player.castBarTimeText
-	castBarIcon = Player.castBarIcon
-	castBarSpark = Player.castBarSpark
+	castBarParent = Player.Bar
+	castBar = Player.Bar.Bar
+	castBarText = Player.Bar.Text
+	castBarTimeText = Player.Bar.TimeText
+	castBarIcon = Player.Bar.Icon
+	castBarSpark = Player.Bar.Spark
 end
 
 do

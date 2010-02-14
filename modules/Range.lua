@@ -48,7 +48,7 @@ do
 		sincelast = sincelast + elapsed
 		if sincelast >= refreshtime then
 			sincelast = 0
-			if not castBar:IsVisible() or Player.fadeOut then
+			if not castBar:IsVisible() or Player.Bar.fadeOut then
 				return f:SetScript("OnUpdate", nil)
 			end
 			if IsSpellInRange(spell, target) == 0 then
@@ -88,7 +88,7 @@ function Range:UNIT_SPELLCAST_START(event, unit)
 		return
 	end
 	if not castBar then
-		castBar = Player.castBar
+		castBar = Player.Bar.Bar
 	end
 	if target then
 		spell = UnitCastingInfo(unit)
@@ -102,7 +102,7 @@ function Range:UNIT_SPELLCAST_CHANNEL_START(event, unit)
 		return
 	end
 	if not castBar then
-		castBar = Player.castBar
+		castBar = Player.Bar.Bar
 	end
 	if target then
 		spell = UnitChannelInfo(unit)

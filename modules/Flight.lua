@@ -119,35 +119,35 @@ elseif FlightMapTimes_BeginFlight then
 end
 
 function Flight:BeginFlight(duration, destination)
-	Player.casting = true
-	Player.startTime = GetTime()
-	Player.endTime = GetTime() + duration
-	Player.delay = 0
-	Player.fadeOut = nil
+	Player.Bar.casting = true
+	Player.Bar.startTime = GetTime()
+	Player.Bar.endTime = GetTime() + duration
+	Player.Bar.delay = 0
+	Player.Bar.fadeOut = nil
 	if db.deplete then
-		Player.casting = nil
-		Player.channeling = true
+		Player.Bar.casting = nil
+		Player.Bar.channeling = true
 	else
-		Player.casting = true
-		Player.channeling = nil
+		Player.Bar.casting = true
+		Player.Bar.channeling = nil
 	end
 	
-	Player.castBar:SetStatusBarColor(unpack(db.color))
+	Player.Bar.Bar:SetStatusBarColor(unpack(db.color))
 	
-	Player.castBar:SetValue(0)
-	Player.castBarParent:Show()
-	Player.castBarParent:SetAlpha(Player.db.profile.alpha)
+	Player.Bar.Bar:SetValue(0)
+	Player.Bar:Show()
+	Player.Bar:SetAlpha(Player.db.profile.alpha)
 	
-	Player.castBarSpark:Show()
-	Player.castBarIcon:SetTexture(nil)
-	Player.castBarText:SetText(destination)
+	Player.Bar.Spark:Show()
+	Player.Bar.Icon:SetTexture(nil)
+	Player.Bar.Text:SetText(destination)
 	
 	local position = Player.db.profile.timetextposition
 	if position == "caststart" then
-		Player.castBarTimeText:SetPoint("LEFT", Player.castBar, "LEFT", Player.db.profile.timetextx, Player.db.profile.timetexty)
-		Player.castBarTimeText:SetJustifyH("LEFT")
+		Player.Bar.TimeText:SetPoint("LEFT", Player.Bar.Bar, "LEFT", Player.db.profile.timetextx, Player.db.profile.timetexty)
+		Player.Bar.TimeText:SetJustifyH("LEFT")
 	elseif position == "castend" then
-		Player.castBarTimeText:SetPoint("RIGHT", Player.castBar, "RIGHT", -1 * Player.db.profile.timetextx, Player.db.profile.timetexty)
-		Player.castBarTimeText:SetJustifyH("RIGHT")
+		Player.Bar.TimeText:SetPoint("RIGHT", Player.Bar.Bar, "RIGHT", -1 * Player.db.profile.timetextx, Player.db.profile.timetexty)
+		Player.Bar.TimeText:SetJustifyH("RIGHT")
 	end
 end
