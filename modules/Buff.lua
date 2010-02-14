@@ -16,9 +16,6 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
-local _G = getfenv(0)
-local LibStub = _G.LibStub
-
 local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
@@ -31,19 +28,16 @@ local Target = Quartz3:GetModule("Target")
 local TimeFmt = Quartz3.Util.TimeFormat
 
 local media = LibStub("LibSharedMedia-3.0")
-local lsmlist = _G.AceGUIWidgetLSMlists
+local lsmlist = AceGUIWidgetLSMlists
 
-local GetTime = _G.GetTime
-local sort = _G.table.sort
-local ceil = _G.math.ceil
-local pairs = _G.pairs
-local ipairs =_G.ipairs
-local unpack = _G.unpack
-local tonumber = _G.tonumber
+----------------------------
+-- Upvalues
+-- GLOBALS: 
+local CreateFrame, GetTime, UIParent = CreateFrame, GetTime, UIParent
+local UnitIsUnit, UnitBuff, UnitDebuff = UnitIsUnit, UnitBuff, UnitDebuff
+local unpack, pairs, next, unpack, sort = unpack, pairs, next, unpack, sort
 
-local UnitIsUnit = _G.UnitIsUnit
-local UnitBuff = _G.UnitBuff
-local UnitDebuff = _G.UnitDebuff
+
 
 local targetlocked = true
 local focuslocked = true
@@ -922,7 +916,8 @@ do
 			end
 			sort(tmp, mysort)
 			local maxindex = 0
-			for k,v in ipairs(tmp) do
+			for k=1,#tmp do
+				local v = tmp[k]
 				maxindex = k
 				local bar = targetbars[k]
 				if v.applications > 1 then
@@ -963,8 +958,8 @@ do
 			targetbars[1]:EnableMouse(false)
 			targetbars[1]:SetScript("OnDragStart", nil)
 			targetbars[1]:SetScript("OnDragStop", nil)
-			for _, v in ipairs(targetbars) do
-				v:Hide()
+			for i=1,#targetbars do
+				targetbars[i]:Hide()
 			end
 		end
 		if targetbars[1]:IsShown() then
@@ -1029,7 +1024,8 @@ do
 			end
 			sort(tmp, mysort)
 			local maxindex = 0
-			for k,v in ipairs(tmp) do
+			for k=1,#tmp do
+				local v = tmp[k]
 				maxindex = k
 				local bar = focusbars[k]
 				if v.applications > 1 then
@@ -1070,8 +1066,8 @@ do
 			focusbars[1]:EnableMouse(false)
 			focusbars[1]:SetScript("OnDragStart", nil)
 			focusbars[1]:SetScript("OnDragStop", nil)
-			for _, v in ipairs(focusbars) do
-				v:Hide()
+			for i=1,#focusbars do
+				focusbars[i]:Hide()
 			end
 		end
 		if focusbars[1]:IsShown() then

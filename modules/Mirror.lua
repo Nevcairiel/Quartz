@@ -16,9 +16,6 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
-local _G = getfenv(0)
-local LibStub = _G.LibStub
-
 local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
@@ -31,20 +28,18 @@ local Target = Quartz3:GetModule("Target")
 local TimeFmt = Quartz3.Util.TimeFormat
 
 local media = LibStub("LibSharedMedia-3.0")
-local lsmlist = _G.AceGUIWidgetLSMlists
+local lsmlist = AceGUIWidgetLSMlists
 
-local GetTime = _G.GetTime
-local table_sort = _G.table.sort
-local math_ceil = _G.math.ceil
-local ipairs = _G.ipairs
-local pairs = _G.pairs
-local tonumber = _G.tonumber
-local unpack = _G.unpack
+----------------------------
+-- Upvalues
+-- GLOBALS: MIRRORTIMER_NUMTIMERS
+local _G = _G
+local CreateFrame, GetTime, UIParent, StaticPopupDialogs = CreateFrame, GetTime, UIParent, StaticPopupDialogs
+local GetMirrorTimerProgress, GetMirrorTimerInfo, GetCorpseRecoveryDelay = GetMirrorTimerProgress, GetMirrorTimerInfo, GetCorpseRecoveryDelay
+local UnitHealth = UnitHealth
+local pairs, unpack, next, wipe, error = pairs, unpack, next, wipe, error
+local table_sort = table.sort
 
-local GetCorpseRecoveryDelay = _G.GetCorpseRecoveryDelay
-local GetMirrorTimerProgress = _G.GetMirrorTimerProgress
-local GetMirrorTimerInfo = _G.GetMirrorTimerInfo
-local UnitHealth = _G.UnitHealth
 
 local gametimebase, gametimetostart
 local locked = true
@@ -394,7 +389,8 @@ do
 		
 		table_sort(tmp, sort)
 		local maxindex = 0
-		for k,v in ipairs(tmp) do
+		for k=1,#tmp do
+			local v = tmp[k]
 			maxindex = k
 			local bar = mirrorbars[k]
 			bar.Text:SetText(v.name)

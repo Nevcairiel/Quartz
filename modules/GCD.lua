@@ -16,9 +16,6 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
-local _G = getfenv(0)
-local LibStub = _G.LibStub
-
 local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
@@ -26,11 +23,10 @@ local MODNAME = "GCD"
 local GCD = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
 local Player = Quartz3:GetModule("Player")
 
-local tonumber = _G.tonumber
-local unpack = _G.unpack
-local GetSpellCooldown = _G.GetSpellCooldown
-local GetTime = _G.GetTime
-local BOOKTYPE_SPELL = _G.BOOKTYPE_SPELL
+----------------------------
+-- Upvalues
+local CreateFrame, GetTime, UIParent, GetSpellCooldown = CreateFrame, GetTime, UIParent, GetSpellCooldown
+local unpack = unpack
 
 local gcdbar, gcdbar_width, gcdspark
 local starttime, duration, warned

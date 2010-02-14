@@ -16,9 +16,6 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
-local _G = getfenv(0)
-local LibStub = _G.LibStub
-
 local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
@@ -26,8 +23,10 @@ local MODNAME = "Flight"
 local Flight = Quartz3:NewModule(MODNAME, "AceHook-3.0", "AceEvent-3.0")
 local Player = Quartz3:GetModule("Player")
 
-local GetTime = _G.GetTime
-local unpack = _G.unpack
+----------------------------
+-- Upvalues
+local GetTime = GetTime
+local unpack = unpack
 
 local db, getOptions
 

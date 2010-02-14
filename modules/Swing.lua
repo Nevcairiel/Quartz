@@ -16,9 +16,6 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
-local _G = getfenv(0)
-local LibStub = _G.LibStub
-
 local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
@@ -27,27 +24,16 @@ local Swing = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
 local Player = Quartz3:GetModule("Player")
 
 local media = LibStub("LibSharedMedia-3.0")
-local lsmlist = _G.AceGUIWidgetLSMlists
+local lsmlist = AceGUIWidgetLSMlists
+
+----------------------------
+-- Upvalues
+local CreateFrame, GetTime, UIParent = CreateFrame, GetTime, UIParent
+local UnitClass, UnitDamage, UnitAttackSpeed, UnitRangedDamage = UnitClass, UnitDamage, UnitAttackSpeed, UnitRangedDamage
+local math_abs, bit_band, unpack = math.abs, bit.band, unpack
+local COMBATLOG_FILTER_ME = COMBATLOG_FILTER_ME
 
 local playerclass
-local bit_bor = _G.bit.bor
-local bit_band = _G.bit.band
-local math_abs = _G.math.abs
-local GetSpellInfo = _G.GetSpellInfo
-local GetTime = _G.GetTime
-local UnitAttackSpeed = _G.UnitAttackSpeed
-local UnitClass = _G.UnitClass
-local UnitDamage = _G.UnitDamage
-local UnitRangedDamage = _G.UnitRangedDamage
-local unpack = _G.unpack
-local tonumber = _G.tonumber
-
-local BOOKTYPE_SPELL = _G.BOOKTYPE_SPELL
-local COMBATLOG_OBJECT_AFFILIATION_MINE = _G.COMBATLOG_OBJECT_AFFILIATION_MINE
-local COMBATLOG_OBJECT_CONTROL_PLAYER = _G.COMBATLOG_OBJECT_CONTROL_PLAYER
-local COMBATLOG_OBJECT_REACTION_FRIENDLY = _G.COMBATLOG_OBJECT_REACTION_FRIENDLY
-local COMBATLOG_OBJECT_TYPE_PLAYER = _G.COMBATLOG_OBJECT_TYPE_PLAYER
-
 local autoshotname = GetSpellInfo(75)
 local slam = GetSpellInfo(1464)
 local swordprocname = GetSpellInfo(12281)
@@ -181,14 +167,6 @@ function Swing:STOP_AUTOREPEAT_SPELL()
 		swingmode = nil
 	end
 end
-
--- blizzard screws that global up, double usage in CombatLog.lua and GlobalStrings.lua, so we create it ourselves
-local COMBATLOG_FILTER_ME = bit_bor(
-	COMBATLOG_OBJECT_AFFILIATION_MINE or 0x00000001,
-	COMBATLOG_OBJECT_REACTION_FRIENDLY or 0x00000010,
-	COMBATLOG_OBJECT_CONTROL_PLAYER or 0x00000100,
-	COMBATLOG_OBJECT_TYPE_PLAYER or 0x00000400
-)
 
 do
 	local swordspecproc = false

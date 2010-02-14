@@ -16,12 +16,17 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
-
 local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
 local media = LibStub("LibSharedMedia-3.0")
-local lsmlist = _G.AceGUIWidgetLSMlists
+local lsmlist = AceGUIWidgetLSMlists
+
+----------------------------
+-- Upvalues
+local min, type, format, unpack, setmetatable = math.min, type, string.format, unpack, setmetatable
+local CreateFrame, GetTime, UIParent = CreateFrame, GetTime, UIParent
+local UnitName, UnitCastingInfo, UnitChannelInfo = UnitName, UnitCastingInfo, UnitChannelInfo
 
 local CastBarTemplate = CreateFrame("Frame")
 local CastBarTemplate_MT = {__index = CastBarTemplate}

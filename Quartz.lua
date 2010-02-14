@@ -21,6 +21,11 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 local media = LibStub("LibSharedMedia-3.0")
 local db
 
+----------------------------
+-- Upvalues
+-- GLOBALS: LibStub, QuartzDB
+local type, pairs, tonumber = type, pairs, tonumber
+
 local defaults = {
 	profile = {
 		modules = { ["*"] = true },
