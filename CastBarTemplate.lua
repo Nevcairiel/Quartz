@@ -524,12 +524,12 @@ do
 	end
 
 	local function dragstop(self)
-		self.config.x = castBarParent:GetLeft()
-		self.config.y = castBarParent:GetBottom()
+		self.config.x = self:GetLeft()
+		self.config.y = self:GetBottom()
 		self:StopMovingOrSizing()
 	end
 
-	local function nothing()
+	local function nothing(self)
 		self:SetAlpha(self.config.alpha)
 	end
 
@@ -1031,6 +1031,7 @@ function Quartz3.CastBarTemplate:new(parent, unit, name, localizedName, config)
 	bar.config = config
 	bar.modName = name
 	bar.localizedName = localizedName
+	bar.locked = true
 
 	Quartz3.CastBarTemplate.bars[name] = bar
 
