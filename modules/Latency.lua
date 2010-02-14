@@ -68,11 +68,7 @@ function Latency:OnEnable()
 	self:RawHook(Player, "UNIT_SPELLCAST_START")
 	self:RawHook(Player, "UNIT_SPELLCAST_DELAYED")
 	
-	self:RawHook(Player, "UNIT_SPELLCAST_CHANNEL_START")
-	self:RawHook(Player, "UNIT_SPELLCAST_CHANNEL_UPDATE")
-	
 	self:RegisterEvent("UNIT_SPELLCAST_SENT")
-	
 	self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
 	media.RegisterCallback(self, "LibSharedMedia_SetGlobal", function(mtype, override)
 		if mtype == "statusbar" then
@@ -80,7 +76,7 @@ function Latency:OnEnable()
 		end
 	end)
 	if not lagbox then
-		castBar = Player.castBar
+		castBar = Player.Bar.Bar
 		lagbox = castBar:CreateTexture(nil, "BACKGROUND")
 		lagtext = castBar:CreateFontString(nil, "OVERLAY")
 		self.lagbox = lagbox
@@ -90,108 +86,25 @@ function Latency:OnEnable()
 end
 
 function Latency:OnDisable()
+	media.UnregisterCallback(self, "LibSharedMedia_SetGlobal")
 	lagbox:Hide()
 	lagtext:Hide()
 end
 
 function Latency:UNIT_SPELLCAST_SENT(event, unit)
-	if unit ~= "player" then
+	if unit ~= "player" and unit ~= "vehicle" then
 		return
 	end
 	sendTime = GetTime()
 end
 
-function Latency:UNIT_SPELLCAST_START(object, event, unit)
-	self.hooks[object].UNIT_SPELLCAST_START(object, event, unit)
-	if unit ~= "player" or not sendTime then
-		return
-	end
-	local startTime = Player.startTime
-	local endTime = Player.endTime
-	if not endTime then
-		return
-	end
+function Latency:UNIT_SPELLCAST_START(object, bar, unit)
+	self.hooks[object].UNIT_SPELLCAST_START(object, bar, unit)
+	
+	local startTime, endTime = bar.startTime, bar.endTime
+	if not sendTime or not endTime then return end
+	
 	timeDiff = GetTime() - sendTime
-	
-	local castlength = endTime - startTime
-	timeDiff = timeDiff > castlength and castlength or timeDiff
-	local perc = timeDiff / castlength 
-	
-	lagbox:ClearAllPoints()
-	local side
-	if db.lagembed then
-		side = "LEFT"
-		lagbox:SetTexCoord(0,perc,0,1)
-		
-		startTime = startTime - timeDiff + db.lagpadding
-		Player.startTime = startTime
-		endTime = endTime - timeDiff + db.lagpadding
-		Player.endTime = endTime
-	else
-		side = "RIGHT"
-		lagbox:SetTexCoord(1-perc,1,0,1)
-	end
-	lagbox:SetDrawLayer(side == "LEFT" and "OVERLAY" or "BACKGROUND")
-	lagbox:SetPoint(side, castBar, side)
-	lagbox:SetWidth(Player.db.profile.w * perc)
-	lagbox:Show()
-	
-	if db.lagtext then
-		if alignoutside then
-			lagtext:SetJustifyH(side)
-			lagtext:ClearAllPoints()
-			local lagtextposition = db.lagtextposition
-			local point, relpoint
-			if lagtextposition == "bottom" then
-				point = "BOTTOM"
-				relpoint = "BOTTOM"
-			elseif lagtextposition == "top" then
-				point = "TOP"
-				relpoint = "TOP"
-			elseif lagtextposition == "above" then
-				point = "BOTTOM"
-				relpoint = "TOP"
-			else --L["Below"]
-				point = "TOP"
-				relpoint = "BOTTOM"
-			end
-			if side == "LEFT" then
-				lagtext:SetPoint(point.."LEFT", lagbox, relpoint.."LEFT", 1, 0)
-			else
-				lagtext:SetPoint(point.."RIGHT", lagbox, relpoint.."RIGHT", -1, 0)
-			end
-		end
-		lagtext:SetFormattedText(L["%dms"], timeDiff*1000)
-		lagtext:Show()
-	else
-		lagtext:Hide()
-	end
-end
-
-function Latency:UNIT_SPELLCAST_DELAYED(object, event, unit)
-	self.hooks[object].UNIT_SPELLCAST_DELAYED(object, event, unit)
-	if unit ~= "player" then
-		return
-	end
-	
-	if db.lagembed then
-		local startTime = Player.startTime - timeDiff + db.lagpadding
-		Player.startTime = startTime
-		local endTime = Player.endTime - timeDiff + db.lagpadding
-		Player.endTime = endTime
-	end
-end
-
-function Latency:UNIT_SPELLCAST_CHANNEL_START(object, event, unit)
-	self.hooks[object].UNIT_SPELLCAST_CHANNEL_START(object, event, unit)
-	if unit ~= "player" or not sendTime then
-		return
-	end
-
-	local startTime = Player.startTime
-	local endTime = Player.endTime
-	timeDiff = GetTime() - sendTime
-	
 	local castlength = endTime - startTime
 	timeDiff = timeDiff > castlength and castlength or timeDiff
 	local perc = timeDiff / castlength
@@ -199,16 +112,26 @@ function Latency:UNIT_SPELLCAST_CHANNEL_START(object, event, unit)
 	lagbox:ClearAllPoints()
 	local side
 	if db.lagembed then
-		side = "RIGHT"
-		lagbox:SetTexCoord(1-perc,1,0,1)
+		if bar.casting then
+			side = "LEFT"
+			lagbox:SetTexCoord(0,perc,0,1)
+		else -- channeling
+			side = "RIGHT"
+			lagbox:SetTexCoord(1-perc,1,0,1)
+		end
 		
 		startTime = startTime - timeDiff + db.lagpadding
-		Player.startTime = startTime
+		bar.startTime = startTime
 		endTime = endTime - timeDiff + db.lagpadding
-		Player.endTime = endTime
+		bar.endTime = endTime
 	else
-		side = "LEFT"
-		lagbox:SetTexCoord(perc,1,0,1)
+		if bar.casting then
+			side = "RIGHT"
+			lagbox:SetTexCoord(1-perc,1,0,1)
+		else -- channeling
+			side = "LEFT"
+			lagbox:SetTexCoord(perc,1,0,1)
+		end
 	end
 	lagbox:SetDrawLayer(side == "LEFT" and "OVERLAY" or "BACKGROUND")
 	lagbox:SetPoint(side, castBar, side)
@@ -247,31 +170,29 @@ function Latency:UNIT_SPELLCAST_CHANNEL_START(object, event, unit)
 	end
 end
 
-function Latency:UNIT_SPELLCAST_CHANNEL_UPDATE(object, event, unit)
-	self.hooks[object].UNIT_SPELLCAST_CHANNEL_UPDATE(object, event, unit)
-	if unit ~= "player" then
-		return
-	end
-	
+function Latency:UNIT_SPELLCAST_DELAYED(object, bar, unit)
+	self.hooks[object].UNIT_SPELLCAST_DELAYED(object, bar, unit)
+
 	if db.lagembed then
-		local startTime = Player.startTime - timeDiff + db.lagpadding
-		Player.startTime = startTime
-		local endTime = Player.endTime - timeDiff + db.lagpadding
-		Player.endTime = endTime
+		local startTime = bar.startTime - timeDiff + db.lagpadding
+		bar.startTime = startTime
+		local endTime = bar.endTime - timeDiff + db.lagpadding
+		bar.endTime = endTime
 	end
 end
 
 function Latency:UNIT_SPELLCAST_INTERRUPTED(event, unit)
-	if unit == "player" then
-		lagbox:Hide()
-		lagtext:Hide()
+	if unit ~= "player" and unit ~= "vehicle" then
+		return
 	end
+	lagbox:Hide()
+	lagtext:Hide()
 end
 
 function Latency:ApplySettings()
 	db = self.db.profile
 	if lagbox and self:IsEnabled() then
-		castBar = Player.castBar
+		castBar = Player.Bar.Bar
 		lagbox:SetHeight(castBar:GetHeight())
 		lagbox:SetTexture(media:Fetch("statusbar", Player.db.profile.texture))
 		lagbox:SetAlpha(db.lagalpha)
