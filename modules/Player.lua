@@ -23,9 +23,9 @@ local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
 local MODNAME = "Player"
-local Player = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
+local Player = Quartz3:NewModule(MODNAME)
 
-local db, getOptions
+local db, getOptions, castBar
 
 local defaults = {
 	profile = Quartz3:Merge(Quartz3.CastBarTemplate.defaults,
@@ -34,38 +34,6 @@ local defaults = {
 		showticks = true,
 	})
 }
-
-
-local sparkfactory = {
-	__index = function(t,k)
-		local spark = castBar:CreateTexture(nil, 'OVERLAY')
-		t[k] = 	spark
-		spark:SetTexture("Interface\\CastingBar\\UI-CastingBar-Spark")
-		spark:SetVertexColor(unpack(Quartz3.db.profile.sparkcolor))
-		spark:SetBlendMode('ADD')
-		spark:SetWidth(20)
-		spark:SetHeight(db.h*2.2)
-		return spark
-	end
-}
-local barticks = setmetatable({}, sparkfactory)
-
-local function setBarTicks(ticknum)
-	if( ticknum and ticknum > 0) then
-		local delta = ( db.w / ticknum )
-		for k = 1,ticknum do
-			local t = barticks[k]
-			t:ClearAllPoints()
-			t:SetPoint("CENTER", castBar, "LEFT", delta * k, 0 )
-			t:Show()
-		end
-	else
-		barticks[1].Hide = nil
-		for _, v in ipairs(barticks) do
-			v:Hide()
-		end
-	end
-end
 
 do 
 	local function setOpt(info, value)
@@ -103,6 +71,7 @@ function Player:OnInitialize()
 	Quartz3:RegisterModuleOptions(MODNAME, getOptions, L["Player"])
 
 	self.Bar = Quartz3.CastBarTemplate:new(self, "player", MODNAME, L["Player"], db)
+	castBar = self.Bar.Bar
 end
 
 
@@ -169,6 +138,37 @@ function Player:OnHide()
 	end
 end
 
+local sparkfactory = {
+	__index = function(t,k)
+		local spark = castBar:CreateTexture(nil, 'OVERLAY')
+		t[k] = spark
+		spark:SetTexture("Interface\\CastingBar\\UI-CastingBar-Spark")
+		spark:SetVertexColor(unpack(Quartz3.db.profile.sparkcolor))
+		spark:SetBlendMode('ADD')
+		spark:SetWidth(20)
+		spark:SetHeight(db.h*2.2)
+		return spark
+	end
+}
+local barticks = setmetatable({}, sparkfactory)
+
+local function setBarTicks(ticknum)
+	if( ticknum and ticknum > 0) then
+		local delta = ( db.w / ticknum )
+		for k = 1,ticknum do
+			local t = barticks[k]
+			t:ClearAllPoints()
+			t:SetPoint("CENTER", castBar, "LEFT", delta * k, 0 )
+			t:Show()
+		end
+	else
+		barticks[1].Hide = nil
+		for _, v in ipairs(barticks) do
+			v:Hide()
+		end
+	end
+end
+
 local channelingTicks = {
 	-- warlock
 	[GetSpellInfo(1120)] = 5, -- drain soul
@@ -196,4 +196,30 @@ local function getChannelingTicks(spell)
 	end
 	
 	return channelingTicks[spell] or 0
+end
+
+function Player:UNIT_SPELLCAST_START(bar, unit)
+	if bar.channeling then
+		local spell = UnitChannelInfo(unit)
+		bar.channelingTicks = getChannelingTicks(spell)
+		setBarTicks(bar.channelingTicks)
+	else
+		setBarTicks(0)
+	end
+end
+
+function Player:UNIT_SPELLCAST_STOP(bar, unit)
+	setBarTicks(0)
+end
+
+function Player:UNIT_SPELLCAST_FAILED(bar, unit)
+	setBarTicks(0)
+end
+
+function Player:UNIT_SPELLCAST_INTERRUPTED(bar, unit)
+	setBarTicks(0)
+end
+
+function Player:UNIT_SPELLCAST_DELAYED(bar, unit)
+
 end
