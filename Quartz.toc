@@ -46,12 +46,12 @@ modules\Target.lua
 modules\Focus.lua
 modules\Pet.lua
 modules\Latency.lua
-modules\Tradeskill.lua
+#modules\Tradeskill.lua
 modules\GCD.lua
 modules\Buff.lua
 modules\Mirror.lua
 modules\Timer.lua
 modules\Swing.lua
 modules\Interrupt.lua
-modules\Range.lua
+#modules\Range.lua
 modules\Flight.lua
