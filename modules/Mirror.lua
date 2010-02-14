@@ -28,6 +28,8 @@ local Player = Quartz3:GetModule("Player")
 local Focus = Quartz3:GetModule("Focus")
 local Target = Quartz3:GetModule("Target")
 
+local TimeFmt = Quartz3.Util.TimeFormat
+
 local media = LibStub("LibSharedMedia-3.0")
 local lsmlist = _G.AceGUIWidgetLSMlists
 
@@ -121,6 +123,7 @@ local icons = {
 	DUEL_REQUESTED = "",
 	GAMESTART = "",
 }
+
 local popups = {
 	CAMP = L["Logout"],
 	DEATH = L["Release"],
@@ -136,6 +139,7 @@ local popups = {
 	DUEL_REQUESTED = L["Duel Request"],
 	GAMESTART = L["Game Start"],
 }
+
 local timeoutoverrides = {
 	DEATH = 360,
 	AREA_SPIRIT_HEAL = 30,
@@ -158,42 +162,30 @@ end})
 
 local mirrorOnUpdate, fakeOnUpdate
 do
-	local function timenum(num)
-		if num <= 10 then
-			return "%.1f", num
-		elseif num <= 60 then
-			return "%d", num
-		elseif num <= 3600 then
-			return "%d:%02d", num / 60, num % 60
-		else
-			return "%d:%02d", num / 3600, (num % 3600) / 60
-		end
-	end
 	function mirrorOnUpdate(frame)
 		local progress = GetMirrorTimerProgress(frame.mode) / 1000
-		local duration = frame.duration
-		progress = progress > duration and duration or progress
+		progress = progress > frame.duration and frame.duration or progress
 		frame:SetValue(progress)
-		frame.timetext:SetFormattedText(timenum(progress))
+		frame.TimeText:SetFormattedText(TimeFmt(progress))
 	end
+
 	function fakeOnUpdate(frame)
 		local currentTime = GetTime()
 		local endTime = frame.endTime
-		
-		local frame_num = frame.framenum
-		if frame_num > 0 then
-			local popup = _G["StaticPopup"..frame_num] -- hate to do this, but I can"t think of a better way.
+
+		if frame.framenum > 0 then
+			local popup = _G["StaticPopup"..frame.framenum] -- hate to do this, but I can"t think of a better way.
 			if popup.which ~= frame.which or not popup:IsVisible() then
 				return Mirror:UpdateBars()
 			end
 		end
-		
+
 		if currentTime > endTime then
 			Mirror:UpdateBars()
 		else
-			local remaining = (currentTime - frame.startTime)
+			local remaining = currentTime - frame.startTime
 			frame:SetValue(endTime - remaining)
-			frame.timetext:SetFormattedText(timenum(endTime - currentTime))
+			frame.TimeText:SetFormattedText(TimeFmt(endTime - currentTime))
 		end
 	end
 end
@@ -209,9 +201,9 @@ local mirrorbars = setmetatable({}, {
 		bar:SetScript("OnHide", OnHide)
 		bar:SetBackdrop({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16})
 		bar:SetBackdropColor(0,0,0)
-		bar.text = bar:CreateFontString(nil, "OVERLAY")
-		bar.timetext = bar:CreateFontString(nil, "OVERLAY")
-		bar.icon = bar:CreateTexture(nil, "DIALOG")
+		bar.Text = bar:CreateFontString(nil, "OVERLAY")
+		bar.TimeText = bar:CreateFontString(nil, "OVERLAY")
+		bar.Icon = bar:CreateTexture(nil, "DIALOG")
 		if k == 1 then
 			bar:SetMovable(true)
 			bar:RegisterForDrag("LeftButton")
@@ -405,8 +397,8 @@ do
 		for k,v in ipairs(tmp) do
 			maxindex = k
 			local bar = mirrorbars[k]
-			bar.text:SetText(v.name)
-			bar.icon:SetTexture(v.texture)
+			bar.Text:SetText(v.name)
+			bar.Icon:SetTexture(v.texture)
 			bar.mode = v.mode
 			if v.isfake then
 				local startTime, endTime = v.startTime, v.endTime
@@ -567,7 +559,7 @@ do
 			end
 		end
 		
-		local timetext = bar.timetext
+		local timetext = bar.TimeText
 		if db.mirrortimetext then
 			timetext:Show()
 			timetext:ClearAllPoints()
@@ -589,7 +581,7 @@ do
 		local normaltimewidth = timetext:GetStringWidth()
 		timetext:SetText(temptext)
 		
-		local text = bar.text
+		local text = bar.Text
 		if db.mirrornametext then
 			text:Show()
 			text:ClearAllPoints()
@@ -610,7 +602,7 @@ do
 		text:SetNonSpaceWrap(false)
 		text:SetHeight(db.mirrorheight)
 		
-		local icon = bar.icon
+		local icon = bar.Icon
 		if showicons then
 			icon:Show()
 			icon:SetWidth(db.mirrorheight-1)
@@ -628,6 +620,7 @@ do
 		
 		return direction
 	end
+
 	function Mirror:ApplySettings()
 		db = self.db.profile
 		if self:IsEnabled() then

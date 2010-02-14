@@ -28,6 +28,8 @@ local Player = Quartz3:GetModule("Player")
 local Focus = Quartz3:GetModule("Focus")
 local Target = Quartz3:GetModule("Target")
 
+local TimeFmt = Quartz3.Util.TimeFormat
+
 local media = LibStub("LibSharedMedia-3.0")
 local lsmlist = _G.AceGUIWidgetLSMlists
 
@@ -117,17 +119,6 @@ local defaults = {
 }
 
 do
-	local min = L["%dm"]
-	local function timenum(num)
-		if num <= 10 then
-			return "%.1f", num
-		elseif num <= 60 then
-			return "%d", num
-		else
-			return min, ceil(num / 60)
-		end
-	end
-	
 	function OnUpdate(frame)
 		local currentTime = GetTime()
 		local endTime = frame.endTime
@@ -136,7 +127,7 @@ do
 		else
 			local remaining = (currentTime - frame.startTime)
 			frame:SetValue(endTime - remaining)
-			frame.timetext:SetFormattedText(timenum(endTime - currentTime))
+			frame.timetext:SetFormattedText(TimeFmt(endTime - currentTime))
 		end
 	end
 end

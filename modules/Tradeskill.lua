@@ -26,6 +26,8 @@ local MODNAME = "Tradeskill"
 local Tradeskill = Quartz3:NewModule(MODNAME, "AceEvent-3.0", "AceHook-3.0")
 local Player = Quartz3:GetModule("Player")
 
+local TimeFmt = Quartz3.Util.TimeFormat
+
 local GetTime = _G.GetTime
 local UnitCastingInfo = _G.UnitCastingInfo
 local tonumber = _G.tonumber
@@ -40,16 +42,6 @@ local repeattimes, castname, duration, totaltime, starttime, casting, bail
 local completedcasts = 0
 local restartdelay = 1
 
-local function timenum(num)
-	if num <= 10 then
-		return "%.1f", num
-	elseif num <= 60 then
-		return "%d", num
-	else
-		return "%d:%02d", num / 60, num % 60
-	end
-end
-
 local function tradeskillOnUpdate()
 	local currentTime = GetTime()
 	if casting then
@@ -61,9 +53,9 @@ local function tradeskillOnUpdate()
 		castBarSpark:SetPoint("CENTER", castBar, "LEFT", perc * Player.db.profile.w, 0)
 		
 		if Player.db.profile.hidecasttime then
-			castBarTimeText:SetFormattedText(timenum(totaltime - elapsed))
+			castBarTimeText:SetFormattedText(TimeFmt(totaltime - elapsed))
 		else
-			castBarTimeText:SetFormattedText("%s / %s", format(timenum(totaltime - elapsed)), format(timenum(totaltime)))
+			castBarTimeText:SetFormattedText("%s / %s", format(TimeFmt(totaltime - elapsed)), format(TimeFmt(totaltime)))
 		end
 	else
 		if (starttime + duration + restartdelay < currentTime) or (completedcasts >= repeattimes) or bail or completedcasts == 0 then
@@ -82,9 +74,9 @@ local function tradeskillOnUpdate()
 			castBarSpark:SetPoint("CENTER", castBar, "LEFT", Player.db.profile.w, 0)
 			
 			if Player.db.profile.hidecasttime then
-				castBarTimeText:SetFormattedText(timenum(totaltime - elapsed))
+				castBarTimeText:SetFormattedText(TimeFmt(totaltime - elapsed))
 			else
-				castBarTimeText:SetFormattedText("%s / %s", format(timenum(totaltime - elapsed)), format(timenum(totaltime)))
+				castBarTimeText:SetFormattedText("%s / %s", format(TimeFmt(totaltime - elapsed)), format(TimeFmt(totaltime)))
 			end
 		end
 	end
