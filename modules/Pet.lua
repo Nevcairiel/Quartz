@@ -28,7 +28,8 @@ local Pet = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
 local db, getOptions
 
 local defaults = {
-	profile = {
+	profile = Quartz3:Merge(Quartz3.CastBarTemplate.defaults,
+	{
 		hideblizz = true,
 		
 		--x =  -- applied automatically in :ApplySettings()
@@ -36,7 +37,7 @@ local defaults = {
 		h = 18,
 		w = 200,
 		texture = "LiteStep",
-	}
+	})
 }
 
 do
