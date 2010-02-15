@@ -137,7 +137,7 @@ end
 
 Quartz3.Util = {}
 function Quartz3.Util.TimeFormat(num, isCastTime)
-	if num <= 10 or isCastTime then
+	if num <= 10 or (isCastTime and num <= 60) then
 		return "%.1f", num
 	elseif num <= 60 then
 		return "%d", num
