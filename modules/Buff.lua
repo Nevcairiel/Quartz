@@ -260,7 +260,7 @@ do
 		if not options then 
 			options = {
 				type = "group",
-				name = L["Global Cooldown"],
+				name = L["Buff"],
 				order = 600,
 				get = getOpt,
 				set = setOpt,
