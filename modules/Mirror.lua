@@ -1174,7 +1174,6 @@ do
 								disabled = getreadycheckhidden,
 								order = 501,
 							},
-
 						},
 					},
 				},
