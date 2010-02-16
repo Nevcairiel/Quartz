@@ -42,6 +42,7 @@ local table_sort = table.sort
 
 
 local gametimebase, gametimetostart
+local lfgshowbase, readycheckshowbase, readycheckshowduration
 local locked = true
 
 local db, getOptions
@@ -92,12 +93,14 @@ local defaults = {
 		PARTY_INVITE = {1, 0.9, 0},
 		DUEL_REQUESTED = {1, 0.13, 0},
 		GAMESTART = {0,1,0},
-		
+		READYCHECK = {0,1,0},
+
 		hideblizzmirrors = true,
-		
+
 		showmirror = true,
 		showstatic = true,
 		showpvp = true,
+		showreadycheck = true,
 	}
 }
 
@@ -117,6 +120,7 @@ local icons = {
 	PARTY_INVITE = "",
 	DUEL_REQUESTED = "",
 	GAMESTART = "",
+	READYCHECK = "",
 }
 
 local popups = {
@@ -133,6 +137,7 @@ local popups = {
 	PARTY_INVITE = L["Party Invite"],
 	DUEL_REQUESTED = L["Duel Request"],
 	GAMESTART = L["Game Start"],
+	READYCHECK = READY_CHECK,
 }
 
 local timeoutoverrides = {
@@ -141,6 +146,7 @@ local timeoutoverrides = {
 	INSTANCE_BOOT = 60,
 	CONFIRM_SUMMON = 120,
 	GAMESTART = 60,
+	READYCHECK = 40,
 }
 
 Mirror.ExternalTimers = setmetatable({}, {__index = function(t,k)
@@ -226,6 +232,11 @@ function Mirror:OnEnable()
 	self:RegisterEvent("PLAYER_ALIVE", "UpdateBars")
 	self:RegisterMessage("Quartz3Mirror_UpdateCustom", "UpdateBars")
 	self:RegisterEvent("CHAT_MSG_BG_SYSTEM_NEUTRAL")
+	self:RegisterEvent("LFG_PROPOSAL_SHOW")
+	self:RegisterEvent("READY_CHECK")
+	self:RegisterEvent("READY_CHECK_FINISHED")
+	self:RegisterEvent("LFG_PROPOSAL_FAILED", "LFG_PROPOSAL_End")
+	self:RegisterEvent("LFG_PROPOSAL_SUCCEEDED", "LFG_PROPOSAL_End")
 	self:SecureHook("StaticPopup_Show", "UpdateBars")
 	media.RegisterCallback(self, "LibSharedMedia_SetGlobal", function(mtype, override)
 		if mtype == "statusbar" then
@@ -297,7 +308,34 @@ do
 				end
 			end
 		end
-		
+
+		if db.showreadycheck then
+			if lfgshowbase or readycheckshowbase then
+				local which = "READYCHECK"
+				local endTime
+				if readycheckshowbase then
+					endTime = readycheckshowbase + readycheckshowduration
+				else
+					endTime = lfgshowbase + timeoutoverrides[which]
+				end
+				if endTime > currentTime then
+					local t = new()
+					tmp[#tmp+1] = t
+					t.name = popups[which]
+					t.texture = icons[which]
+					t.mode = which
+					t.startTime = lfgshowbase or readycheckshowbase
+					t.endTime = endTime
+					t.isfake = true
+					t.framenum = 0
+				else
+					lfgshowbase = nil
+					readycheckshowbase = nil
+					readycheckshowduration = nil
+				end
+			end
+		end
+
 		if db.showmirror then
 			for i = 1, MIRRORTIMER_NUMTIMERS do
 				local timer, value, maxvalue, scale, paused, label = GetMirrorTimerInfo(i)
@@ -443,6 +481,24 @@ function Mirror:CHAT_MSG_BG_SYSTEM_NEUTRAL(event, msg)
 		gametimebase = GetTime()
 		gametimetostart = 15
 	end
+	self:UpdateBars()
+end
+
+function Mirror:LFG_PROPOSAL_SHOW(event, msg)
+	lfgshowbase = GetTime()
+	self:UpdateBars()
+end
+function Mirror:LFG_PROPOSAL_End(event, msg)
+	lfgshowbase = nil
+	self:UpdateBars()
+end
+function Mirror:READY_CHECK(event, msg, duration)
+	readycheckshowbase = GetTime()
+	readycheckshowduration = duration
+	self:UpdateBars()
+end
+function Mirror:READY_CHECK_FINISHED(event, msg)
+	readycheckshowbase = nil
 	self:UpdateBars()
 end
 do
@@ -661,7 +717,11 @@ do
 	local function getpvphidden()
 		return not db.showpvp
 	end
-	
+
+	local function getreadycheckhidden()
+		return not db.showreadycheck
+	end
+
 	local function getfreeoptionshidden()
 		return db.mirroranchor ~= "free"
 	end
@@ -1097,6 +1157,24 @@ do
 								disabled = getpvphidden,
 								order = 301,
 							},
+							--ready check
+							showreadycheck = {
+								type = "toggle",
+								name = L["Show Ready Check"],
+								desc = L["Show bar for Ready Checks"],
+								order = 500,
+								width = "full",
+							},
+							READYCHECK = {
+								type = "color",
+								name = L["%s Color"]:format(READY_CHECK),
+								desc = L["Set the color of the bars for %s"]:format(READY_CHECK),
+								get = getColor,
+								set = setColor,
+								disabled = getreadycheckhidden,
+								order = 501,
+							},
+
 						},
 					},
 				},
