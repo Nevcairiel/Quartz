@@ -133,7 +133,7 @@ end
 local function SetNameText(self, name, rank)
 	local mask, arg = nil, nil
 	if self.config.spellrank and rank then
-		mask, arg = RomanFmt(rank, self.config.rankstyle)
+		mask, arg = RomanFmt(rank, self.config.spellrankstyle)
 	end
 
 	if self.config.targetname and self.targetName and self.targetName ~= "" then
