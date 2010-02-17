@@ -220,6 +220,8 @@ function CastBarTemplate:UNIT_SPELLCAST_START(event, unit)
 		spell, rank, displayName, icon, startTime, endTime, isTradeSkill, castID, notInterruptible = UnitCastingInfo(unit)
 	else -- self.channeling
 		spell, rank, displayName, icon, startTime, endTime, isTradeSkill, notInterruptible = UnitChannelInfo(unit)
+		-- channeling spells sometimes just display "Channeling" - this is not wanted
+		displayName = spell
 	end
 
 	startTime = startTime / 1000
