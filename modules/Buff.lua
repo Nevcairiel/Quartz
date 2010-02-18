@@ -285,9 +285,6 @@ do
 						order = 101,
 						get = getOptFocus,
 						set = setOptFocus,
-						disabled = function()
-							return not db.focus
-						end,
 						args = {
 							show = {
 								type = "toggle",
@@ -456,9 +453,6 @@ do
 						order = 102,
 						get = getOptTarget,
 						set = setOptTarget,
-						disabled = function()
-							return not db.target
-						end,
 						args = {
 							show = {
 								type = "toggle",
