@@ -69,7 +69,7 @@ do
 				type = "toggle",
 				name = L["Show Target Name"],
 				desc = L["Display target name of spellcasts after spell name"],
-				disabled = hidenametextoptions,
+				disabled = function() return db.hidenametext end,
 				order = 402,
 			}
 			options.args.noInterruptGroup = nil
