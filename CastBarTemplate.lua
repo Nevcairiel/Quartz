@@ -779,12 +779,10 @@ do
 					desc = L["Disable the text that displays the spell name/rank"],
 					order = 401,
 				},
-				targetname = {
-					type = "toggle",
-					name = L["Show Target Name"],
-					desc = L["Display target name of spellcasts after spell name"],
-					disabled = hidenametextoptions,
-					order = 402,
+				nlname = {
+					type = "description",
+					name = "",
+					order = 403,
 				},
 				nametextposition = {
 					type = "select",
@@ -792,14 +790,14 @@ do
 					desc = L["Set the alignment of the spell name text"],
 					values = {["left"] = L["Left"], ["right"] = L["Right"], ["center"] = L["Center"]},
 					disabled = hidenametextoptions,
-					order = 403,
+					order = 404,
 				},
 				fontsize = {
 					type = "range",
 					name = L["Spell Name Font Size"],
 					desc = L["Set the size of the spell name text"],
 					min = 7, max = 20, step = 1,
-					order = 404,
+					order = 405,
 					disabled = hidenametextoptions,
 				},
 				nametextx = {
@@ -808,7 +806,7 @@ do
 					desc = L["Adjust the X position of the spell name text"],
 					min = -35, max = 35, step = 1,
 					disabled = hidenametextoptions,
-					order = 405,
+					order = 406,
 				},
 				nametexty = {
 					type = "range",
@@ -816,14 +814,14 @@ do
 					desc = L["Adjust the Y position of the name text"],
 					min = -35, max = 35, step = 1,
 					disabled = hidenametextoptions,
-					order = 406,
+					order = 407,
 				},
 				spellrank = {
 					type = "toggle",
 					name = L["Spell Rank"],
 					desc = L["Display the rank of spellcasts alongside their name"],
 					disabled = hidenametextoptions,
-					order = 407,
+					order = 408,
 				},
 				spellrankstyle = {
 					type = "select",
@@ -831,7 +829,7 @@ do
 					desc = L["Set the display style of the spell rank"],
 					disabled = hidespellrankstyle,
 					values = {["number"] = L["Number"], ["roman"] = L["Roman"], ["full"] = L["Full Text"], ["romanfull"] = L["Roman Full Text"]},
-					order = 408,
+					order = 409,
 				},
 				hidetimetext = {
 					type = "toggle",

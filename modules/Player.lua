@@ -35,6 +35,10 @@ local defaults = {
 	{
 		hideblizz = true,
 		showticks = true,
+		-- no interrupt is pointless for player, disable all options
+		noInterruptBorderChange = false,
+		noInterruptColorChange = false,
+		noInterruptShield = false,
 	})
 }
 
@@ -60,6 +64,13 @@ do
 				name = L["Show channeling ticks"],
 				desc = L["Show damage / mana ticks while channeling spells like Drain Life or Blizzard"],
 				order = 102,
+			}
+			options.args.targetname = {
+				type = "toggle",
+				name = L["Show Target Name"],
+				desc = L["Display target name of spellcasts after spell name"],
+				disabled = hidenametextoptions,
+				order = 402,
 			}
 			options.args.noInterruptGroup = nil
 		end
