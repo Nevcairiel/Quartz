@@ -223,6 +223,8 @@ function CastBarTemplate:UNIT_SPELLCAST_START(event, unit)
 		-- channeling spells sometimes just display "Channeling" - this is not wanted
 		displayName = spell
 	end
+	-- in case this returned nothing
+	if not startTime then return end
 
 	startTime = startTime / 1000
 	endTime = endTime / 1000
