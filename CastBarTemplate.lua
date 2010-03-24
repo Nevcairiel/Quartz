@@ -397,6 +397,8 @@ function CastBarTemplate:ApplySettings()
 	self.Bar:SetWidth(db.w)
 	self.Bar:SetHeight(db.h)
 	self.Bar:SetStatusBarTexture(media:Fetch("statusbar", db.texture))
+	self.Bar:GetStatusBarTexture():SetHorizTile(false)
+	self.Bar:GetStatusBarTexture():SetVertTile(false)
 	self.Bar:SetMinMaxValues(0, 1)
 
 	if db.hidetimetext then
@@ -511,6 +513,8 @@ function CastBarTemplate:RegisterEvents()
 	media.RegisterCallback(self, "LibSharedMedia_SetGlobal", function(mtype, override)
 		if mtype == "statusbar" then
 			self.Bar:SetStatusBarTexture(media:Fetch("statusbar", override))
+			self.Bar:GetStatusBarTexture():SetHorizTile(false)
+			self.Bar:GetStatusBarTexture():SetVertTile(false)
 		end
 	end)
 end

@@ -267,6 +267,8 @@ function Swing:ApplySettings()
 		
 		swingstatusbar:SetAllPoints(swingbar)
 		swingstatusbar:SetStatusBarTexture(media:Fetch("statusbar", Player.db.profile.texture))
+		swingstatusbar:GetStatusBarTexture():SetHorizTile(false)
+		swingstatusbar:GetStatusBarTexture():SetVertTile(false)
 		swingstatusbar:SetStatusBarColor(unpack(db.barcolor))
 		swingstatusbar:SetMinMaxValues(0, 1)
 		

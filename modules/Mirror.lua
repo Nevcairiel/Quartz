@@ -242,6 +242,8 @@ function Mirror:OnEnable()
 		if mtype == "statusbar" then
 			for i, v in pairs(mirrorbars) do
 				v:SetStatusBarTexture(media:Fetch("statusbar", override))
+				v:GetStatusBarTexture():SetHorizTile(false)
+				v:GetStatusBarTexture():SetVertTile(false)
 			end
 		end
 	end)
@@ -515,6 +517,8 @@ do
 		
 		bar:ClearAllPoints()
 		bar:SetStatusBarTexture(media:Fetch("statusbar", db.mirrortexture))
+		bar:GetStatusBarTexture():SetHorizTile(false)
+		bar:GetStatusBarTexture():SetVertTile(false)
 		bar:SetWidth(db.mirrorwidth)
 		bar:SetHeight(db.mirrorheight)
 		bar:SetScale(qpdb.scale)

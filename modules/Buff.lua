@@ -778,9 +778,13 @@ function Buff:OnEnable()
 		if mtype == "statusbar" then
 			for i, v in pairs(targetbars) do
 				v:SetStatusBarTexture(media:Fetch("statusbar", override))
+				v:GetStatusBarTexture():SetHorizTile(false)
+				v:GetStatusBarTexture():SetVertTile(false)
 			end
 			for i, v in pairs(focusbars) do
 				v:SetStatusBarTexture(media:Fetch("statusbar", override))
+				v:GetStatusBarTexture():SetHorizTile(false)
+				v:GetStatusBarTexture():SetVertTile(false)
 			end
 		end
 	end)
@@ -1112,6 +1116,8 @@ do
 		end
 		bar:ClearAllPoints()
 		bar:SetStatusBarTexture(media:Fetch("statusbar", db.bufftexture))
+		bar:GetStatusBarTexture():SetHorizTile(false)
+		bar:GetStatusBarTexture():SetVertTile(false)
 		bar:SetWidth(width)
 		bar:SetHeight(height)
 		bar:SetScale(qpdb.scale)
