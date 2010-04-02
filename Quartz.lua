@@ -95,6 +95,92 @@ function Quartz3:ApplySettings()
 	end
 end
 
+function Quartz3:ToggleLock(showUI)
+	local func = self.unlock and "Lock" or "Unlock"
+	self[func](self, showUI)
+end
+
+function Quartz3:Unlock(showUI)
+	self.unlock = true
+	for k,v in self:IterateModules() do
+		if v:IsEnabled() and type(v.Unlock) == "function" then
+			v:Unlock()
+		end
+	end
+	if showUI then
+		self:ShowUnlockDialog()
+	end
+end
+
+function Quartz3:Lock()
+	self.unlock = nil
+	for k,v in self:IterateModules() do
+		if v:IsEnabled() and type(v.Lock) == "function" then
+			v:Lock()
+		end
+	end
+	if self.unlock_dialog then self.unlock_dialog:Hide() end
+end
+
+function Quartz3:ShowUnlockDialog()
+	if not self.unlock_dialog then
+		local f = CreateFrame("Frame", "Quartz3UnlockDialog", UIParent)
+		f:SetFrameStrata("DIALOG")
+		f:SetToplevel(true)
+		f:EnableMouse(true)
+		f:SetClampedToScreen(true)
+		f:SetWidth(360)
+		f:SetHeight(110)
+		f:SetBackdrop{
+			bgFile="Interface\\DialogFrame\\UI-DialogBox-Background" ,
+			edgeFile="Interface\\DialogFrame\\UI-DialogBox-Border",
+			tile = true,
+			insets = {left = 11, right = 12, top = 12, bottom = 11},
+			tileSize = 32,
+			edgeSize = 32,
+		}
+		f:SetPoint("TOP", 0, -50)
+		f:Hide()
+		f:SetScript("OnShow", function() PlaySound("igMainMenuOption") end)
+		f:SetScript("OnHide", function() PlaySound("gsTitleOptionExit") end)
+
+		local tr = f:CreateTitleRegion()
+		tr:SetAllPoints(f)
+
+		local header = f:CreateTexture(nil, "ARTWORK")
+		header:SetTexture("Interface\\DialogFrame\\UI-DialogBox-Header")
+		header:SetWidth(256); header:SetHeight(64)
+		header:SetPoint("TOP", 0, 12)
+
+		local title = f:CreateFontString("ARTWORK")
+		title:SetFontObject("GameFontNormal")
+		title:SetPoint("TOP", header, "TOP", 0, -14)
+		title:SetText(L["Quartz3"])
+
+		local desc = f:CreateFontString("ARTWORK")
+		desc:SetFontObject("GameFontHighlight")
+		desc:SetJustifyV("TOP")
+		desc:SetJustifyH("LEFT")
+		desc:SetPoint("TOPLEFT", 18, -32)
+		desc:SetPoint("BOTTOMRIGHT", -18, 48)
+		desc:SetText(L["Bars unlocked. Move them now and click Lock when you are done."])
+
+		local lockBars = CreateFrame("CheckButton", "Quartz3UnlockDialogLock", f, "OptionsButtonTemplate")
+		getglobal(lockBars:GetName() .. "Text"):SetText(L["Lock"])
+
+		lockBars:SetScript("OnClick", function(self)
+			Quartz3:Lock()
+			LibStub("AceConfigRegistry-3.0"):NotifyChange("Quartz3")
+		end)
+
+		--position buttons
+		lockBars:SetPoint("BOTTOMRIGHT", -14, 14)
+
+		self.unlock_dialog = f
+	end
+	self.unlock_dialog:Show()
+end
+
 local copyExclude = {
 	x = true,
 	y = true,

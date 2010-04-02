@@ -130,6 +130,14 @@ function Player:ApplySettings()
 	end
 end
 
+function Player:Unlock()
+	self.Bar:Unlock()
+end
+
+function Player:Lock()
+	self.Bar:Lock()
+end
+
 ----------------------------
 -- Cast Bar Hooks
 

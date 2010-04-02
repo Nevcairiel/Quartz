@@ -115,3 +115,11 @@ function Pet:ApplySettings()
 		self.Bar:ApplySettings()
 	end
 end
+
+function Pet:Unlock()
+	self.Bar:Unlock()
+end
+
+function Pet:Lock()
+	self.Bar:Lock()
+end

@@ -103,3 +103,11 @@ function Target:ApplySettings()
 		self.Bar:ApplySettings()
 	end
 end
+
+function Target:Unlock()
+	self.Bar:Unlock()
+end
+
+function Target:Lock()
+	self.Bar:Lock()
+end

@@ -112,3 +112,11 @@ function Focus:ApplySettings()
 		self.Bar:ApplySettings()
 	end
 end
+
+function Focus:Unlock()
+	self.Bar:Unlock()
+end
+
+function Focus:Lock()
+	self.Bar:Lock()
+end

@@ -524,14 +524,7 @@ function CastBarTemplate:UnregisterEvents()
 	media.UnregisterCallback(self, "LibSharedMedia_SetGlobal")
 end
 
-----------------------------
--- Options
-
 do
-	local function getBar(info)
-		return Quartz3.CastBarTemplate.bars[info[1]]
-	end
-
 	local function dragstart(self)
 		self:StartMoving()
 	end
@@ -544,6 +537,37 @@ do
 
 	local function nothing(self)
 		self:SetAlpha(self.config.alpha)
+	end
+
+	function CastBarTemplate:Unlock()
+		self:Show()
+		self:EnableMouse(true)
+		self:SetScript("OnDragStart", dragstart)
+		self:SetScript("OnDragStop", dragstop)
+		self:SetAlpha(1)
+		self.Hide = nothing
+		self.Icon:SetTexture("Interface\\Icons\\Temp")
+		self.Text:SetText(self.unit)
+	end
+
+	function CastBarTemplate:Lock()
+		self.Hide = nil
+		self:EnableMouse(false)
+		self:SetScript("OnDragStart", nil)
+		self:SetScript("OnDragStop", nil)
+		if not (self.channeling or self.casting) then
+			self:Hide()
+		end
+	end
+end
+
+
+----------------------------
+-- Options
+
+do
+	local function getBar(info)
+		return Quartz3.CastBarTemplate.bars[info[1]]
 	end
 
 	local function hideiconoptions(info)
@@ -584,32 +608,6 @@ do
 	local function icondisabled(info)
 		local db = getBar(info).config
 		return db.hideicon
-	end
-
-	local function getMovable(info)
-		return getBar(info).locked
-	end
-
-	local function setMovable(info, v)
-		local bar = getBar(info)
-		if v then
-			bar.Hide = nil
-			bar:EnableMouse(false)
-			bar:SetScript("OnDragStart", nil)
-			bar:SetScript("OnDragStop", nil)
-			if not (bar.channeling or bar.casting) then
-				bar:Hide()
-			end
-		else
-			bar:Show()
-			bar:EnableMouse(true)
-			bar:SetScript("OnDragStart", dragstart)
-			bar:SetScript("OnDragStop", dragstop) 
-			bar:SetAlpha(1)
-			bar.Hide = nothing
-			bar.Icon:SetTexture("Interface\\Icons\\Temp")
-		end
-		bar.locked = v
 	end
 
 	local function snapToCenter(info, v)
@@ -673,14 +671,7 @@ do
 					get = getEnabled,
 					set = setEnabled,
 					order = 99,
-				},
-				lock = {
-					type = "toggle",
-					name = L["Lock"],
-					desc = L["Toggle Cast Bar lock"],
-					get = getMovable,
-					set = setMovable,
-					order = 100,
+					width = "full",
 				},
 				h = {
 					type = "range",

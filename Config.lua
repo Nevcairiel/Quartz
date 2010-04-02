@@ -58,6 +58,20 @@ local function getOptions()
 					inline = true,
 					name = "",
 					args = {
+						unlock = {
+							type = "execute",
+							name = L["Toggle Bar Lock"],
+							desc = L["Unlock the Bars to be able to move them around."],
+							func = function()
+								Quartz3:ToggleLock(true)
+							end,
+							order = 50,
+						},
+						nllock = {
+							type = "description",
+							name = "",
+							order = 51,
+						},
 						hidesamwise = {
 							type = "toggle",
 							name = L["Hide Samwise Icon"],
