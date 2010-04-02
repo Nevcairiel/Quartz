@@ -77,6 +77,15 @@ function Quartz3:OnEnable()
 	media.RegisterCallback(self, "LibSharedMedia_Registered", "ApplySettings")
 	media.RegisterCallback(self, "LibSharedMedia_SetGlobal", "ApplySettings")
 
+	CONFIGMODE_CALLBACKS = CONFIGMODE_CALLBACKS or {}
+	CONFIGMODE_CALLBACKS["Quartz3"] = function(action)
+		if action == "ON" then
+			self:Unlock(false)
+		elseif action == "OFF" then
+			self:Lock()
+		end
+	end
+
 	self:ApplySettings()
 end
 
