@@ -41,6 +41,7 @@ local defaults = {
 		bordercolor = {0, 0, 0},
 		backgroundalpha = 1,
 		borderalpha = 1,
+		casttimeprecision = 1,
 	},
 }
 
@@ -138,7 +139,7 @@ end
 Quartz3.Util = {}
 function Quartz3.Util.TimeFormat(num, isCastTime)
 	if num <= 10 or (isCastTime and num <= 60) then
-		return "%.1f", num
+		return ("%%.%df"):format(db.casttimeprecision), num
 	elseif num <= 60 then
 		return "%d", num
 	elseif num <= 3600 then
