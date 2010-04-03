@@ -661,6 +661,8 @@ do
 								desc = L["Set the color of the text for the buff bars"],
 								order = 110,
 								width = "full",
+								get = getColor,
+								set = setColor,
 							},
 							bufffontsize = {
 								type = "range",
@@ -765,7 +767,12 @@ end
 function Buff:OnInitialize()
 	self.db = Quartz3.db:RegisterNamespace(MODNAME, defaults)
 	db = self.db.profile
-	
+
+	-- fix broken buff text color
+	if type(db.bufftextcolor) ~= "table" then
+		db.bufftextcolor = {1,1,1}
+	end
+
 	self:SetEnabledState(Quartz3:GetModuleEnabled(MODNAME))
 	Quartz3:RegisterModuleOptions(MODNAME, getOptions, L["Buff"])
 end
