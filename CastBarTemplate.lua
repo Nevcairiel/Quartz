@@ -513,8 +513,12 @@ function CastBarTemplate:RegisterEvents()
 	media.RegisterCallback(self, "LibSharedMedia_SetGlobal", function(mtype, override)
 		if mtype == "statusbar" then
 			self.Bar:SetStatusBarTexture(media:Fetch("statusbar", override))
-			self.Bar:GetStatusBarTexture():SetHorizTile(false)
-			self.Bar:GetStatusBarTexture():SetVertTile(false)
+		end
+	end)
+
+	media.RegisterCallback(self, "LibSharedMedia_Registered", function(mtype, key)
+		if mtype == "statusbar" and key == self.config.texture then
+			self.Bar:SetStatusBarTexture(media:Fetch("statusbar", self.config.texture))
 		end
 	end)
 end
@@ -522,6 +526,7 @@ end
 function CastBarTemplate:UnregisterEvents()
 	self:UnregisterAllEvents()
 	media.UnregisterCallback(self, "LibSharedMedia_SetGlobal")
+	media.UnregisterCallback(self, "LibSharedMedia_Registered")
 end
 
 do

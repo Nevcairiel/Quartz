@@ -242,11 +242,18 @@ function Mirror:OnEnable()
 		if mtype == "statusbar" then
 			for i, v in pairs(mirrorbars) do
 				v:SetStatusBarTexture(media:Fetch("statusbar", override))
-				v:GetStatusBarTexture():SetHorizTile(false)
-				v:GetStatusBarTexture():SetVertTile(false)
 			end
 		end
 	end)
+
+	media.RegisterCallback(self, "LibSharedMedia_Registered", function(mtype, key)
+		if mtype == "statusbar" and key == self.config.mirrortexture then
+			for i, v in pairs(mirrorbars) do
+				v:SetStatusBarTexture(media:Fetch("statusbar", self.config.mirrortexture))
+			end
+		end
+	end)
+
 	self:ApplySettings()
 end
 
@@ -255,14 +262,19 @@ function Mirror:OnDisable()
 	mirrorbars[1]:EnableMouse(false)
 	mirrorbars[1]:SetScript("OnDragStart", nil)
 	mirrorbars[1]:SetScript("OnDragStop", nil)
+
 	for _, v in pairs(mirrorbars) do
 		v:Hide()
 	end
+
 	for i = 1, 3 do
 		_G["MirrorTimer"..i]:RegisterEvent("MIRROR_TIMER_PAUSE")
 		_G["MirrorTimer"..i]:RegisterEvent("MIRROR_TIMER_STOP")
 	end
 	UIParent:RegisterEvent("MIRROR_TIMER_START")
+
+	media.UnregisterCallback(self, "LibSharedMedia_SetGlobal")
+	media.UnregisterCallback(self, "LibSharedMedia_Registered")
 end
 
 do

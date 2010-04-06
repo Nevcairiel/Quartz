@@ -785,16 +785,24 @@ function Buff:OnEnable()
 		if mtype == "statusbar" then
 			for i, v in pairs(targetbars) do
 				v:SetStatusBarTexture(media:Fetch("statusbar", override))
-				v:GetStatusBarTexture():SetHorizTile(false)
-				v:GetStatusBarTexture():SetVertTile(false)
 			end
 			for i, v in pairs(focusbars) do
 				v:SetStatusBarTexture(media:Fetch("statusbar", override))
-				v:GetStatusBarTexture():SetHorizTile(false)
-				v:GetStatusBarTexture():SetVertTile(false)
 			end
 		end
 	end)
+
+	media.RegisterCallback(self, "LibSharedMedia_Registered", function(mtype, key)
+		if mtype == "statusbar" and key == self.config.bufftexture then
+			for i, v in pairs(targetbars) do
+				v:SetStatusBarTexture(media:Fetch("statusbar", self.config.bufftexture))
+			end
+			for i, v in pairs(focusbars) do
+				v:SetStatusBarTexture(media:Fetch("statusbar", self.config.bufftexture))
+			end
+		end
+	end)
+
 	self:ApplySettings()
 end
 
@@ -806,6 +814,7 @@ function Buff:OnDisable()
 	for _, v in pairs(targetbars) do
 		v:Hide()
 	end
+
 	focusbars[1].Hide = nil
 	focusbars[1]:EnableMouse(false)
 	focusbars[1]:SetScript("OnDragStart", nil)
@@ -813,6 +822,9 @@ function Buff:OnDisable()
 	for _, v in pairs(focusbars) do
 		v:Hide()
 	end
+
+	media.UnregisterCallback(self, "LibSharedMedia_SetGlobal")
+	media.UnregisterCallback(self, "LibSharedMedia_Registered")
 end
 
 function Buff:UNIT_AURA(units)
