@@ -182,6 +182,7 @@ local function setBarTicks(ticknum)
 	end
 end
 
+-- TODO: this will need updates for Cataclysm
 local channelingTicks = {
 	-- warlock
 	[GetSpellInfo(1120)] = 5, -- drain soul
@@ -199,8 +200,6 @@ local channelingTicks = {
 	[GetSpellInfo(5143)] = 5, -- arcane missiles
 	[GetSpellInfo(10)] = 5, -- blizzard
 	[GetSpellInfo(12051)] = 4, -- evocation
-	-- hunter
-	[GetSpellInfo(1510)] = 6, -- volley
 }
 
 local function getChannelingTicks(spell)
