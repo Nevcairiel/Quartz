@@ -31,7 +31,7 @@ local UnitName, UnitCastingInfo, UnitChannelInfo = UnitName, UnitCastingInfo, Un
 local CastBarTemplate = CreateFrame("Frame")
 local CastBarTemplate_MT = {__index = CastBarTemplate}
 
-local TimeFmt, RomanFmt = Quartz3.Util.TimeFormat, Quartz3.Util.ConvertRankToRomanNumeral
+local TimeFmt = Quartz3.Util.TimeFormat
 
 local playerName = UnitName("player")
 
@@ -130,21 +130,9 @@ end
 ----------------------------
 -- Template Methods
 
-local function SetNameText(self, name, rank)
-	local mask, arg = nil, nil
-	if self.config.spellrank and rank then
-		mask, arg = RomanFmt(rank, self.config.spellrankstyle)
-	end
-
+local function SetNameText(self, name)
 	if self.config.targetname and self.targetName and self.targetName ~= "" then
-		if mask then
-			mask = mask .. " -> " .. self.targetName
-		else
-			name = name .. " -> " .. self.targetName
-		end
-	end
-	if mask then
-		self.Text:SetFormattedText(mask, name, arg)
+		self.Text:SetFormattedText("%s -> %s", name, self.targetName)
 	else
 		self.Text:SetText(name)
 	end
@@ -239,7 +227,7 @@ function CastBarTemplate:UNIT_SPELLCAST_START(event, unit)
 	self:Show()
 	self:SetAlpha(db.alpha)
 
-	SetNameText(self, displayName, rank)
+	SetNameText(self, displayName)
 
 	self.Spark:Show()
 
@@ -595,11 +583,6 @@ do
 		return db.hidenametext
 	end
 
-	local function hidespellrankstyle(info)
-		local db = getBar(info).config
-		return db.hidenametext or not db.spellrank
-	end
-
 	local function noInterruptChangeBorder(info)
 		local db = getBar(info).config
 		return not db.noInterruptChangeBorder
@@ -778,7 +761,7 @@ do
 				hidenametext = {
 					type = "toggle",
 					name = L["Hide Spell Name"],
-					desc = L["Disable the text that displays the spell name/rank"],
+					desc = L["Disable the text that displays the spell name"],
 					order = 401,
 				},
 				nlname = {
@@ -817,21 +800,6 @@ do
 					min = -35, max = 35, step = 1,
 					disabled = hidenametextoptions,
 					order = 407,
-				},
-				spellrank = {
-					type = "toggle",
-					name = L["Spell Rank"],
-					desc = L["Display the rank of spellcasts alongside their name"],
-					disabled = hidenametextoptions,
-					order = 408,
-				},
-				spellrankstyle = {
-					type = "select",
-					name = L["Spell Rank Style"],
-					desc = L["Set the display style of the spell rank"],
-					disabled = hidespellrankstyle,
-					values = {["number"] = L["Number"], ["roman"] = L["Roman"], ["full"] = L["Full Text"], ["romanfull"] = L["Roman Full Text"]},
-					order = 409,
 				},
 				hidetimetext = {
 					type = "toggle",
@@ -1012,8 +980,6 @@ Quartz3.CastBarTemplate.defaults = {
 	hidecasttime = false,
 	timefontsize = 12,
 	targetname = false,
-	spellrank = false,
-	spellrankstyle = "roman",
 	border = "Blizzard Tooltip",
 	nametextx = 3,
 	nametexty = 0,

@@ -243,29 +243,3 @@ function Quartz3.Util.TimeFormat(num, isCastTime)
 		return "%d:%02d", num / 3600, (num % 3600) / 60
 	end
 end
-
-do
-	local numerals = { -- 25"s enough for now, I think?
-		"I", "II", "III", "IV", "V",
-		"VI", "VII", "VIII", "IX", "X",
-		"XI", "XII", "XIII", "XIV", "XV",
-		"XVI", "XVII", "XVIII", "XIX", "XX",
-		"XXI", "XXII", "XXIII", "XXIV", "XXV",
-	}
-	function Quartz3.Util.ConvertRankToRomanNumeral(rank, style)
-		local mask, arg = nil, nil
-		local number = tonumber(rank:match(L["Rank (%d+)"]))
-		if number and number > 0 then
-			if style == "number" then
-				mask, arg = "%s %d", number
-			elseif style == "full" then
-				mask, arg = "%s (%s)", rank
-			elseif style == "roman" then
-				mask, arg = "%s %s", numerals[number]
-			else -- full roman
-				mask, arg = "%s (%s)", L["Rank %s"]:format(numerals[number])
-			end
-		end
-		return mask, arg
-	end
-end
