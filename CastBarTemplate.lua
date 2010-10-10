@@ -385,8 +385,6 @@ function CastBarTemplate:ApplySettings()
 	self.Bar:SetWidth(db.w)
 	self.Bar:SetHeight(db.h)
 	self.Bar:SetStatusBarTexture(media:Fetch("statusbar", db.texture))
-	self.Bar:GetStatusBarTexture():SetHorizTile(false)
-	self.Bar:GetStatusBarTexture():SetVertTile(false)
 	self.Bar:SetMinMaxValues(0, 1)
 
 	if db.hidetimetext then
@@ -1017,7 +1015,7 @@ function Quartz3.CastBarTemplate:new(parent, unit, name, localizedName, config)
 	bar:RegisterForDrag("LeftButton")
 	bar:SetClampedToScreen(true)
 
-	bar.Bar      = CreateFrame("StatusBar", nil, bar)
+	bar.Bar      = Quartz3:CreateStatusBar(nil, bar) --CreateFrame("StatusBar", nil, bar)
 	bar.Text     = bar.Bar:CreateFontString(nil, "OVERLAY")
 	bar.TimeText = bar.Bar:CreateFontString(nil, "OVERLAY")
 	bar.Icon     = bar.Bar:CreateTexture(nil, "DIALOG")

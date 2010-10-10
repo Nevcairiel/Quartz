@@ -136,7 +136,7 @@ end
 
 local framefactory = {
 	__index = function(t,k)
-		local bar = CreateFrame("StatusBar", nil, UIParent)
+		local bar = Quartz3:CreateStatusBar(nil, UIParent)
 		t[k] = bar
 		bar:SetFrameStrata("MEDIUM")
 		bar:Hide()
@@ -1135,8 +1135,6 @@ do
 		end
 		bar:ClearAllPoints()
 		bar:SetStatusBarTexture(media:Fetch("statusbar", db.bufftexture))
-		bar:GetStatusBarTexture():SetHorizTile(false)
-		bar:GetStatusBarTexture():SetVertTile(false)
 		bar:SetWidth(width)
 		bar:SetHeight(height)
 		bar:SetScale(qpdb.scale)

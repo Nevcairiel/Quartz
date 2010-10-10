@@ -195,7 +195,7 @@ local function OnHide(frame)
 end
 local mirrorbars = setmetatable({}, {
 	__index = function(t,k)
-		local bar = CreateFrame("StatusBar", nil, UIParent)
+		local bar = Quartz3:CreateStatusBar(nil, UIParent)
 		t[k] = bar
 		bar:SetFrameStrata("MEDIUM")
 		bar:Hide()

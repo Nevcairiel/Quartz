@@ -132,7 +132,7 @@ function Swing:OnEnable()
 		swingbar:RegisterForDrag("LeftButton")
 		swingbar:SetClampedToScreen(true)
 		
-		swingstatusbar = CreateFrame("StatusBar", nil, swingbar)
+		swingstatusbar = Quartz3:CreateStatusBar(nil, swingbar)
 		
 		durationtext = swingstatusbar:CreateFontString(nil, "OVERLAY")
 		remainingtext = swingstatusbar:CreateFontString(nil, "OVERLAY")
@@ -267,8 +267,6 @@ function Swing:ApplySettings()
 		
 		swingstatusbar:SetAllPoints(swingbar)
 		swingstatusbar:SetStatusBarTexture(media:Fetch("statusbar", Player.db.profile.texture))
-		swingstatusbar:GetStatusBarTexture():SetHorizTile(false)
-		swingstatusbar:GetStatusBarTexture():SetVertTile(false)
 		swingstatusbar:SetStatusBarColor(unpack(db.barcolor))
 		swingstatusbar:SetMinMaxValues(0, 1)
 		
