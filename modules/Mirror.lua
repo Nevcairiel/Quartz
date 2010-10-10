@@ -529,8 +529,6 @@ do
 		
 		bar:ClearAllPoints()
 		bar:SetStatusBarTexture(media:Fetch("statusbar", db.mirrortexture))
-		bar:GetStatusBarTexture():SetHorizTile(false)
-		bar:GetStatusBarTexture():SetVertTile(false)
 		bar:SetWidth(db.mirrorwidth)
 		bar:SetHeight(db.mirrorheight)
 		bar:SetScale(qpdb.scale)
