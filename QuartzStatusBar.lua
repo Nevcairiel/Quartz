@@ -50,7 +50,7 @@ function DrawBar(self)
 	if self.__color then
 		if #self.__color == 3 then
 			r, g, b = unpack(self.__color)
-		elseif #self.color == 4 then
+		elseif #self.__color == 4 then
 			r, g, b, a = unpack(self.__color)
 		end
 	end
