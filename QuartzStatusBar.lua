@@ -31,7 +31,8 @@ local DrawBar, UpdateBarValue
 
 function Quartz3:CreateStatusBar(name, parent)
 	local bar = setmetatable(CreateFrame("Frame", name, parent), MetaTable)
-	bar.__texture = bar:CreateTexture()
+	bar.__texture = bar:CreateTexture(nil, "ARTWORK")
+	bar.__texture:SetTexture([[Interface\TargetingFrame\UI-StatusBar]])
 
 	DrawBar(bar)
 
@@ -60,8 +61,7 @@ end
 
 function UpdateBarValue(self)
 	local perc = (self.__value - self.__min) / (self.__max - self.__min)
-	if perc < 0 then perc = 0
-	elseif perc > 1 then perc = 1 end
+	perc = min(max(perc, 0), 1)
 	local width = self:GetWidth()
 	self.__texture:SetPoint("RIGHT", self, "LEFT", perc * width, 0)
 	self.__texture:SetTexCoord(0, perc, 0, 1)
@@ -72,8 +72,11 @@ function QuartzStatusBar:GetMinMaxValues()
 end
 
 function QuartzStatusBar:SetMinMaxValues(min, max)
-	self.__min = min
-	self.__max = max
+	if not tonumber(min) or not tonumber(max) then
+		return error(format("QuartzStatusBar:SetMinMaxValues(min, max): Invalid min or max specified! Values were: %q, %q", min, max), 2)
+	end
+	self.__min = tonumber(min)
+	self.__max = tonumber(max)
 	UpdateBarValue(self)
 end
 
@@ -82,7 +85,10 @@ function QuartzStatusBar:GetValue()
 end
 
 function QuartzStatusBar:SetValue(value)
-	self.__value = value
+	if not tonumber(value) then
+		return error(format("QuartzStatusBar:SetValue(value): Invalid value specified! Value was: %q", value), 2)
+	end
+	self.__value = tonumber(value)
 	UpdateBarValue(self)
 end
 
@@ -92,6 +98,9 @@ function QuartzStatusBar:GetOrientation()
 end
 
 function QuartzStatusBar:SetOrientation(orientation)
+	if orientation ~= "HORIZONTAL" and orientation ~= "VERTICAL" then
+		return error("QuartzStatusBar:SetOrientation(orientation): Only HORIZONTAL and VERTICAL orientations supported!", 2)
+	end
 	self.__orientation = orientation
 	DrawBar(self)
 end
@@ -101,7 +110,7 @@ function QuartzStatusBar:GetRotatesTexture()
 end
 
 function QuartzStatusBar:GetRotatesTexture(rotate)
-	self.__rotatesTexture = rotate
+	self.__rotatesTexture = rotate and 1 or nil
 	DrawBar(self)
 end
 

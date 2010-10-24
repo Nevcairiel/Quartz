@@ -212,7 +212,7 @@ function CastBarTemplate:UNIT_SPELLCAST_START(event, unit)
 		displayName = spell
 	end
 	-- in case this returned nothing
-	if not startTime then return end
+	if not startTime or not endTime then return end
 
 	startTime = startTime / 1000
 	endTime = endTime / 1000
@@ -317,7 +317,7 @@ function CastBarTemplate:UNIT_SPELLCAST_DELAYED(event, unit)
 		spell, rank, displayName, icon, startTime, endTime = UnitChannelInfo(unit)
 	end
 
-	if not startTime then
+	if not startTime or not endTime then
 		return self:Hide()
 	end
 
