@@ -819,14 +819,14 @@ do
 							mirroranchor = {
 								type = "select",
 								name = L["Anchor Frame"],
-								desc = L["Select where to anchor the mirror bars"],
+								desc = L["Select where to anchor the bars"],
 								values = {["player"] = L["Player"], ["free"] = L["Free"], ["target"] = L["Target"], ["focus"] = L["Focus"]},
 							},
 							-- free
 							mirrorlock = {
 								type = "toggle",
 								name = L["Lock"],
-								desc = L["Toggle mirror bar lock"],
+								desc = L["Toggle bar lock"],
 								get = function()
 									return locked
 								end,
@@ -853,7 +853,7 @@ do
 							mirrorgrowdirection = {
 								type = "select",
 								name = L["Grow Direction"],
-								desc = L["Set the grow direction of the mirror bars"],
+								desc = L["Set the grow direction of the bars"],
 								values = {["up"] = L["Up"], ["down"] = L["Down"]},
 								hidden = getfreeoptionshidden,
 								order = 102,
@@ -878,7 +878,7 @@ do
 							mirrorposition = {
 								type = "select",
 								name = L["Position"],
-								desc = L["Position the mirror bars"],
+								desc = L["Position the bars"],
 								values = positions,
 								hidden = getnotfreeoptionshidden,
 								order = 101,
@@ -886,7 +886,7 @@ do
 							mirrorgap = {
 								type = "range",
 								name = L["Gap"],
-								desc = L["Tweak the vertical position of the mirror bars"],
+								desc = L["Tweak the vertical position of the bars"],
 								min = -35, max = 35, step = 1,
 								hidden = getnotfreeoptionshidden,
 								order = 102,
@@ -894,7 +894,7 @@ do
 							mirroroffset = {
 								type = "range",
 								name = L["Offset"],
-								desc = L["Tweak the horizontal position of the mirror bars"],
+								desc = L["Tweak the horizontal position of the bars"],
 								min = -35, max = 35, step = 1,
 								hidden = getnotfreeoptionshidden,
 								order = 103,
@@ -902,7 +902,7 @@ do
 							mirrorspacing = {
 								type = "range",
 								name = L["Spacing"],
-								desc = L["Tweak the space between mirror bars"],
+								desc = L["Tweak the space between bars"],
 								min = -35, max = 35, step = 1,
 								order = 104,
 							},
@@ -914,13 +914,13 @@ do
 							mirroricons = {
 								type = "toggle",
 								name = L["Show Icons"],
-								desc = L["Show icons on mirror bars"],
+								desc = L["Show icons on the bars"],
 								order = 110,
 							},
 							mirroriconside = {
 								type = "select",
 								name = L["Icon Position"],
-								desc = L["Set the side of the mirror bar that the icon appears on"],
+								desc = L["Set the side of the bar that the icon appears on"],
 								values = {["left"] = L["Left"], ["right"] = L["Right"]},
 								order = 111,
 							},
@@ -928,7 +928,7 @@ do
 								type = "select",
 								dialogControl = "LSM30_Statusbar",
 								name = L["Texture"],
-								desc = L["Set the mirror bar Texture"],
+								desc = L["Set the bar Texture"],
 								values = lsmlist.statusbar,
 								order = 112,
 							},
@@ -940,21 +940,21 @@ do
 							mirrorwidth = {
 								type = "range",
 								name = L["Mirror Bar Width"],
-								desc = L["Set the width of the mirror bars"],
+								desc = L["Set the width of the bars"],
 								min = 50, max = 300, step = 1,
 								order = 114,
 							},
 							mirrorheight = {
 								type = "range",
 								name = L["Mirror Bar Height"],
-								desc = L["Set the height of the mirror bars"],
+								desc = L["Set the height of the bars"],
 								min = 4, max = 25, step = 1,
 								order = 115,
 							},
 							mirroralpha = {
 								type = "range",
 								name = L["Alpha"],
-								desc = L["Set the alpha of the mirror bars"],
+								desc = L["Set the alpha of the bars"],
 								min = 0.05, max = 1, bigStep = 0.05,
 								isPercent = true,
 								order = 116,
@@ -966,35 +966,35 @@ do
 							},
 							mirrornametext = {
 								type = "toggle",
-								name = L["Mirror Name Text"],
+								name = L["Name Text"],
 								desc = L["Display the names of Mirror Bar Types on their bars"],
 								order = 120,
 							},
 							mirrortimetext = {
 								type = "toggle",
-								name = L["Mirror Time Text"],
-								desc = L["Display the time remaining on mirror bars"],
+								name = L["Time Text"],
+								desc = L["Display the time remaining on the bars"],
 								order = 121,
 							},
 							mirrorfont = {
 								type = "select",
 								dialogControl = "LSM30_Font",
 								name = L["Font"],
-								desc = L["Set the font used in the mirror bars"],
+								desc = L["Set the font used in the bars"],
 								values = lsmlist.font,
 								order = 122,
 							},
 							mirrorfontsize = {
 								type = "range",
 								name = L["Font Size"],
-								desc = L["Set the font size for the mirror bars"],
+								desc = L["Set the font size for the bars"],
 								min = 3, max = 15, step = 1,
 								order = 123,
 							},
 							mirrortextcolor = {
 								type = "color",
 								name = L["Text Color"],
-								desc = L["Set the color of the text for the mirror bars"],
+								desc = L["Set the color of the text for the bars"],
 								get = getColor,
 								set = setColor,
 								order = 124,

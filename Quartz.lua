@@ -28,7 +28,7 @@ local type, pairs, tonumber = type, pairs, tonumber
 
 local defaults = {
 	profile = {
-		modules = { ["*"] = true },
+		modules = { ["*"] = true, ["EnemyCasts"] = false },
 		hidesamwise = true,
 		sparkcolor = {1, 1, 1, 0.5},
 		spelltextcolor = {1, 1, 1},
@@ -52,6 +52,7 @@ media:Register("statusbar", "LiteStep", "Interface\\AddOns\\Quartz\\textures\\Li
 media:Register("statusbar", "Rocks", "Interface\\AddOns\\Quartz\\textures\\Rocks")
 media:Register("statusbar", "Runes", "Interface\\AddOns\\Quartz\\textures\\Runes")
 media:Register("statusbar", "Xeon", "Interface\\AddOns\\Quartz\\textures\\Xeon")
+media:Register("statusbar", "Minimalist", "Interface\\AddOns\\Quartz\\textures\\Minimalist")
 media:Register("border", "Tooltip enlarged", "Interface\\AddOns\\Quartz\\textures\\Tooltip-BigBorder")
 
 function Quartz3:OnInitialize()
