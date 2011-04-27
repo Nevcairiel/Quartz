@@ -170,7 +170,7 @@ end
 
 do
 	local swordspecproc = false
-	function Swing:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, combatevent, srcGUID, srcName, srcFlags, dstName, dstGUID, dstFlags, spellID, spellName)
+	function Swing:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, combatevent, hideCaster, srcGUID, srcName, srcFlags, dstName, dstGUID, dstFlags, spellID, spellName)
 		if swingmode ~= 0 then return end
 		if combatevent == "SPELL_EXTRA_ATTACKS" and spellName == swordprocname and (bit_band(srcFlags, COMBATLOG_FILTER_ME) == COMBATLOG_FILTER_ME) then
 			swordspecproc = true

@@ -160,7 +160,7 @@ end
 
 function Enemy:CLEUHandler(e, ...)
 	if db.instanceonly and not IsInInstance() then return end
-	local timestamp, event, sGUID, sName, sFlags, dGUID, dName, dFlags = ...
+	local timestamp, event, hideCaster, sGUID, sName, sFlags, dGUID, dName, dFlags = ...
 	if 
 		bit_band(sFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == COMBATLOG_OBJECT_REACTION_FRIENDLY or 
 		bit_band(sFlags, COMBATLOG_OBJECT_CONTROL_NPC) == 0
