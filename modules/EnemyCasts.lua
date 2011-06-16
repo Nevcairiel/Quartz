@@ -168,7 +168,7 @@ function Enemy:CLEUHandler(e, ...)
 		return
 	end
 	if event == "SPELL_CAST_START" then
-		local spellId, spellName, spellSchool = select(9, ...)
+		local spellId, spellName, spellSchool = select(10, ...)
 		if not casts[sGUID] then
 			casts[sGUID] = new()
 		end
