@@ -60,7 +60,10 @@ function DrawBar(self)
 end
 
 function UpdateBarValue(self)
-	local perc = (self.__value - self.__min) / (self.__max - self.__min)
+	local perc = 0
+	if self.__max ~= self.__min then
+		perc = (self.__value - self.__min) / (self.__max - self.__min)
+	end
 	perc = min(max(perc, 0), 1)
 	local width = self:GetWidth()
 	self.__texture:SetPoint("RIGHT", self, "LEFT", perc * width, 0)
