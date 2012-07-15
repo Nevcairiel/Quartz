@@ -37,13 +37,6 @@ local playerclass
 local autoshotname = GetSpellInfo(75)
 local slam = GetSpellInfo(1464)
 local swordprocname = GetSpellInfo(12281)
-local resetspells = {
-	[GetSpellInfo(845)] = true, -- Cleave
-	[GetSpellInfo(78)] = true, -- Heroic Strike
-	[GetSpellInfo(6807)] = true, -- Maul
-	[GetSpellInfo(2973)] = true, -- Raptor Strike
-	[GetSpellInfo(56815)] = true, -- Rune Strike
-}
 
 local resetautoshotspells = {
 	--[GetSpellInfo(19434)] = true, -- Aimed Shot
@@ -189,9 +182,7 @@ end
 function Swing:UNIT_SPELLCAST_SUCCEEDED(event, unit, spell)
 	if unit ~= "player" then return end
 	if swingmode == 0 then
-		if resetspells[spell] then
-			self:MeleeSwing()
-		elseif spell == slam and slamstart then
+		if spell == slam and slamstart then
 			starttime = starttime + GetTime() - slamstart
 			slamstart = nil
 		end
