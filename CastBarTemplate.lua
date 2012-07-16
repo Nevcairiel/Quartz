@@ -530,8 +530,8 @@ do
 	end
 
 	local function dragstop(self)
-		self.config.x = self:GetLeft()
-		self.config.y = self:GetBottom()
+		self.config.x = self:GetLeft()-UIParent:GetLeft()
+		self.config.y = self:GetBottom()-UIParent:GetBottom()
 		self:StopMovingOrSizing()
 	end
 
