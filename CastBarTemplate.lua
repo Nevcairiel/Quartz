@@ -373,7 +373,12 @@ function CastBarTemplate:ApplySettings()
 		db.x = (UIParent:GetWidth() / 2 - (db.w * db.scale) / 2) / db.scale
 	end
 	self:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", db.x, db.y)
-	self:SetWidth(db.w + 10)
+	local width = db.w
+	local iconwidth = db.h + db.icongap
+	if not db.hideicon then
+		width = width + iconwidth
+	end
+	self:SetWidth(width + 10)
 	self:SetHeight(db.h + 10)
 	self:SetAlpha(db.alpha)
 	self:SetScale(db.scale)
@@ -381,7 +386,8 @@ function CastBarTemplate:ApplySettings()
 	ToggleCastNotInterruptible(self, self.lastNotInterruptible, true)
 
 	self.Bar:ClearAllPoints()
-	self.Bar:SetPoint("CENTER",self,"CENTER")
+	local iconoffset = db.hideicon and 0 or (iconwidth/2 * (db.iconposition == "left" and 1 or -1))
+	self.Bar:SetPoint("CENTER",self,"CENTER", iconoffset, 0)
 	self.Bar:SetWidth(db.w)
 	self.Bar:SetHeight(db.h)
 	self.Bar:SetStatusBarTexture(media:Fetch("statusbar", db.texture))
