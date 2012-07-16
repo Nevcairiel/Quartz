@@ -190,16 +190,13 @@ do
 		end
 	end
 end
-local function OnHide(frame)
-	frame:SetScript("OnUpdate", nil)
-end
+
 local mirrorbars = setmetatable({}, {
 	__index = function(t,k)
 		local bar = Quartz3:CreateStatusBar(nil, UIParent)
 		t[k] = bar
 		bar:SetFrameStrata("MEDIUM")
 		bar:Hide()
-		bar:SetScript("OnHide", OnHide)
 		bar:SetBackdrop({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16})
 		bar:SetBackdropColor(0,0,0)
 		bar.Text = bar:CreateFontString(nil, "OVERLAY")
@@ -265,6 +262,7 @@ function Mirror:OnDisable()
 
 	for _, v in pairs(mirrorbars) do
 		v:Hide()
+		v:SetScript("OnUpdate", nil)
 	end
 
 	for i = 1, 3 do
@@ -475,6 +473,7 @@ do
 		end
 		for i = maxindex+1, #mirrorbars do
 			mirrorbars[i]:Hide()
+			mirrorbars[i]:SetScript("OnUpdate", nil)
 		end
 	end
 	
