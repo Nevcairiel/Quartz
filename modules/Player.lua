@@ -117,9 +117,15 @@ function Player:ApplySettings()
 	else
 		CastingBarFrame.RegisterEvent = nil
 		CastingBarFrame:UnregisterAllEvents()
-		CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_START")
-		CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_STOP")
-		CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_FAILED")
+		if wowMoP then
+			CastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")
+			CastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_STOP", "player")
+			CastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_FAILED", "player")
+		else
+			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_START")
+			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_STOP")
+			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_FAILED")
+		end
 		CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
 		CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_DELAYED")
 		CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
