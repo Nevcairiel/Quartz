@@ -373,22 +373,19 @@ function CastBarTemplate:ApplySettings()
 		db.x = (UIParent:GetWidth() / 2 - (db.w * db.scale) / 2) / db.scale
 	end
 	self:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", db.x, db.y)
-	local width = db.w
-	local iconwidth = db.h + db.icongap
-	if not db.hideicon then
-		width = width + iconwidth
-	end
-	self:SetWidth(width + 10)
+	self:SetWidth(db.w + 10)
 	self:SetHeight(db.h + 10)
 	self:SetAlpha(db.alpha)
 	self:SetScale(db.scale)
 
 	ToggleCastNotInterruptible(self, self.lastNotInterruptible, true)
 
-	self.Bar:ClearAllPoints()
+	local iconwidth = db.h + db.icongap
 	local iconoffset = db.hideicon and 0 or (iconwidth/2 * (db.iconposition == "left" and 1 or -1))
+	local castbarwidth = db.hideicon and db.w or db.w-iconwidth
+	self.Bar:ClearAllPoints()
 	self.Bar:SetPoint("CENTER",self,"CENTER", iconoffset, 0)
-	self.Bar:SetWidth(db.w)
+	self.Bar:SetWidth(castbarwidth)
 	self.Bar:SetHeight(db.h)
 	self.Bar:SetStatusBarTexture(media:Fetch("statusbar", db.texture))
 	self.Bar:SetMinMaxValues(0, 1)
@@ -398,7 +395,7 @@ function CastBarTemplate:ApplySettings()
 	else
 		self.TimeText:Show()
 		self.TimeText:ClearAllPoints()
-		self.TimeText:SetWidth(db.w)
+		self.TimeText:SetWidth(castbarwidth)
 		local position = db.timetextposition
 		if position == "left" then
 			self.TimeText:SetPoint("LEFT", self.Bar, "LEFT", db.timetextx, db.timetexty)
@@ -440,9 +437,9 @@ function CastBarTemplate:ApplySettings()
 			self.Text:SetPoint("LEFT", self.Bar, "LEFT", db.nametextx, db.nametexty)
 			self.Text:SetJustifyH("LEFT")
 			if db.hidetimetext or db.timetextposition ~= "right" then
-				self.Text:SetWidth(db.w)
+				self.Text:SetWidth(castbarwidth)
 			else
-				self.Text:SetWidth(db.w - normaltimewidth - 5)
+				self.Text:SetWidth(castbarwidth - normaltimewidth - 5)
 			end
 		elseif position == "center" then
 			self.Text:SetPoint("CENTER", self.Bar, "CENTER", db.nametextx, db.nametexty)
@@ -454,9 +451,9 @@ function CastBarTemplate:ApplySettings()
 			self.Text:SetPoint("RIGHT", self.Bar, "RIGHT", -1 * db.nametextx, db.nametexty)
 			self.Text:SetJustifyH("RIGHT")
 			if db.hidetimetext or db.timetextposition ~= "left" then
-				self.Text:SetWidth(db.w)
+				self.Text:SetWidth(castbarwidth)
 			else
-				self.Text:SetWidth(db.w - normaltimewidth - 5)
+				self.Text:SetWidth(castbarwidth - normaltimewidth - 5)
 			end
 		end
 	end
