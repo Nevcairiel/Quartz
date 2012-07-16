@@ -171,8 +171,11 @@ local function setBarTicks(ticknum)
 		for k = 1,ticknum do
 			local t = barticks[k]
 			t:ClearAllPoints()
-			t:SetPoint("CENTER", castBar, "LEFT", delta * k, 0 )
+			t:SetPoint("CENTER", castBar, "LEFT", delta * (k-1), 0 )
 			t:Show()
+		end
+		for k = ticknum+1,#barticks do
+			barticks[k]:Hide()
 		end
 	else
 		barticks[1].Hide = nil
