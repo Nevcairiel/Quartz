@@ -76,7 +76,7 @@ local function OnUpdate(self)
 
 		self.Bar:SetValue(perc)
 		self.Spark:ClearAllPoints()
-		self.Spark:SetPoint("CENTER", self.Bar, "LEFT", perc * db.w, 0)
+		self.Spark:SetPoint("CENTER", self.Bar, "LEFT", perc * self.Bar:GetWidth(), 0)
 
 		if delay and delay ~= 0 then
 			if db.hidecasttime then
