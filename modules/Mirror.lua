@@ -193,7 +193,8 @@ end
 
 local mirrorbars = setmetatable({}, {
 	__index = function(t,k)
-		local bar = Quartz3:CreateStatusBar(nil, UIParent)
+		if k == nil then return nil end
+		local bar = Quartz3:CreateStatusBar("QuartzMirrorBar" .. tostring(k), UIParent)
 		t[k] = bar
 		bar:SetFrameStrata("MEDIUM")
 		bar:Hide()
