@@ -28,6 +28,12 @@ local UnitIsEnemy, UnitIsFriend, UnitIsUnit = UnitIsEnemy, UnitIsFriend, UnitIsU
 
 local db, getOptions
 
+local wowMoP
+do
+	local _, _, _, interface = GetBuildInfo()
+	wowMoP = (interface >= 50000)
+end
+
 local defaults = {
 	profile = Quartz3:Merge(Quartz3.CastBarTemplate.defaults,
 	{
@@ -40,14 +46,28 @@ local defaults = {
 		showfriendly = true,
 		showhostile = true,
 		showtarget = true,
+
+		hideblizz = true,
 	})
 }
 
 do
+	local function setOpt(info, value)
+		db[info[#info]] = value
+		Focus:ApplySettings()
+	end
+
 	local options
 	function getOptions()
 		if not options then
 			options = Focus.Bar:CreateOptions()
+			options.args.hideblizz = {
+				type = "toggle",
+				name = L["Disable Blizzard Cast Bar"],
+				desc = L["Disable and hide the default UI's casting bar"],
+				set = setOpt,
+				order = 101,
+			}
 			options.args.showfriendly = {
 				type = "toggle",
 				name = L["Show for Friends"],
@@ -107,6 +127,35 @@ end
 function Focus:ApplySettings()
 	db = self.db.profile
 	
+	-- obey the hideblizz setting no matter if disabled or not
+	if db.hideblizz then
+		FocusFrameSpellBar.RegisterEvent = function() end
+		FocusFrameSpellBar:UnregisterAllEvents()
+		FocusFrameSpellBar:Hide()
+	else
+		FocusFrameSpellBar.RegisterEvent = nil
+		FocusFrameSpellBar:UnregisterAllEvents()
+		if wowMoP then
+			FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_START", "focus")
+			FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_STOP", "focus")
+			FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_FAILED", "focus")
+		else
+			FocusFrameSpellBar:RegisterEvent("UNIT_SPELLCAST_START")
+			FocusFrameSpellBar:RegisterEvent("UNIT_SPELLCAST_STOP")
+			FocusFrameSpellBar:RegisterEvent("UNIT_SPELLCAST_FAILED")
+		end
+		FocusFrameSpellBar:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
+		FocusFrameSpellBar:RegisterEvent("UNIT_SPELLCAST_DELAYED")
+		FocusFrameSpellBar:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
+		FocusFrameSpellBar:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
+		FocusFrameSpellBar:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
+		FocusFrameSpellBar:RegisterEvent("UNIT_SPELLCAST_INTERRUPTIBLE")
+		FocusFrameSpellBar:RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE")
+		FocusFrameSpellBar:RegisterEvent("PLAYER_ENTERING_WORLD")
+		FocusFrameSpellBar:RegisterEvent("PLAYER_FOCUS_CHANGED")
+		FocusFrameSpellBar:RegisterEvent("CVAR_UPDATE")
+	end
+
 	self.Bar:SetConfig(db)
 	if self:IsEnabled() then
 		self.Bar:ApplySettings()
