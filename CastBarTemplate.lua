@@ -406,6 +406,9 @@ function CastBarTemplate:ApplySettings()
 		elseif position == "center" then
 			self.TimeText:SetPoint("CENTER", self.Bar, "CENTER", db.timetextx, db.timetexty)
 			self.TimeText:SetJustifyH("CENTER")
+		elseif position == "centerback" then
+			self.TimeText:SetPoint("CENTER", self, "CENTER", db.timetextx, db.timetexty)
+			self.TimeText:SetJustifyH("CENTER")
 		elseif position == "right" then
 			self.TimeText:SetPoint("RIGHT", self.Bar, "RIGHT", -1 * db.timetextx, db.timetexty)
 			self.TimeText:SetJustifyH("RIGHT")
@@ -443,6 +446,9 @@ function CastBarTemplate:ApplySettings()
 			end
 		elseif position == "center" then
 			self.Text:SetPoint("CENTER", self.Bar, "CENTER", db.nametextx, db.nametexty)
+			self.Text:SetJustifyH("CENTER")
+		elseif position == "centerback" then
+			self.Text:SetPoint("CENTER", self, "CENTER", db.nametextx, db.nametexty)
 			self.Text:SetJustifyH("CENTER")
 		else -- L["Right"]
 			self.Text:SetPoint("RIGHT", self.Bar, "RIGHT", -1 * db.nametextx, db.nametexty)
@@ -777,7 +783,7 @@ do
 					type = "select",
 					name = L["Spell Name Position"],
 					desc = L["Set the alignment of the spell name text"],
-					values = {["left"] = L["Left"], ["right"] = L["Right"], ["center"] = L["Center"]},
+					values = {["left"] = L["Left"], ["right"] = L["Right"], ["center"] = L["Center (CastBar)"], ["centerback"] = L["Center (Backdrop)"]},
 					disabled = hidenametextoptions,
 					order = 404,
 				},
@@ -830,7 +836,7 @@ do
 					type = "select",
 					name = L["Time Text Position"],
 					desc = L["Set the alignment of the time text"],
-					values = {["left"] = L["Left"], ["right"] = L["Right"], ["center"] = L["Center"], ["caststart"] = L["Cast Start Side"], ["castend"] = L["Cast End Side"]},
+					values = {["left"] = L["Left"], ["right"] = L["Right"], ["center"] = L["Center (CastBar)"], ["centerback"] = L["Center (Backdrop)"], ["caststart"] = L["Cast Start Side"], ["castend"] = L["Cast End Side"]},
 					disabled = hidetimetextoptions,
 					order = 415,
 				},
