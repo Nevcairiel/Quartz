@@ -30,6 +30,12 @@ local UnitChannelInfo = UnitChannelInfo
 
 local db, getOptions, castBar
 
+local wowMoP
+do
+	local _, _, _, interface = GetBuildInfo()
+	wowMoP = (interface >= 50000)
+end
+
 local defaults = {
 	profile = Quartz3:Merge(Quartz3.CastBarTemplate.defaults,
 	{
@@ -185,24 +191,44 @@ local function setBarTicks(ticknum)
 	end
 end
 
--- TODO: this will need updates for Cataclysm
-local channelingTicks = {
-	-- warlock
-	[GetSpellInfo(1120)] = 5, -- drain soul
-	[GetSpellInfo(689)] = 5, -- drain life
-	[GetSpellInfo(5740)] = 4, -- rain of fire
-	-- druid
-	[GetSpellInfo(740)] = 4, -- Tranquility
-	[GetSpellInfo(16914)] = 10, -- Hurricane
-	-- priest
-	[GetSpellInfo(15407)] = 3, -- mind flay
-	[GetSpellInfo(48045)] = 5, -- mind sear
-	[GetSpellInfo(47540)] = 2, -- penance
-	-- mage
-	[GetSpellInfo(5143)] = 5, -- arcane missiles
-	[GetSpellInfo(10)] = 5, -- blizzard
-	[GetSpellInfo(12051)] = 4, -- evocation
-}
+local channelingTicks
+if wowMoP then
+	channelingTicks = {
+		-- warlock
+		[GetSpellInfo(1120)] = 6, -- drain soul
+		[GetSpellInfo(689)] = 6, -- drain life
+		-- druid
+		[GetSpellInfo(740)] = 4, -- Tranquility
+		[GetSpellInfo(16914)] = 10, -- Hurricane
+		[GetSpellInfo(106996)] = 10, -- Astral Storm
+		-- priest
+		[GetSpellInfo(15407)] = 3, -- mind flay
+		[GetSpellInfo(48045)] = 5, -- mind sear
+		[GetSpellInfo(47540)] = 2, -- penance
+		-- mage
+		[GetSpellInfo(5143)] = 5, -- arcane missiles
+		[GetSpellInfo(10)] = 8, -- blizzard
+		[GetSpellInfo(12051)] = 3, -- evocation
+	}
+else
+	channelingTicks = {
+		-- warlock
+		[GetSpellInfo(1120)] = 5, -- drain soul
+		[GetSpellInfo(689)] = 3, -- drain life
+		[GetSpellInfo(5740)] = 4, -- rain of fire
+		-- druid
+		[GetSpellInfo(740)] = 4, -- Tranquility
+		[GetSpellInfo(16914)] = 10, -- Hurricane
+		-- priest
+		[GetSpellInfo(15407)] = 3, -- mind flay
+		[GetSpellInfo(48045)] = 5, -- mind sear
+		[GetSpellInfo(47540)] = 2, -- penance
+		-- mage
+		[GetSpellInfo(5143)] = 5, -- arcane missiles
+		[GetSpellInfo(10)] = 8, -- blizzard
+		[GetSpellInfo(12051)] = 3, -- evocation
+	}
+end
 
 local function getChannelingTicks(spell)
 	if not db.showticks then
