@@ -69,6 +69,7 @@ function Latency:OnEnable()
 	
 	self:RegisterEvent("UNIT_SPELLCAST_SENT")
 	self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
+	self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 	media.RegisterCallback(self, "LibSharedMedia_SetGlobal", function(mtype, override)
 		if mtype == "statusbar" then
 			lagbox:SetTexture(media:Fetch("statusbar", override))
@@ -94,6 +95,13 @@ function Latency:UNIT_SPELLCAST_SENT(event, unit)
 		return
 	end
 	sendTime = GetTime()
+end
+
+function Latency:UNIT_SPELLCAST_SUCCEEDED(event, unit)
+	if unit ~= "player" and unit ~= "vehicle" then
+		return
+	end
+	sendTime = nil
 end
 
 function Latency:UNIT_SPELLCAST_START(object, bar, unit)
@@ -166,6 +174,9 @@ function Latency:UNIT_SPELLCAST_START(object, bar, unit)
 	else
 		lagtext:Hide()
 	end
+
+	-- after using it, clear it, or we might end up with a spell with a much too high latency
+	sendTime = nil
 end
 
 function Latency:UNIT_SPELLCAST_DELAYED(object, bar, unit)
