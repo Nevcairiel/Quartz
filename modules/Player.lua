@@ -30,12 +30,6 @@ local UnitChannelInfo = UnitChannelInfo
 
 local db, getOptions, castBar
 
-local wowMoP
-do
-	local _, _, _, interface = GetBuildInfo()
-	wowMoP = (interface >= 50000)
-end
-
 local defaults = {
 	profile = Quartz3:Merge(Quartz3.CastBarTemplate.defaults,
 	{
@@ -117,15 +111,9 @@ function Player:ApplySettings()
 	else
 		CastingBarFrame.RegisterEvent = nil
 		CastingBarFrame:UnregisterAllEvents()
-		if wowMoP then
-			CastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")
-			CastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_STOP", "player")
-			CastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_FAILED", "player")
-		else
-			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_START")
-			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_STOP")
-			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_FAILED")
-		end
+		CastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")
+		CastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_STOP", "player")
+		CastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_FAILED", "player")
 		CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
 		CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_DELAYED")
 		CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
@@ -198,8 +186,7 @@ local function setBarTicks(ticknum)
 end
 
 local channelingTicks
-if wowMoP then
-	channelingTicks = {
+channelingTicks = {
 		-- warlock
 		[GetSpellInfo(1120)] = 6, -- drain soul
 		[GetSpellInfo(689)] = 6, -- drain life
@@ -211,32 +198,15 @@ if wowMoP then
 		[GetSpellInfo(106996)] = 10, -- Astral Storm
 		-- priest
 		[GetSpellInfo(15407)] = 3, -- mind flay
+		[GetSpellInfo(129197)] = 3, -- mind flay: insanity
 		[GetSpellInfo(48045)] = 5, -- mind sear
 		[GetSpellInfo(47540)] = 2, -- penance
 		-- mage
 		[GetSpellInfo(5143)] = 5, -- arcane missiles
 		[GetSpellInfo(10)] = 8, -- blizzard
 		[GetSpellInfo(12051)] = 3, -- evocation
-	}
-else
-	channelingTicks = {
-		-- warlock
-		[GetSpellInfo(1120)] = 5, -- drain soul
-		[GetSpellInfo(689)] = 3, -- drain life
-		[GetSpellInfo(5740)] = 4, -- rain of fire
-		-- druid
-		[GetSpellInfo(740)] = 4, -- Tranquility
-		[GetSpellInfo(16914)] = 10, -- Hurricane
-		-- priest
-		[GetSpellInfo(15407)] = 3, -- mind flay
-		[GetSpellInfo(48045)] = 5, -- mind sear
-		[GetSpellInfo(47540)] = 2, -- penance
-		-- mage
-		[GetSpellInfo(5143)] = 5, -- arcane missiles
-		[GetSpellInfo(10)] = 8, -- blizzard
-		[GetSpellInfo(12051)] = 3, -- evocation
-	}
-end
+}
+
 
 local function getChannelingTicks(spell)
 	if not db.showticks then
