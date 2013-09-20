@@ -190,7 +190,6 @@ local channelingTicks = {
 	[GetSpellInfo(1120)] = 6, -- drain soul
 	[GetSpellInfo(689)] = 6, -- drain life
 	[GetSpellInfo(103103)] = 4, -- malefic grasp
-	[GetSpellInfo(108371)] = 6, -- harvest life
 	-- druid
 	[GetSpellInfo(740)] = 4, -- Tranquility
 	[GetSpellInfo(16914)] = 10, -- Hurricane
