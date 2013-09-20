@@ -167,7 +167,7 @@ local barticks = setmetatable({}, sparkfactory)
 
 local function setBarTicks(ticknum)
 	if( ticknum and ticknum > 0) then
-		local delta = ( db.w / ticknum )
+		local delta = ( castBar:GetWidth() / ticknum )
 		for k = 1,ticknum do
 			local t = barticks[k]
 			t:ClearAllPoints()
