@@ -22,6 +22,8 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 local MODNAME = "Player"
 local Player = Quartz3:NewModule(MODNAME)
 
+local WoD = select(4, GetBuildInfo()) >= 60000
+
 ----------------------------
 -- Upvalues
 -- GLOBALS: CastingBarFrame
@@ -185,7 +187,32 @@ local function setBarTicks(ticknum)
 	end
 end
 
-local channelingTicks = {
+local channelingTicks
+if WoD then
+channelingTicks = {
+	-- warlock
+	[GetSpellInfo(689)] = 6, -- drain life
+	[GetSpellInfo(103103)] = 4, -- drain soul
+	[GetSpellInfo(5740)] = 6, -- rain of fire
+	-- druid
+	[GetSpellInfo(740)] = 4, -- Tranquility
+	[GetSpellInfo(16914)] = 10, -- Hurricane
+	[GetSpellInfo(106996)] = 10, -- Astral Storm
+	-- priest
+	[GetSpellInfo(15407)] = 3, -- mind flay
+	[GetSpellInfo(129197)] = 3, -- mind flay: insanity
+	[GetSpellInfo(48045)] = 5, -- mind sear
+	[GetSpellInfo(47540)] = 2, -- penance
+	-- mage
+	[GetSpellInfo(5143)] = 5, -- arcane missiles
+	[GetSpellInfo(10)] = 8, -- blizzard
+	[GetSpellInfo(12051)] = 3, -- evocation
+	-- monk
+	[GetSpellInfo(125953)] = 9, -- soothing mist
+	[GetSpellInfo(117952)] = 4, -- crackling jade lightning
+}
+else
+channelingTicks = {
 	-- warlock
 	[GetSpellInfo(1120)] = 6, -- drain soul
 	[GetSpellInfo(689)] = 6, -- drain life
@@ -207,6 +234,7 @@ local channelingTicks = {
 	[GetSpellInfo(125953)] = 9, -- soothing mist
 	[GetSpellInfo(117952)] = 6, -- crackling jade lightning
 }
+end
 
 local function getChannelingTicks(spell)
 	if not db.showticks then
