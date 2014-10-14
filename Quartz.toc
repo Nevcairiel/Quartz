@@ -1,5 +1,5 @@
 ## Title: Quartz
-## Interface: 50400
+## Interface: 60000
 ## Notes: Modular casting bar.
 ## Author: Nevcairiel, Nymbia
 ## Version: @project-version@
