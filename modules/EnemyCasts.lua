@@ -172,7 +172,7 @@ function Enemy:CLEUHandler(e, ...)
 		if not casts[sGUID] then
 			casts[sGUID] = new()
 		end
-		local _, _, texture, _, _, _, castTime = GetSpellInfo(spellId)
+		local _, _, texture, castTime = GetSpellInfo(spellId)
 		casts[sGUID].name = sName
 		casts[sGUID].spellName = spellName
 		casts[sGUID].spellId = spellId
