@@ -220,6 +220,7 @@ end
 function Player:UNIT_SPELLCAST_START(bar, unit)
 	if bar.channeling then
 		local spell = UnitChannelInfo(unit)
+		bar.channelingEnd = bar.endTime
 		bar.channelingDuration = bar.endTime - bar.startTime
 		bar.channelingTicks = getChannelingTicks(spell)
 		bar.channelingTickTime = bar.channelingDuration / bar.channelingTicks
@@ -250,19 +251,19 @@ function Player:UNIT_SPELLCAST_INTERRUPTED(bar, unit)
 end
 
 function Player:UNIT_SPELLCAST_DELAYED(bar, unit)
-	if bar.channeling and bar.delay == 0 then
+	if bar.channeling and bar.endTime > bar.channelingEnd then
 		local duration = bar.endTime - bar.startTime
 		if bar.channelingDuration and duration > bar.channelingDuration and bar.channelingTicks > 0 then
 			local extraTime = (duration - bar.channelingDuration)
 			for i = 1, bar.channelingTicks do
 				bar.ticks[i] = bar.ticks[i] + extraTime
 			end
-			while extraTime > 0 do
+			while bar.ticks[bar.channelingTicks] > bar.channelingTickTime do
 				bar.channelingTicks = bar.channelingTicks + 1
 				bar.ticks[bar.channelingTicks] = bar.ticks[bar.channelingTicks-1] - bar.channelingTickTime
-				extraTime = extraTime - bar.channelingTickTime
 			end
 			bar.channelingDuration = duration
+			bar.channelingEnd = bar.endTime
 			setBarTicks(bar.channelingTicks, bar.channelingDuration, bar.ticks)
 		end
 	end
