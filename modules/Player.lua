@@ -165,13 +165,14 @@ local sparkfactory = {
 }
 local barticks = setmetatable({}, sparkfactory)
 
-local function setBarTicks(ticknum)
+local function setBarTicks(ticknum, duration, ticks)
 	if( ticknum and ticknum > 0) then
-		local delta = ( castBar:GetWidth() / ticknum )
-		for k = 1,ticknum do
+		local width = castBar:GetWidth()
+		for k = 1, ticknum do
 			local t = barticks[k]
 			t:ClearAllPoints()
-			t:SetPoint("CENTER", castBar, "LEFT", delta * (k-1), 0 )
+			local x = ticks[k] / duration
+			t:SetPoint("CENTER", castBar, "RIGHT", -width * x, 0 )
 			t:Show()
 		end
 		for k = ticknum+1,#barticks do
@@ -221,7 +222,12 @@ function Player:UNIT_SPELLCAST_START(bar, unit)
 		local spell = UnitChannelInfo(unit)
 		bar.channelingDuration = bar.endTime - bar.startTime
 		bar.channelingTicks = getChannelingTicks(spell)
-		setBarTicks(bar.channelingTicks)
+		bar.channelingTickTime = bar.channelingDuration / bar.channelingTicks
+		bar.ticks = bar.ticks or {}
+		for i = 1, bar.channelingTicks do
+			bar.ticks[i] = bar.channelingDuration - (i - 1) * bar.channelingTickTime
+		end
+		setBarTicks(bar.channelingTicks, bar.channelingDuration, bar.ticks)
 	else
 		setBarTicks(0)
 		bar.channelingDuration = nil
@@ -248,8 +254,17 @@ function Player:UNIT_SPELLCAST_DELAYED(bar, unit)
 		local duration = bar.endTime - bar.startTime
 		if bar.channelingDuration and duration > bar.channelingDuration and bar.channelingTicks > 0 then
 			local spell = UnitChannelInfo(unit)
-			bar.channelingTicks = getChannelingTicks(spell) + 1
-			setBarTicks(bar.channelingTicks)
+			local extraTime = (duration - bar.channelingDuration)
+			for i = 1, bar.channelingTicks do
+				bar.ticks[i] = bar.ticks[i] + extraTime
+			end
+			while extraTime > 0 do
+				bar.channelingTicks = bar.channelingTicks + 1
+				bar.ticks[bar.channelingTicks] = bar.ticks[bar.channelingTicks-1] - bar.channelingTickTime
+				extraTime = extraTime - bar.channelingTickTime
+			end
+			bar.channelingDuration = duration
+			setBarTicks(bar.channelingTicks, bar.channelingDuration, bar.ticks)
 		end
 	end
 end
