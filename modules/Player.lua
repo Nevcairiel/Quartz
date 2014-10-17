@@ -253,7 +253,6 @@ function Player:UNIT_SPELLCAST_DELAYED(bar, unit)
 	if bar.channeling and bar.delay == 0 then
 		local duration = bar.endTime - bar.startTime
 		if bar.channelingDuration and duration > bar.channelingDuration and bar.channelingTicks > 0 then
-			local spell = UnitChannelInfo(unit)
 			local extraTime = (duration - bar.channelingDuration)
 			for i = 1, bar.channelingTicks do
 				bar.ticks[i] = bar.ticks[i] + extraTime
