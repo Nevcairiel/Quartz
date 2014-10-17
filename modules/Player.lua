@@ -247,25 +247,37 @@ end
 function Player:UNIT_SPELLCAST_START(bar, unit)
 	if bar.channeling then
 		local spell = UnitChannelInfo(unit)
+		bar.channelingDuration = bar.endTime - bar.startTime
 		bar.channelingTicks = getChannelingTicks(spell)
 		setBarTicks(bar.channelingTicks)
 	else
 		setBarTicks(0)
+		bar.channelingDuration = nil
 	end
 end
 
 function Player:UNIT_SPELLCAST_STOP(bar, unit)
 	setBarTicks(0)
+	bar.channelingDuration = nil
 end
 
 function Player:UNIT_SPELLCAST_FAILED(bar, unit)
 	setBarTicks(0)
+	bar.channelingDuration = nil
 end
 
 function Player:UNIT_SPELLCAST_INTERRUPTED(bar, unit)
 	setBarTicks(0)
+	bar.channelingDuration = nil
 end
 
 function Player:UNIT_SPELLCAST_DELAYED(bar, unit)
-
+	if bar.channeling and bar.delay == 0 then
+		local duration = bar.endTime - bar.startTime
+		if bar.channelingDuration and duration > bar.channelingDuration and bar.channelingTicks > 0 then
+			local spell = UnitChannelInfo(unit)
+			bar.channelingTicks = getChannelingTicks(spell) + 1
+			setBarTicks(bar.channelingTicks)
+		end
+	end
 end
