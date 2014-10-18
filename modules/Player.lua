@@ -223,7 +223,7 @@ function Player:UNIT_SPELLCAST_START(bar, unit)
 		bar.channelingEnd = bar.endTime
 		bar.channelingDuration = bar.endTime - bar.startTime
 		bar.channelingTicks = getChannelingTicks(spell)
-		bar.channelingTickTime = bar.channelingDuration / bar.channelingTicks
+		bar.channelingTickTime = bar.channelingTicks > 0 and (bar.channelingDuration / bar.channelingTicks) or 0
 		bar.ticks = bar.ticks or {}
 		for i = 1, bar.channelingTicks do
 			bar.ticks[i] = bar.channelingDuration - (i - 1) * bar.channelingTickTime
