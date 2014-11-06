@@ -112,7 +112,7 @@ function QuartzStatusBar:GetRotatesTexture()
 	return self.__rotatesTexture
 end
 
-function QuartzStatusBar:GetRotatesTexture(rotate)
+function QuartzStatusBar:SetRotatesTexture(rotate)
 	self.__rotatesTexture = rotate and 1 or nil
 	DrawBar(self)
 end
