@@ -89,7 +89,7 @@ function Tradeskill:OnEnable()
 	self:RegisterEvent("UNIT_SPELLCAST_STOP")
 	self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 	self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
-	self:Hook("DoTradeSkill", true)
+	self:SecureHook("DoTradeSkill")
 end
 
 function Tradeskill:UNIT_SPELLCAST_START(object, event, unit)
