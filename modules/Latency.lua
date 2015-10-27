@@ -182,7 +182,7 @@ end
 function Latency:UNIT_SPELLCAST_DELAYED(object, bar, unit)
 	self.hooks[object].UNIT_SPELLCAST_DELAYED(object, bar, unit)
 
-	if db.lagembed then
+	if db.lagembed and timeDiff then
 		local startTime = bar.startTime - timeDiff + db.lagpadding
 		bar.startTime = startTime
 		local endTime = bar.endTime - timeDiff + db.lagpadding
