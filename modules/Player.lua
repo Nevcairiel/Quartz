@@ -93,6 +93,8 @@ end
 function Player:OnEnable()
 	self.Bar:RegisterEvents()
 	self:ApplySettings()
+
+	self:UpdateChannelingTicks()
 end
 
 function Player:OnDisable()
@@ -216,6 +218,14 @@ local function getChannelingTicks(spell)
 	end
 	
 	return channelingTicks[spell] or 0
+end
+
+function Player:UpdateChannelingTicks()
+	if IsSpellKnown(157223) then
+		-- draenor perk increases mind flay/insanity to 4 ticks
+		channelingTicks[GetSpellInfo(15407)]  = 4
+		channelingTicks[GetSpellInfo(129197)] = 4
+	end
 end
 
 function Player:UNIT_SPELLCAST_START(bar, unit)
