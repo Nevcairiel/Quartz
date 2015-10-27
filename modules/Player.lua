@@ -200,6 +200,7 @@ local channelingTicks = {
 	[GetSpellInfo(129197)] = 3, -- mind flay: insanity
 	[GetSpellInfo(48045)] = 5, -- mind sear
 	[GetSpellInfo(47540)] = 2, -- penance
+	[GetSpellInfo(179338)] = 5, -- Searing Insanity
 	-- mage
 	[GetSpellInfo(5143)] = 5, -- arcane missiles
 	[GetSpellInfo(10)] = 8, -- blizzard
