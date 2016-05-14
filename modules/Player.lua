@@ -28,6 +28,8 @@ local Player = Quartz3:NewModule(MODNAME)
 local unpack = unpack
 local UnitChannelInfo = UnitChannelInfo
 
+local IsLegion = select(4, GetBuildInfo()) >= 70000
+
 local db, getOptions, castBar
 
 local defaults = {
@@ -188,7 +190,9 @@ local function setBarTicks(ticknum, duration, ticks)
 	end
 end
 
-local channelingTicks = {
+local channelingTicks
+if not IsLegion then
+	channelingTicks = {
 	-- warlock
 	[GetSpellInfo(689)] = 6, -- drain life
 	[GetSpellInfo(103103)] = 4, -- drain soul
@@ -211,6 +215,9 @@ local channelingTicks = {
 	[GetSpellInfo(125953)] = 9, -- soothing mist
 	[GetSpellInfo(117952)] = 4, -- crackling jade lightning
 }
+else
+	channelingTicks = {}
+end
 
 local function getChannelingTicks(spell)
 	if not db.showticks then
@@ -221,7 +228,7 @@ local function getChannelingTicks(spell)
 end
 
 function Player:UpdateChannelingTicks()
-	if IsSpellKnown(157223) then
+	if not IsLegion and IsSpellKnown(157223) then
 		-- draenor perk increases mind flay/insanity to 4 ticks
 		channelingTicks[GetSpellInfo(15407)]  = 4
 		channelingTicks[GetSpellInfo(129197)] = 4
