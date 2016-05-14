@@ -224,6 +224,13 @@ end
 
 function Swing:MeleeSwing()
 	duration = UnitAttackSpeed("player")
+	if not duration or duration == 0 then
+		duration = nil
+		starttime = nil
+		swingbar:Hide()
+		return
+	end
+
 	durationtext:SetFormattedText("%.1f", duration)
 	starttime = GetTime()
 	swingbar:Show()
@@ -231,6 +238,13 @@ end
 
 function Swing:Shoot()
 	duration = UnitRangedDamage("player")
+	if not duration or duration == 0 then
+		duration = nil
+		starttime = nil
+		swingbar:Hide()
+		return
+	end
+
 	durationtext:SetFormattedText("%.1f", duration)
 	starttime = GetTime()
 	swingbar:Show()
