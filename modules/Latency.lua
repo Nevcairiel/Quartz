@@ -142,7 +142,7 @@ function Latency:UNIT_SPELLCAST_START(object, bar, unit)
 	lagbox:SetDrawLayer(side == "LEFT" and "OVERLAY" or "BACKGROUND")
 	lagbox:SetPoint(side, Player.Bar.Bar, side)
 	lagbox:SetWidth(Player.Bar.Bar:GetWidth() * perc)
-	lagbox:Show()
+	lagbox:SetShown(perc > 0)
 	
 	if db.lagtext then
 		if alignoutside then
