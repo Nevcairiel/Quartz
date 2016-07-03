@@ -216,7 +216,26 @@ if not IsLegion then
 	[GetSpellInfo(117952)] = 4, -- crackling jade lightning
 }
 else
-	channelingTicks = {}
+	channelingTicks = {
+	-- warlock
+	[GetSpellInfo(689)] = 6, -- drain life
+	[GetSpellInfo(193440)] = 3, -- demonwrath
+	[GetSpellInfo(198590)] = 6, -- drain soul
+	-- druid
+	[GetSpellInfo(740)] = 4, -- tranquility
+	-- priest
+	[GetSpellInfo(64843)] = 4, -- divine hymn
+	[GetSpellInfo(15407)] = 4, -- mind flay
+	[GetSpellInfo(48045)] = 5, -- mind sear
+	[GetSpellInfo(47540)] = 2, -- penance
+	-- mage
+	[GetSpellInfo(5143)] = 5, -- arcane missiles
+	[GetSpellInfo(12051)] = 3, -- evocation
+	[GetSpellInfo(205021)] = 10, -- ray of frost
+	-- monk
+	[GetSpellInfo(117952)] = 4, -- crackling jade lightning
+	[GetSpellInfo(191837)] = 3, -- essence font
+	}
 end
 
 local function getChannelingTicks(spell)
