@@ -228,6 +228,7 @@ else
 	[GetSpellInfo(15407)] = 4, -- mind flay
 	[GetSpellInfo(48045)] = 5, -- mind sear
 	[GetSpellInfo(47540)] = 2, -- penance
+	[GetSpellInfo(205065)] = 4, -- void torrent
 	-- mage
 	[GetSpellInfo(5143)] = 5, -- arcane missiles
 	[GetSpellInfo(12051)] = 3, -- evocation
