@@ -66,8 +66,9 @@ end
 function Latency:OnEnable()
 	self:RawHook(Player, "UNIT_SPELLCAST_START")
 	self:RawHook(Player, "UNIT_SPELLCAST_DELAYED")
-	
-	self:RegisterEvent("UNIT_SPELLCAST_SENT")
+
+	self:RegisterEvent("CURRENT_SPELL_CAST_CHANGED")
+	--self:RegisterEvent("UNIT_SPELLCAST_SENT")
 	self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
 	self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 	media.RegisterCallback(self, "LibSharedMedia_SetGlobal", function(mtype, override)
@@ -88,6 +89,10 @@ function Latency:OnDisable()
 	media.UnregisterCallback(self, "LibSharedMedia_SetGlobal")
 	lagbox:Hide()
 	lagtext:Hide()
+end
+
+function Latency:CURRENT_SPELL_CAST_CHANGED(event)
+	sendTime = GetTime()
 end
 
 function Latency:UNIT_SPELLCAST_SENT(event, unit)
