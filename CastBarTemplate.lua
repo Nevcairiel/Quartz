@@ -303,7 +303,6 @@ function CastBarTemplate:UNIT_SPELLCAST_INTERRUPTED(event, unit)
 
 	call(self, "UNIT_SPELLCAST_INTERRUPTED", unit)
 end
-CastBarTemplate.UNIT_SPELLCAST_CHANNEL_INTERRUPTED = CastBarTemplate.UNIT_SPELLCAST_INTERRUPTED
 
 function CastBarTemplate:UNIT_SPELLCAST_DELAYED(event, unit)
 	if unit ~= self.unit and not (self.unit == "player" and unit == "vehicle") or call(self, "PreShowCondition", unit) then
@@ -499,7 +498,6 @@ function CastBarTemplate:RegisterEvents()
 	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
 	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
 	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
-	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_INTERRUPTED")
 	if self.unit ~= "player" then
 		self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTIBLE")
 		self:RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE")
