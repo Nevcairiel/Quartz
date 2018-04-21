@@ -109,8 +109,8 @@ function Latency:UNIT_SPELLCAST_SUCCEEDED(event, unit)
 	sendTime = nil
 end
 
-function Latency:UNIT_SPELLCAST_START(object, bar, unit)
-	self.hooks[object].UNIT_SPELLCAST_START(object, bar, unit)
+function Latency:UNIT_SPELLCAST_START(object, bar, unit, guid, spellID)
+	self.hooks[object].UNIT_SPELLCAST_START(object, bar, unit, guid, spellID)
 	
 	local startTime, endTime = bar.startTime, bar.endTime
 	if not sendTime or not endTime then return end

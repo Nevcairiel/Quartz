@@ -895,7 +895,7 @@ do
 			end
 			if db.targetbuffs then
 				for i = 1, 32 do
-					local name, rank, texture, applications, _, duration, expirationTime, caster = UnitBuff("target", i)
+					local name, texture, applications, _, duration, expirationTime, caster = UnitBuff("target", i)
 					local remaining = expirationTime and (expirationTime - GetTime()) or nil
 					if not name then
 						break
@@ -914,7 +914,7 @@ do
 			end
 			if db.targetdebuffs then
 				for i = 1, 40 do
-					local name, rank, texture, applications, dispeltype, duration, expirationTime, caster = UnitDebuff("target", i)
+					local name, texture, applications, dispeltype, duration, expirationTime, caster = UnitDebuff("target", i)
 					local remaining =  expirationTime and (expirationTime - GetTime()) or nil
 					if not name then
 						break
@@ -1003,7 +1003,7 @@ do
 			end
 			if db.focusbuffs then
 				for i = 1, 32 do
-					local name, rank, texture, applications, dispeltype, duration, expirationTime, caster = UnitBuff("focus", i)
+					local name, texture, applications, dispeltype, duration, expirationTime, caster = UnitBuff("focus", i)
 					local remaining =  expirationTime and (expirationTime - GetTime()) or nil
 					if not name then
 						break
@@ -1022,7 +1022,7 @@ do
 			end
 			if db.focusdebuffs then
 				for i = 1, 40 do
-					local name, rank, texture, applications, dispeltype, duration, expirationTime, caster = UnitDebuff("focus", i)
+					local name, texture, applications, dispeltype, duration, expirationTime, caster = UnitDebuff("focus", i)
 					local remaining =  expirationTime and (expirationTime - GetTime()) or nil
 					if not name then
 						break

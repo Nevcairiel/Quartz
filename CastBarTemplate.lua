@@ -178,21 +178,21 @@ CastBarTemplate.ToggleCastNotInterruptible = ToggleCastNotInterruptible
 ----------------------------
 -- Event Handlers
 
-function CastBarTemplate:UNIT_SPELLCAST_SENT(event, unit, spell, rank, target)
+function CastBarTemplate:UNIT_SPELLCAST_SENT(event, unit, guid, spellID)
 	if unit ~= self.unit and not (self.unit == "player" and unit == "vehicle") then
 		return
 	end
-	if target then
+	--[[if target then
 		self.targetName = target
 	else
 		-- auto selfcast? is this needed, even?
 		self.targetName = playerName
-	end
+	end]]
 
-	call(self, "UNIT_SPELLCAST_SENT", unit, spell, rank, target)
+	call(self, "UNIT_SPELLCAST_SENT", unit, guid, spellID)
 end
 
-function CastBarTemplate:UNIT_SPELLCAST_START(event, unit)
+function CastBarTemplate:UNIT_SPELLCAST_START(event, unit, guid, spellID)
 	if (unit ~= self.unit and not (self.unit == "player" and unit == "vehicle")) or call(self, "PreShowCondition", unit) then
 		return
 	end
@@ -203,11 +203,11 @@ function CastBarTemplate:UNIT_SPELLCAST_START(event, unit)
 		self.casting, self.channeling = nil, true
 	end
 
-	local spell, rank, displayName, icon, startTime, endTime, isTradeSkill, castID, notInterruptible
+	local spell, displayName, icon, startTime, endTime, isTradeSkill, castID, notInterruptible
 	if self.casting then
-		spell, rank, displayName, icon, startTime, endTime, isTradeSkill, castID, notInterruptible = UnitCastingInfo(unit)
+		spell, displayName, icon, startTime, endTime, isTradeSkill, castID, notInterruptible = UnitCastingInfo(unit)
 	else -- self.channeling
-		spell, rank, displayName, icon, startTime, endTime, isTradeSkill, notInterruptible = UnitChannelInfo(unit)
+		spell, displayName, icon, startTime, endTime, isTradeSkill, notInterruptible = UnitChannelInfo(unit)
 		-- channeling spells sometimes just display "Channeling" - this is not wanted
 		displayName = spell
 	end
@@ -249,7 +249,7 @@ function CastBarTemplate:UNIT_SPELLCAST_START(event, unit)
 
 	ToggleCastNotInterruptible(self, notInterruptible)
 
-	call(self, "UNIT_SPELLCAST_START", unit)
+	call(self, "UNIT_SPELLCAST_START", unit, guid, spellID)
 end
 CastBarTemplate.UNIT_SPELLCAST_CHANNEL_START = CastBarTemplate.UNIT_SPELLCAST_START
 
@@ -309,11 +309,11 @@ function CastBarTemplate:UNIT_SPELLCAST_DELAYED(event, unit)
 		return
 	end
 	local oldStart = self.startTime
-	local spell, rank, displayName, icon, startTime, endTime
+	local spell, displayName, icon, startTime, endTime
 	if self.casting then
-		spell, rank, displayName, icon, startTime, endTime = UnitCastingInfo(unit)
+		spell, displayName, icon, startTime, endTime = UnitCastingInfo(unit)
 	else
-		spell, rank, displayName, icon, startTime, endTime = UnitChannelInfo(unit)
+		spell, displayName, icon, startTime, endTime = UnitChannelInfo(unit)
 	end
 
 	if not startTime or not endTime then
