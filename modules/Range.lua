@@ -107,7 +107,7 @@ function Range:UNIT_SPELLCAST_CHANNEL_START(event, unit)
 	end
 end
 
-function Range:UNIT_SPELLCAST_SENT(event, unit, _, _, name)
+function Range:UNIT_SPELLCAST_SENT(event, unit, name)
 	if unit ~= "player" then
 		return
 	end

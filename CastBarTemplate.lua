@@ -178,18 +178,18 @@ CastBarTemplate.ToggleCastNotInterruptible = ToggleCastNotInterruptible
 ----------------------------
 -- Event Handlers
 
-function CastBarTemplate:UNIT_SPELLCAST_SENT(event, unit, guid, spellID)
+function CastBarTemplate:UNIT_SPELLCAST_SENT(event, unit, target, guid, spellID)
 	if unit ~= self.unit and not (self.unit == "player" and unit == "vehicle") then
 		return
 	end
-	--[[if target then
+	if target then
 		self.targetName = target
 	else
 		-- auto selfcast? is this needed, even?
 		self.targetName = playerName
-	end]]
+	end
 
-	call(self, "UNIT_SPELLCAST_SENT", unit, guid, spellID)
+	call(self, "UNIT_SPELLCAST_SENT", unit, target, guid, spellID)
 end
 
 function CastBarTemplate:UNIT_SPELLCAST_START(event, unit, guid, spellID)
