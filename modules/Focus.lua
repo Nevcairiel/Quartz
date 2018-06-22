@@ -28,12 +28,6 @@ local UnitIsEnemy, UnitIsFriend, UnitIsUnit = UnitIsEnemy, UnitIsFriend, UnitIsU
 
 local db, getOptions
 
-local wowMoP
-do
-	local _, _, _, interface = GetBuildInfo()
-	wowMoP = (interface >= 50000)
-end
-
 local defaults = {
 	profile = Quartz3:Merge(Quartz3.CastBarTemplate.defaults,
 	{
@@ -135,15 +129,9 @@ function Focus:ApplySettings()
 	else
 		FocusFrameSpellBar.RegisterEvent = nil
 		FocusFrameSpellBar:UnregisterAllEvents()
-		if wowMoP then
-			FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_START", "focus")
-			FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_STOP", "focus")
-			FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_FAILED", "focus")
-		else
-			FocusFrameSpellBar:RegisterEvent("UNIT_SPELLCAST_START")
-			FocusFrameSpellBar:RegisterEvent("UNIT_SPELLCAST_STOP")
-			FocusFrameSpellBar:RegisterEvent("UNIT_SPELLCAST_FAILED")
-		end
+		FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_START", "focus")
+		FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_STOP", "focus")
+		FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_FAILED", "focus")
 		FocusFrameSpellBar:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
 		FocusFrameSpellBar:RegisterEvent("UNIT_SPELLCAST_DELAYED")
 		FocusFrameSpellBar:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
