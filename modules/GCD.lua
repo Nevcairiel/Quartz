@@ -102,7 +102,7 @@ function GCD:OnDisable()
 	gcdbar:Hide()
 end
 
-function GCD:CheckGCD(event, unit, spell)
+function GCD:CheckGCD(event, unit, guid, spell)
 	if unit == "player" then
 		local start, dur = GetSpellCooldown(spell)
 		if dur and dur > 0 and dur <= 1.5 then
