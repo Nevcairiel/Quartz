@@ -53,7 +53,8 @@ function Interrupt:ApplySettings()
 	db = self.db.profile
 end
 
-function Interrupt:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, combatEvent, _, _, sourceName, _, _, _, _, destFlags)
+function Interrupt:COMBAT_LOG_EVENT_UNFILTERED()
+	local timestamp, combatEvent, _, _, sourceName, _, _, _, _, destFlags = CombatLogGetCurrentEventInfo()
 	if combatEvent == "SPELL_INTERRUPT" and destFlags == 0x511 then
 		Player.Bar.Text:SetFormattedText(L["INTERRUPTED (%s)"], (sourceName or UNKNOWN):upper())
 		Player.Bar.Bar:SetStatusBarColor(unpack(db.interruptcolor))

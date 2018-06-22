@@ -36,7 +36,6 @@ local COMBATLOG_FILTER_ME = COMBATLOG_FILTER_ME
 local playerclass
 local autoshotname = GetSpellInfo(75)
 local slam = GetSpellInfo(1464)
-local swordprocname = GetSpellInfo(12281)
 
 local resetautoshotspells = {
 	--[GetSpellInfo(19434)] = true, -- Aimed Shot
@@ -161,21 +160,13 @@ function Swing:STOP_AUTOREPEAT_SPELL()
 	end
 end
 
-do
-	local swordspecproc = false
-	function Swing:COMBAT_LOG_EVENT_UNFILTERED(event, timestamp, combatevent, hideCaster, srcGUID, srcName, srcFlags, srcRaidFlags, dstName, dstGUID, dstFlags, dstRaidFlags, spellID, spellName)
-		if swingmode ~= 0 then return end
-		if combatevent == "SPELL_EXTRA_ATTACKS" and spellName == swordprocname and (bit_band(srcFlags, COMBATLOG_FILTER_ME) == COMBATLOG_FILTER_ME) then
-			swordspecproc = true
-		elseif (combatevent == "SWING_DAMAGE" or combatevent == "SWING_MISSED") and (bit_band(srcFlags, COMBATLOG_FILTER_ME) == COMBATLOG_FILTER_ME) then
-			if swordspecproc then
-				swordspecproc = false
-			else
-				self:MeleeSwing()
-			end
-		elseif (combatevent == "SWING_MISSED") and (bit_band(dstFlags, COMBATLOG_FILTER_ME) == COMBATLOG_FILTER_ME) and spellID == "PARRY" and duration then
-			duration = duration * 0.6
-		end
+function Swing:COMBAT_LOG_EVENT_UNFILTERED()
+	if swingmode ~= 0 then return end
+	local timestamp, combatevent, hideCaster, srcGUID, srcName, srcFlags, srcRaidFlags, dstName, dstGUID, dstFlags, dstRaidFlags, spellID, spellName = CombatLogGetCurrentEventInfo()
+	if (combatevent == "SWING_DAMAGE" or combatevent == "SWING_MISSED") and (bit_band(srcFlags, COMBATLOG_FILTER_ME) == COMBATLOG_FILTER_ME) then
+		self:MeleeSwing()
+	elseif (combatevent == "SWING_MISSED") and (bit_band(dstFlags, COMBATLOG_FILTER_ME) == COMBATLOG_FILTER_ME) and spellID == "PARRY" and duration then
+		duration = duration * 0.6
 	end
 end
 

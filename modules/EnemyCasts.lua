@@ -158,9 +158,9 @@ function Enemy:OnDisable()
 	media.UnregisterCallback(self, "LibSharedMedia_Registered")
 end
 
-function Enemy:CLEUHandler(e, ...)
+function Enemy:CLEUHandler()
 	if db.instanceonly and not IsInInstance() then return end
-	local timestamp, event, hideCaster, sGUID, sName, sFlags, sRaidFlags, dGUID, dName, dFlags, dRaidFlags = ...
+	local timestamp, event, hideCaster, sGUID, sName, sFlags, sRaidFlags, dGUID, dName, dFlags, dRaidFlags, spellId, spellName = CombatLogGetCurrentEventInfo()
 	if 
 		bit_band(sFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == COMBATLOG_OBJECT_REACTION_FRIENDLY or 
 		bit_band(sFlags, COMBATLOG_OBJECT_CONTROL_NPC) == 0
@@ -168,7 +168,6 @@ function Enemy:CLEUHandler(e, ...)
 		return
 	end
 	if event == "SPELL_CAST_START" then
-		local spellId, spellName, spellSchool = select(12, ...)
 		if not casts[sGUID] then
 			casts[sGUID] = new()
 		end

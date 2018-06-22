@@ -30,8 +30,6 @@ local TimeFmt = Quartz3.Util.TimeFormat
 local GetTime, UnitCastingInfo = GetTime, UnitCastingInfo
 local unpack, tonumber, format = unpack, tonumber, format
 
-local IsLegion = select(4, GetBuildInfo()) >= 70000
-
 local getOptions
 
 local castBar, castBarText, castBarTimeText, castBarIcon, castBarSpark, castBarParent
@@ -91,11 +89,7 @@ function Tradeskill:OnEnable()
 	self:RegisterEvent("UNIT_SPELLCAST_STOP")
 	self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 	self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
-	if IsLegion then
-		self:SecureHook(C_TradeSkillUI, "CraftRecipe", "DoTradeSkill")
-	else
-		self:SecureHook("DoTradeSkill")
-	end
+	self:SecureHook(C_TradeSkillUI, "CraftRecipe", "DoTradeSkill")
 end
 
 function Tradeskill:UNIT_SPELLCAST_START(object, event, unit, guid, spellID)
