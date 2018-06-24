@@ -25,4 +25,4 @@ tools-used:
   - localescrapper
 
 ignore:
-  - localcheck.lua
+  - locale-export.lua
