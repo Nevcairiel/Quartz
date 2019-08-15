@@ -497,6 +497,11 @@ function CastBarTemplate:ApplySettings()
 	self.Spark:SetBlendMode("ADD")
 	self.Spark:SetWidth(20)
 	self.Spark:SetHeight(db.h*2.2)
+
+	if self.Shield then
+		self.Shield:SetWidth(36 * (db.h/25))
+		self.Shield:SetHeight(64 * (db.h/25))
+	end
 end
 
 function CastBarTemplate:RegisterEvents()
