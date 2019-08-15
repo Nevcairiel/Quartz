@@ -28,6 +28,19 @@ local min, type, format, unpack, setmetatable = math.min, type, string.format, u
 local CreateFrame, GetTime, UIParent = CreateFrame, GetTime, UIParent
 local UnitName, UnitCastingInfo, UnitChannelInfo = UnitName, UnitCastingInfo, UnitChannelInfo
 
+local WoWClassic = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
+if WoWClassic then
+	UnitCastingInfo = function(unit)
+		if unit ~= "player" then return end
+		return CastingInfo()
+	end
+
+	UnitChannelInfo = function(unit)
+		if unit ~= "player" then return end
+		return ChannelInfo()
+	end
+end
+
 local CastBarTemplate = CreateFrame("Frame")
 local CastBarTemplate_MT = {__index = CastBarTemplate}
 

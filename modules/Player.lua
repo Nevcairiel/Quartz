@@ -22,11 +22,26 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 local MODNAME = "Player"
 local Player = Quartz3:NewModule(MODNAME)
 
+local UnitCastingInfo, UnitChannelInfo = UnitCastingInfo, UnitChannelInfo
+
+local WoWClassic = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
+if WoWClassic then
+	UnitCastingInfo = function(unit)
+		if unit ~= "player" then return end
+		return CastingInfo()
+	end
+
+	UnitChannelInfo = function(unit)
+		if unit ~= "player" then return end
+		return ChannelInfo()
+	end
+end
+
 ----------------------------
 -- Upvalues
 -- GLOBALS: CastingBarFrame
 local unpack = unpack
-local UnitChannelInfo = UnitChannelInfo
+
 
 local db, getOptions, castBar
 
@@ -188,7 +203,10 @@ local function setBarTicks(ticknum, duration, ticks)
 	end
 end
 
-local channelingTicks = {
+local channelingTicks = WoWClassic and {
+	-- druid
+	[GetSpellInfo(740)] = 4, -- tranquility
+} or {
 	-- warlock
 	[GetSpellInfo(234153)] = 6, -- drain life
 	[GetSpellInfo(193440)] = 3, -- demonwrath
