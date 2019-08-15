@@ -499,8 +499,11 @@ function CastBarTemplate:ApplySettings()
 	self.Spark:SetHeight(db.h*2.2)
 
 	if self.Shield then
-		self.Shield:SetWidth(36 * (db.h/25))
-		self.Shield:SetHeight(64 * (db.h/25))
+		local scale = (db.h/25)
+		self.Shield:SetWidth(36 * scale)
+		self.Shield:SetHeight(64 * scale)
+		self.Shield:ClearAllPoints()
+		self.Shield:SetPoint("CENTER", self.Icon, "CENTER", -2 * scale, -1 * scale)
 	end
 end
 
