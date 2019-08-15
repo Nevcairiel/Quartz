@@ -205,7 +205,24 @@ end
 
 local channelingTicks = WoWClassic and {
 	-- druid
-	[GetSpellInfo(740)] = 4, -- tranquility
+	[GetSpellInfo(740)] = 5, -- tranquility
+	[GetSpellInfo(16914)] = 10, -- hurricane
+	-- hunter
+	[GetSpellInfo(136)] = 5, -- mend pet
+	[GetSpellInfo(1510)] = 6, -- volley
+	-- mage
+	[GetSpellInfo(10)] = 8, -- blizzard
+	[GetSpellInfo(5143)] = 3, -- arcane missiles
+	-- priest
+	[GetSpellInfo(15407)] = 3, -- mind flay
+	[GetSpellInfo(10797)] = 6, -- star shards
+	-- warlock
+	[GetSpellInfo(1949)] = 15, -- hellfire
+	[GetSpellInfo(5740)] = 4, -- rain of fire
+	[GetSpellInfo(5138)] = 5, -- drain mana
+	[GetSpellInfo(689)] = 5, -- drain life
+	[GetSpellInfo(1120)] = 5, -- drain soul
+	[GetSpellInfo(755)] = 10, -- health funnel
 } or {
 	-- warlock
 	[GetSpellInfo(234153)] = 6, -- drain life
