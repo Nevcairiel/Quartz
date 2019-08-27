@@ -168,10 +168,13 @@ function Enemy:CLEUHandler()
 		return
 	end
 	if event == "SPELL_CAST_START" then
+		local _, _, texture, castTime, _, _, returnedSpellId = GetSpellInfo(spellId)
+		if not returnedSpellId then
+			return
+		end
 		if not casts[sGUID] then
 			casts[sGUID] = new()
 		end
-		local _, _, texture, castTime = GetSpellInfo(spellId)
 		casts[sGUID].name = sName
 		casts[sGUID].spellName = spellName
 		casts[sGUID].spellId = spellId
