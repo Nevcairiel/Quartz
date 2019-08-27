@@ -19,7 +19,18 @@
 local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
-if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then return end
+local WoWClassic = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
+if WoWClassic then
+	UnitCastingInfo = function(unit)
+		if unit ~= "player" then return end
+		return CastingInfo()
+	end
+
+	UnitChannelInfo = function(unit)
+		if unit ~= "player" then return end
+		return ChannelInfo()
+	end
+end
 
 local MODNAME = "Tradeskill"
 local Tradeskill = Quartz3:NewModule(MODNAME, "AceEvent-3.0", "AceHook-3.0")
@@ -91,7 +102,11 @@ function Tradeskill:OnEnable()
 	self:RegisterEvent("UNIT_SPELLCAST_STOP")
 	self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 	self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
-	self:SecureHook(C_TradeSkillUI, "CraftRecipe", "DoTradeSkill")
+	if WoWClassic then
+		self:SecureHook("DoTradeSkill")
+	else
+		self:SecureHook(C_TradeSkillUI, "CraftRecipe", "DoTradeSkill")
+	end
 end
 
 function Tradeskill:UNIT_SPELLCAST_START(object, bar, unit, guid, spellID)
