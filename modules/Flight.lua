@@ -85,29 +85,38 @@ function Flight:OnInitialize()
 	
 	self:SetEnabledState(Quartz3:GetModuleEnabled(MODNAME))
 	Quartz3:RegisterModuleOptions(MODNAME, getOptions, L["Flight"])
+
+	self:RegisterEvent("TAXIMAP_OPENED")
 end
 
 function Flight:ApplySettings()
 	db = self.db.profile
 end
 
---[[
-if InFlight then
-	function Flight:OnEnable()
-		self:RawHook(InFlight, "StartTimer")
-	end
+function Flight:TAXIMAP_OPENED()
+	local loaded = LoadAddOn("InFlight")
+	if loaded then
+		function Flight:OnEnable()
+			self:SecureHook(InFlight, "StartTimer")
+		end
 
-	function Flight:StartTimer(object, ...)
-		self.hooks[object].StartTimer(object, ...)
-		
-		local f = InFlightBar
-		local _, duration = f:GetMinMaxValues()
-		local _, locText = f:GetRegions()
-		local destination = locText:GetText()
+		function Flight:StartTimer()
+			local f = InFlightBar
+			InFlightBar:Hide()
+			local _, duration = f:GetMinMaxValues()
+			local _, locText = f:GetRegions()
+			local destination = locText:GetText()
+			self:BeginFlight(duration, destination)
+		end
 
-		self:BeginFlight(duration, destination)
+		if Flight:IsEnabled() then
+			Flight:OnEnable()
+		end
+
+		self:UnregisterEvent("TAXIMAP_OPENED")
 	end
-else ]]
+end
+
 if FlightMapTimes_BeginFlight then
 	function Flight:OnEnable()
 		self:RawHook("FlightMapTimes_BeginFlight")
@@ -142,7 +151,7 @@ function Flight:BeginFlight(duration, destination)
 	Player.Bar:SetAlpha(Player.db.profile.alpha)
 	
 	Player.Bar.Spark:Show()
-	Player.Bar.Icon:SetTexture(nil)
+	Player.Bar.Icon:SetTexture("Interface\\Icons\\ability_druid_flightform")
 	Player.Bar.Text:SetText(destination)
 	
 	local position = Player.db.profile.timetextposition
