@@ -39,7 +39,7 @@ local defaults = {
 
 do
 	local options
-	function getOptions() 
+	function getOptions()
 	options = options or {
 		type = "group",
 		name = L["Flight"],
@@ -82,7 +82,7 @@ end
 function Flight:OnInitialize()
 	self.db = Quartz3.db:RegisterNamespace(MODNAME, defaults)
 	db = self.db.profile
-	
+
 	self:SetEnabledState(Quartz3:GetModuleEnabled(MODNAME))
 	Quartz3:RegisterModuleOptions(MODNAME, getOptions, L["Flight"])
 
@@ -101,12 +101,11 @@ function Flight:TAXIMAP_OPENED()
 		end
 
 		function Flight:StartTimer()
-			local f = InFlightBar
 			InFlightBar:Hide()
-			local _, duration = f:GetMinMaxValues()
-			local _, locText = f:GetRegions()
-			local destination = locText:GetText()
-			self:BeginFlight(duration, destination)
+			local duration = InFlight:GetFlightTime()
+			if duration and duration > 0 then
+				self:BeginFlight(duration, InFlight:GetDestination())
+			end
 		end
 
 		if Flight:IsEnabled() then
@@ -143,17 +142,17 @@ function Flight:BeginFlight(duration, destination)
 		Player.Bar.casting = true
 		Player.Bar.channeling = nil
 	end
-	
+
 	Player.Bar.Bar:SetStatusBarColor(unpack(db.color))
-	
+
 	Player.Bar.Bar:SetValue(0)
 	Player.Bar:Show()
 	Player.Bar:SetAlpha(Player.db.profile.alpha)
-	
+
 	Player.Bar.Spark:Show()
 	Player.Bar.Icon:SetTexture("Interface\\Icons\\ability_druid_flightform")
 	Player.Bar.Text:SetText(destination)
-	
+
 	local position = Player.db.profile.timetextposition
 	if position == "caststart" then
 		Player.Bar.TimeText:SetPoint("LEFT", Player.Bar.Bar, "LEFT", Player.db.profile.timetextx, Player.db.profile.timetexty)
