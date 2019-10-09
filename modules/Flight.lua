@@ -85,7 +85,9 @@ function Flight:OnInitialize()
 
 	self:SetEnabledState(Quartz3:GetModuleEnabled(MODNAME))
 	Quartz3:RegisterModuleOptions(MODNAME, getOptions, L["Flight"])
+end
 
+function Flight:OnEnable()
 	self:RegisterEvent("TAXIMAP_OPENED")
 end
 
@@ -108,6 +110,7 @@ function Flight:TAXIMAP_OPENED()
 			end
 		end
 
+		-- Execute the new OnEnable to hook InFlight
 		if Flight:IsEnabled() then
 			Flight:OnEnable()
 		end
