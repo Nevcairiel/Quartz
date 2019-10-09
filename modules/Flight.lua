@@ -116,7 +116,7 @@ function Flight:TAXIMAP_OPENED()
 	end
 end
 
-if FlightMapTimes_BeginFlight then
+--[[if FlightMapTimes_BeginFlight then
 	function Flight:OnEnable()
 		self:RawHook("FlightMapTimes_BeginFlight")
 	end
@@ -127,7 +127,7 @@ if FlightMapTimes_BeginFlight then
 		end
 		return self.hooks.FlightMapTimes_BeginFlight(duration, destination)
 	end
-end
+end]]
 
 function Flight:BeginFlight(duration, destination)
 	Player.Bar.casting = true
