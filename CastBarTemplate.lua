@@ -245,7 +245,7 @@ function CastBarTemplate:UNIT_SPELLCAST_START(event, unit, guid, spellID)
 	self.Spark:Show()
 
 	if (icon == "Interface\\Icons\\Temp" or icon == 136235) and Quartz3.db.profile.hidesamwise then
-		icon = nil
+		icon = 136243
 	end
 	self.Icon:SetTexture(icon)
 

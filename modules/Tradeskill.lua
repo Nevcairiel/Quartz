@@ -137,7 +137,7 @@ function Tradeskill:UNIT_SPELLCAST_START(object, bar, unit, guid, spellID)
 		castBarSpark:Show()
 
 		if (icon == "Interface\\Icons\\Temp" or icon == 136235) and Quartz3.db.profile.hidesamwise then
-			icon = nil
+			icon = 136243
 		end
 		castBarIcon:SetTexture(icon)
 	else
