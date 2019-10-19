@@ -203,6 +203,37 @@ function CastBarTemplate:UNIT_SPELLCAST_SENT(event, unit, target, guid, spellID)
 	end
 
 	call(self, "UNIT_SPELLCAST_SENT", unit, target, guid, spellID)
+
+	displayName, _, icon, castTime = GetSpellInfo(spellID)
+
+	local endTime
+	local startTime = GetTime()
+	if displayName == "Aimed Shot" then
+	    endTime = startTime + castTime / 1000
+	elseif displayName == "Multi-Shot" then
+	    endTime = startTime + 0.5 -- multi shot is considered instant for some reason, hardcode this value
+	else
+	    return
+	end
+
+	local db = self.config
+	self.casting = true
+
+	self.startTime = startTime
+	self.endTime = endTime
+	self.delay = 0
+	self.fadeOut = nil
+
+	self.Bar:SetStatusBarColor(unpack(self.casting and Quartz3.db.profile.castingcolor or Quartz3.db.profile.channelingcolor))
+
+	self.Bar:SetValue(self.casting and 0 or 1)
+	self:Show()
+	self:SetAlpha(db.alpha)
+
+	SetNameText(self, displayName)
+
+	self.Spark:Show()
+	self.Icon:SetTexture(icon)
 end
 
 function CastBarTemplate:UNIT_SPELLCAST_START(event, unit, guid, spellID)
