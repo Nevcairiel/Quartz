@@ -16,7 +16,7 @@ externals:
   libs/AceHook-3.0: https://repos.wowace.com/wow/ace3/trunk/AceHook-3.0
   libs/AceGUI-3.0-SharedMediaWidgets: https://repos.wowace.com/wow/ace-gui-3-0-shared-media-widgets/trunk/AceGUI-3.0-SharedMediaWidgets
   libs/LibSharedMedia-3.0: https://repos.wowace.com/wow/libsharedmedia-3-0/trunk/LibSharedMedia-3.0
-  libs/LibClassicCasterino-1.0:  
+  libs/LibClassicCasterino-1.2:  
     url: git://github.com/rgd87/LibClassicCasterino
     tag: 1.20
 
