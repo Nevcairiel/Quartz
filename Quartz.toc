@@ -43,6 +43,7 @@ libs\AceGUI-3.0-SharedMediaWidgets\widget.xml
 
 locale\locale.xml
 
+libs\LibClassicCasterino-1.2\LibClassicCasterino.lua
 Quartz.lua
 Config.lua
 

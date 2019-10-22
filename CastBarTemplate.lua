@@ -19,6 +19,7 @@
 local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
+local LibClassicCasterino = LibStub('LibClassicCasterino', true)
 local media = LibStub("LibSharedMedia-3.0")
 local lsmlist = AceGUIWidgetLSMlists
 
@@ -28,16 +29,13 @@ local min, type, format, unpack, setmetatable = math.min, type, string.format, u
 local CreateFrame, GetTime, UIParent = CreateFrame, GetTime, UIParent
 local UnitName, UnitCastingInfo, UnitChannelInfo = UnitName, UnitCastingInfo, UnitChannelInfo
 
-local WoWClassic = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
-if WoWClassic then
+if LibClassicCasterino then
 	UnitCastingInfo = function(unit)
-		if unit ~= "player" then return end
-		return CastingInfo()
+		return LibClassicCasterino:UnitCastingInfo(unit)
 	end
 
 	UnitChannelInfo = function(unit)
-		if unit ~= "player" then return end
-		return ChannelInfo()
+		return LibClassicCasterino:UnitChannelInfo(unit)
 	end
 end
 
@@ -511,17 +509,33 @@ function CastBarTemplate:RegisterEvents()
 	if self.unit == "player" then
 		self:RegisterEvent("UNIT_SPELLCAST_SENT")
 	end
-	self:RegisterEvent("UNIT_SPELLCAST_START")
-	self:RegisterEvent("UNIT_SPELLCAST_STOP")
-	self:RegisterEvent("UNIT_SPELLCAST_FAILED")
-	self:RegisterEvent("UNIT_SPELLCAST_DELAYED")
-	self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
-	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
-	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
-	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
-	if self.unit ~= "player" then
-		self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTIBLE")
-		self:RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE")
+
+	if LibClassicCasterino then
+		local CastbarEventHandler = function(event, ...)
+			return self[event](self, event, ...)
+		end
+		LibClassicCasterino.RegisterCallback(self, 'UNIT_SPELLCAST_START', CastbarEventHandler)
+		LibClassicCasterino.RegisterCallback(self, 'UNIT_SPELLCAST_STOP', CastbarEventHandler)
+		LibClassicCasterino.RegisterCallback(self, 'UNIT_SPELLCAST_FAILED', CastbarEventHandler)
+		LibClassicCasterino.RegisterCallback(self, 'UNIT_SPELLCAST_DELAYED', CastbarEventHandler)
+		LibClassicCasterino.RegisterCallback(self, 'UNIT_SPELLCAST_INTERRUPTED', CastbarEventHandler)
+		LibClassicCasterino.RegisterCallback(self, 'UNIT_SPELLCAST_CHANNEL_START', CastbarEventHandler)
+		LibClassicCasterino.RegisterCallback(self, 'UNIT_SPELLCAST_CHANNEL_UPDATE', CastbarEventHandler)
+		LibClassicCasterino.RegisterCallback(self, 'UNIT_SPELLCAST_CHANNEL_STOP', CastbarEventHandler)
+	else
+		self:RegisterEvent("UNIT_SPELLCAST_START")
+		self:RegisterEvent("UNIT_SPELLCAST_STOP")
+		self:RegisterEvent("UNIT_SPELLCAST_FAILED")
+		self:RegisterEvent("UNIT_SPELLCAST_DELAYED")
+		self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
+		self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
+		self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
+		self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
+
+		if self.unit ~= "player" then
+			self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTIBLE")
+			self:RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE")
+		end
 	end
 
 	media.RegisterCallback(self, "LibSharedMedia_SetGlobal", function(mtype, override)
@@ -538,6 +552,16 @@ function CastBarTemplate:RegisterEvents()
 end
 
 function CastBarTemplate:UnregisterEvents()
+	if LibClassicCasterino then
+			LibClassicCasterino.UnregisterCallback(self, 'UNIT_SPELLCAST_START')
+			LibClassicCasterino.UnregisterCallback(self, 'UNIT_SPELLCAST_STOP')
+			LibClassicCasterino.UnregisterCallback(self, 'UNIT_SPELLCAST_FAILED')
+			LibClassicCasterino.UnregisterCallback(self, 'UNIT_SPELLCAST_DELAYED')
+			LibClassicCasterino.UnregisterCallback(self, 'UNIT_SPELLCAST_INTERRUPTED')
+			LibClassicCasterino.UnregisterCallback(self, 'UNIT_SPELLCAST_CHANNEL_START')
+			LibClassicCasterino.UnregisterCallback(self, 'UNIT_SPELLCAST_CHANNEL_UPDATE')
+			LibClassicCasterino.UnregisterCallback(self, 'UNIT_SPELLCAST_CHANNEL_STOP')
+	end
 	self:UnregisterAllEvents()
 	media.UnregisterCallback(self, "LibSharedMedia_SetGlobal")
 	media.UnregisterCallback(self, "LibSharedMedia_Registered")
