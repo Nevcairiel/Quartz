@@ -27,15 +27,12 @@ local TimeFmt = Quartz3.Util.TimeFormat
 
 ----------------------------
 -- Upvalues
-local GetTime, UnitCastingInfo = GetTime, UnitCastingInfo
+local GetTime = GetTime
 local unpack, tonumber, format = unpack, tonumber, format
 
-local WoWClassic = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
-if WoWClassic then
-	UnitCastingInfo = function(unit)
-		if unit ~= "player" then return end
-		return CastingInfo()
-	end
+local UnitCastingInfo = function(unit)
+	if unit ~= "player" then return end
+	return CastingInfo()
 end
 
 local getOptions
@@ -97,11 +94,7 @@ function Tradeskill:OnEnable()
 	self:RegisterEvent("UNIT_SPELLCAST_STOP")
 	self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 	self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
-	if WoWClassic then
-		self:SecureHook("DoTradeSkill")
-	else
-		self:SecureHook(C_TradeSkillUI, "CraftRecipe", "DoTradeSkill")
-	end
+	self:SecureHook("DoTradeSkill")
 end
 
 function Tradeskill:UNIT_SPELLCAST_START(object, bar, unit, guid, spellID)

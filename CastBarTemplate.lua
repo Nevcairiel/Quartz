@@ -26,19 +26,16 @@ local lsmlist = AceGUIWidgetLSMlists
 -- Upvalues
 local min, type, format, unpack, setmetatable = math.min, type, string.format, unpack, setmetatable
 local CreateFrame, GetTime, UIParent = CreateFrame, GetTime, UIParent
-local UnitName, UnitCastingInfo, UnitChannelInfo = UnitName, UnitCastingInfo, UnitChannelInfo
+local UnitName = UnitName
 
-local WoWClassic = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
-if WoWClassic then
-	UnitCastingInfo = function(unit)
-		if unit ~= "player" then return end
-		return CastingInfo()
-	end
+local UnitCastingInfo = function(unit)
+	if unit ~= "player" then return end
+	return CastingInfo()
+end
 
-	UnitChannelInfo = function(unit)
-		if unit ~= "player" then return end
-		return ChannelInfo()
-	end
+local UnitChannelInfo = function(unit)
+	if unit ~= "player" then return end
+	return ChannelInfo()
 end
 
 local CastBarTemplate = CreateFrame("Frame")

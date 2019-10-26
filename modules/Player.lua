@@ -22,19 +22,14 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 local MODNAME = "Player"
 local Player = Quartz3:NewModule(MODNAME)
 
-local UnitCastingInfo, UnitChannelInfo = UnitCastingInfo, UnitChannelInfo
+local UnitCastingInfo = function(unit)
+	if unit ~= "player" then return end
+	return CastingInfo()
+end
 
-local WoWClassic = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
-if WoWClassic then
-	UnitCastingInfo = function(unit)
-		if unit ~= "player" then return end
-		return CastingInfo()
-	end
-
-	UnitChannelInfo = function(unit)
-		if unit ~= "player" then return end
-		return ChannelInfo()
-	end
+local UnitChannelInfo = function(unit)
+	if unit ~= "player" then return end
+	return ChannelInfo()
 end
 
 ----------------------------
@@ -203,7 +198,7 @@ local function setBarTicks(ticknum, duration, ticks)
 	end
 end
 
-local channelingTicks = WoWClassic and {
+local channelingTicks = {
 	-- druid
 	[GetSpellInfo(740)] = 5, -- tranquility
 	[GetSpellInfo(16914)] = 10, -- hurricane
@@ -223,26 +218,6 @@ local channelingTicks = WoWClassic and {
 	[GetSpellInfo(689)] = 5, -- drain life
 	[GetSpellInfo(1120)] = 5, -- drain soul
 	[GetSpellInfo(755)] = 10, -- health funnel
-} or {
-	-- warlock
-	[GetSpellInfo(234153)] = 6, -- drain life
-	[GetSpellInfo(193440)] = 3, -- demonwrath
-	[GetSpellInfo(198590)] = 6, -- drain soul
-	-- druid
-	[GetSpellInfo(740)] = 4, -- tranquility
-	-- priest
-	[GetSpellInfo(64843)] = 4, -- divine hymn
-	[GetSpellInfo(15407)] = 4, -- mind flay
-	[GetSpellInfo(47540)] = 2, -- penance
-	[GetSpellInfo(205065)] = 4, -- void torrent
-	-- mage
-	[GetSpellInfo(5143)] = 5, -- arcane missiles
-	[GetSpellInfo(12051)] = 3, -- evocation
-	[GetSpellInfo(205021)] = 10, -- ray of frost
-	-- monk
-	[GetSpellInfo(117952)] = 4, -- crackling jade lightning
-	[GetSpellInfo(191837)] = 3, -- essence font
-	[GetSpellInfo(115175)] = 8, -- soothing mist
 }
 
 local function getChannelingTicks(spell)
