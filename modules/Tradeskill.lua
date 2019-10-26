@@ -39,7 +39,7 @@ local getOptions
 
 local castBar, castBarText, castBarTimeText, castBarIcon, castBarSpark, castBarParent
 
-local repeattimes, castSpellID, duration, totaltime, starttime, casting, bail
+local repeattimes, castSpellID, duration, totaltime, starttime, casting, bail, tradeskillicon
 local completedcasts = 0
 local restartdelay = 1
 
@@ -130,7 +130,7 @@ function Tradeskill:UNIT_SPELLCAST_START(object, bar, unit, guid, spellID)
 		castBarSpark:Show()
 
 		if (icon == "Interface\\Icons\\Temp" or icon == 136235) and Quartz3.db.profile.hidesamwise then
-			icon = 136243
+			icon = tradeskillicon or 136243
 		end
 		castBarIcon:SetTexture(icon)
 	else
@@ -165,6 +165,7 @@ end
 function Tradeskill:DoTradeSkill(index, num)
 	completedcasts = 0
 	repeattimes = tonumber(num) or 1
+	tradeskillicon = GetTradeSkillIcon(index)
 end
 
 function Tradeskill:ApplySettings()
