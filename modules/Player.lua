@@ -22,14 +22,17 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 local MODNAME = "Player"
 local Player = Quartz3:NewModule(MODNAME)
 
-local UnitCastingInfo = function(unit)
-	if unit ~= "player" then return end
-	return CastingInfo()
-end
+local LibClassicCasterino = LibStub('LibClassicCasterino', true)
 
 local UnitChannelInfo = function(unit)
 	if unit ~= "player" then return end
 	return ChannelInfo()
+end
+
+if LibClassicCasterino then
+	UnitChannelInfo = function(unit)
+		return LibClassicCasterino:UnitChannelInfo(unit)
+	end
 end
 
 ----------------------------

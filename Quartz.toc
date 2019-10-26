@@ -34,6 +34,8 @@ libs\AceHook-3.0\AceHook-3.0.xml
 
 libs\LibSharedMedia-3.0\lib.xml
 libs\AceGUI-3.0-SharedMediaWidgets\widget.xml
+
+libs\LibClassicCasterino\LibClassicCasterino.lua
 #@end-no-lib-strip@
 
 locale\locale.xml
