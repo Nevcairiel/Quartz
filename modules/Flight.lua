@@ -133,6 +133,8 @@ end
 end]]
 
 function Flight:BeginFlight(duration, destination)
+	if not Player:IsEnabled() then return end
+
 	Player.Bar.casting = true
 	Player.Bar.startTime = GetTime()
 	Player.Bar.endTime = GetTime() + duration
