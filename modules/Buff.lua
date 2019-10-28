@@ -28,6 +28,7 @@ local Target = Quartz3:GetModule("Target", true)
 local TimeFmt = Quartz3.Util.TimeFormat
 
 local media = LibStub("LibSharedMedia-3.0")
+local LibClassicDurations = LibStub("LibClassicDurations")
 local lsmlist = AceGUIWidgetLSMlists
 
 ----------------------------
@@ -913,11 +914,12 @@ do
 			end
 			if db.targetdebuffs then
 				for i = 1, 40 do
-					local name, texture, applications, dispeltype, duration, expirationTime, caster = UnitDebuff("target", i)
-					local remaining =  expirationTime and (expirationTime - GetTime()) or nil
+					local name, texture, applications, dispeltype, duration, expirationTime, caster, _, _, spellId = UnitDebuff("target", i)
 					if not name then
 						break
 					end
+          duration, expirationTime = LibClassicDurations:GetAuraDurationByUnit("target", spellId, caster, name)
+					local remaining =  expirationTime and (expirationTime - GetTime()) or nil
 					if (caster=="player" or caster=="pet" or caster=="vehicle") and duration > 0 then
 						local t = new()
 						tmp[#tmp+1] = t

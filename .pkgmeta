@@ -17,6 +17,7 @@ externals:
   libs/AceGUI-3.0-SharedMediaWidgets: https://repos.wowace.com/wow/ace-gui-3-0-shared-media-widgets/trunk/AceGUI-3.0-SharedMediaWidgets
   libs/LibSharedMedia-3.0: https://repos.wowace.com/wow/libsharedmedia-3-0/trunk/LibSharedMedia-3.0
   libs/LibClassicCasterino: https://github.com/rgd87/LibClassicCasterino.git
+  Libs/LibClassicDurations: https://repos.curseforge.com/wow/libclassicdurations
 
 tools-used:
   - localescrapper
