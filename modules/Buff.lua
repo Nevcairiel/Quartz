@@ -665,7 +665,7 @@ do
 						duration, expirationTime = LibClassicDurations:GetAuraDurationByUnit("target", spellId, caster, name)
 					end
 					local remaining = expirationTime and (expirationTime - GetTime()) or nil
-					if (caster=="player" or caster=="pet" or caster=="vehicle") and duration > 0 then
+					if (caster=="player" or caster=="pet" or caster=="vehicle") and (duration and duration > 0) then
 						local t = new()
 						tmp[#tmp+1] = t
 						t.name = name
@@ -687,7 +687,7 @@ do
 						duration, expirationTime = LibClassicDurations:GetAuraDurationByUnit("target", spellId, caster, name)
 					end
 					local remaining =  expirationTime and (expirationTime - GetTime()) or nil
-					if (caster=="player" or caster=="pet" or caster=="vehicle") and duration > 0 then
+					if (caster=="player" or caster=="pet" or caster=="vehicle") and (duration and duration > 0) then
 						local t = new()
 						tmp[#tmp+1] = t
 						t.name = name
