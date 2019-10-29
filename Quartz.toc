@@ -15,7 +15,7 @@
 ## Notes-zhTW: 模組化施法條。
 
 ## SavedVariables: Quartz3DB
-## OptionalDeps: Ace3, LibSharedMedia-3.0, AceGUI-3.0-SharedMediaWidgets, SharedMedia
+## OptionalDeps: Ace3, LibSharedMedia-3.0, AceGUI-3.0-SharedMediaWidgets, SharedMedia, LibClassicCasterino, LibClassicDurations
 
 #@no-lib-strip@
 libs\LibStub\LibStub.lua
@@ -36,6 +36,7 @@ libs\LibSharedMedia-3.0\lib.xml
 libs\AceGUI-3.0-SharedMediaWidgets\widget.xml
 
 libs\LibClassicCasterino\LibClassicCasterino.lua
+libs\LibClassicDurations\LibClassicDurations.xml
 #@end-no-lib-strip@
 
 locale\locale.xml
