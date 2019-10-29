@@ -51,21 +51,10 @@ function Timer:ChatHandler(msg)
 				return Quartz3:Print(L["Usage: /quartztimer timername 60 or /quartztimer kill timername"])
 			end
 		else
-		local duration = tonumber(msg:match("^(%d+)"))
-		local name
-		if duration then
-			name = msg:match("^%d+ (.+)$")
-		else
-			duration = tonumber(msg:match("(%d+)$"))
-			if not duration then
-				return Quartz3:Print(L["Usage: /quartztimer timername 60 or /quartztimer 60 timername"])
-			end
-			name = msg:match("^(.+) %d+$")
+		local duration, name = self:GetTimerInfo(msg)
+		if not duration or not name then
+			return Quartz3:Print(L["Usage: /quartztimer timername 60 or /quartztimer 60 timername"])
 		end
-		if not name then
-			return Quartz3:Print(L["Usage: /quartztimer timername 60 or /quartztimer kill timername"])
-		end
-
 		local currentTime = GetTime()
 		external[name].startTime = currentTime
 		external[name].endTime = currentTime + duration
@@ -79,6 +68,30 @@ function Timer:ChatHandler(msg)
 			self:SendMessage("Quartz3Mirror_UpdateCustom")
 		end
 	end
+end
+
+function Timer:GetTimerInfo(msg)
+	local duration
+	local flags
+	local name
+
+	duration, flags, name = msg:match("^(%d+)(m?) (.+)$")
+
+	if not duration then
+		name, duration, flags = msg:match("^(.+) (%d+)(m?)$")
+	end
+
+	if not duration or not name then
+		return duration, name
+	end
+
+	duration = tonumber(duration)
+
+	if tostring(flags) == "m" then
+		duration = duration * 60
+	end
+
+	return duration, name
 end
 
 function Timer:OnDisable()
