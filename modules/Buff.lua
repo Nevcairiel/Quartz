@@ -22,7 +22,6 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 local MODNAME = "Buff"
 local Buff = Quartz3:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0", "AceTimer-3.0")
 local Player = Quartz3:GetModule("Player")
-local Focus = Quartz3:GetModule("Focus", true)
 local Target = Quartz3:GetModule("Target", true)
 
 local TimeFmt = Quartz3.Util.TimeFormat
@@ -41,7 +40,6 @@ local unpack, pairs, next, unpack, sort = unpack, pairs, next, unpack, sort
 
 
 local targetlocked = true
-local focuslocked = true
 
 local OnUpdate
 local showicons
@@ -57,7 +55,7 @@ local defaults = {
 		targeticons = true,
 		targeticonside = "right",
 		
-		targetanchor = "player",--L["Free"], L["Target"], L["Focus"]
+		targetanchor = "player",--L["Free"], L["Target"]
 		targetx = 500,
 		targety = 350,
 		targetgrowdirection = "up", --L["Down"]
@@ -69,26 +67,6 @@ local defaults = {
 		
 		targetwidth = 120,
 		targetheight = 12,
-		
-		focus = true,
-		focusbuffs = true,
-		focusdebuffs = true,
-		focusfixedduration = 0,
-		focusicons = true,
-		focusiconside = "left",
-		
-		focusanchor = "player",--L["Free"], L["Target"], L["Focus"]
-		focusx = 400,
-		focusy = 350,
-		focusgrowdirection = "up", --L["Down"]
-		focusposition = "bottomleft",
-		
-		focusgap = 1,
-		focusspacing = 1,
-		focusoffset = 3,
-		
-		focuswidth = 120,
-		focusheight = 12,
 		
 		buffnametext = true,
 		bufftimetext = true,
@@ -158,7 +136,6 @@ local framefactory = {
 	end
 }
 local targetbars = setmetatable({}, framefactory)
-local focusbars = setmetatable({}, framefactory)
 
 local getOptions
 do
@@ -203,23 +180,6 @@ do
 	local function targetnothing()
 		targetbars[1]:SetAlpha(db.buffalpha)
 	end
-	local function getfocusfreeoptionshidden()
-		return db.focusanchor ~= "free"
-	end
-	local function getfocusnotfreeoptionshidden()
-		return db.focusanchor == "free"
-	end
-	local function focusdragstart()
-		focusbars[1]:StartMoving()
-	end
-	local function focusdragstop()
-		db.focusx = focusbars[1]:GetLeft()
-		db.focusy = focusbars[1]:GetBottom()
-		focusbars[1]:StopMovingOrSizing()
-	end
-	local function focusnothing()
-		focusbars[1]:SetAlpha(db.buffalpha)
-	end
 	
 	local function setOpt(info, value)
 		db[info.arg or info[#info]] = value
@@ -228,15 +188,6 @@ do
 
 	local function getOpt(info)
 		return db[info.arg or info[#info]]
-	end
-	
-	local function setOptFocus(info, value)
-		db[info.arg or ("focus"..info[#info])] = value
-		Buff:ApplySettings()
-	end
-
-	local function getOptFocus(info)
-		return db[info.arg or ("focus"..info[#info])]
 	end
 	
 	local function setOptTarget(info, value)
@@ -278,174 +229,6 @@ do
 							Quartz3:SetModuleEnabled(MODNAME, v)
 						end,
 						order = 100,
-					},
-					focus = {
-						type = "group",
-						name = L["Focus"],
-						desc = L["Focus"],
-						order = 101,
-						get = getOptFocus,
-						set = setOptFocus,
-						args = {
-							show = {
-								type = "toggle",
-								name = L["Enable %s"]:format(L["Focus"]),
-								desc = L["Show buffs/debuffs for your %s"]:format(L["Focus"]),
-								arg = "focus",
-								order = 90,
-								width = "full",
-								disabled = false,
-							},
-							buffs = {
-								type = "toggle",
-								name = L["Enable Buffs"],
-								desc = L["Show buffs for your %s"]:format(L["Focus"]),
-								order = 91,
-							},
-							debuffs = {
-								type = "toggle",
-								name = L["Enable Debuffs"],
-								desc = L["Show debuffs for your %s"]:format(L["Focus"]),
-								order = 92,
-							},
-							fixedduration = {
-								type = "range",
-								name = L["Fixed Duration"],
-								desc = L["Fix bars to a specified duration"],
-								min = 0, max = 60, step = 1,
-								order = 93,
-							},
-							nlf = {
-								type = "description",
-								name = "",
-								order = 100,
-							},
-							width = {
-								type = "range",
-								name = L["Buff Bar Width"],
-								desc = L["Set the width of the buff bars"],
-								min = 50, max = 300, step = 1,
-								order = 101,
-							},
-							height = {
-								type = "range",
-								name = L["Buff Bar Height"],
-								desc = L["Set the height of the buff bars"],
-								min = 4, max = 25, step = 1,
-								order = 101,
-							},
-							anchor = {
-								type = "select",
-								name = L["Anchor Frame"],
-								desc = L["Select where to anchor the %s bars"]:format(L["Focus"]),
-								values = {["player"] = L["Player"], ["free"] = L["Free"], ["target"] = L["Target"], ["focus"] = L["Focus"]},
-								order = 102,
-							},
-							-- free
-							focuslock = {
-								type = "toggle",
-								name = L["Lock"],
-								desc = L["Toggle %s bar lock"]:format(L["Focus"]),
-								get = function()
-									return focuslocked
-								end,
-								set = function(info, v)
-									local bar = focusbars[1]
-									if v then
-										bar.Hide = nil
-										bar:EnableMouse(false)
-										bar:SetScript("OnDragStart", nil)
-										bar:SetScript("OnDragStop", nil)
-										Buff:UpdateBars()
-									else
-										bar:Show()
-										bar:EnableMouse(true)
-										bar:SetScript("OnDragStart", focusdragstart)
-										bar:SetScript("OnDragStop", focusdragstop)
-										bar:SetAlpha(1)
-										bar.endTime = bar.endTime or 0
-										bar.Hide = focusnothing
-									end
-									focuslocked = v
-								end,
-								hidden = getfocusfreeoptionshidden,
-								order = 103,
-							},
-							x = {
-								type = "range",
-								name = L["X"],
-								desc = L["Set an exact X value for this bar's position."],
-								min = 0, max = 2560, step = 1,
-								hidden = getfocusfreeoptionshidden,
-								order = 104,
-							},
-							y = {
-								type = "range",
-								name = L["Y"],
-								desc = L["Set an exact Y value for this bar's position."],
-								min = 0, max = 1600, step = 1,
-								hidden = getfocusfreeoptionshidden,
-								order = 104,
-							},
-							growdirection = {
-								type = "select",
-								name = L["Grow Direction"],
-								desc = L["Set the grow direction of the %s bars"]:format(L["Focus"]),
-								values = {["up"] = L["Up"], ["down"] = L["Down"]},
-								hidden = getfocusfreeoptionshidden,
-								order = 105,
-							},
-							-- anchored to a cast bar
-							position = {
-								type = "select",
-								name = L["Position"],
-								desc = L["Position the bars for your %s"]:format(L["Focus"]),
-								values = positions,
-								hidden = getfocusnotfreeoptionshidden,
-								order = 103,
-							},
-							gap = {
-								type = "range",
-								name = L["Gap"],
-								desc = L["Tweak the vertical position of the bars for your %s"]:format(L["Focus"]),
-								min = -35, max = 35, step = 1,
-								hidden = getfocusnotfreeoptionshidden,
-								order = 104,
-							},
-							offset = {
-								type = "range",
-								name = L["Offset"],
-								desc = L["Tweak the horizontal position of the bars for your %s"]:format(L["Focus"]),
-								min = -35, max = 35,step = 1,
-								hidden = getfocusnotfreeoptionshidden,
-								order = 106,
-							},
-							spacing = {
-								type = "range",
-								name = L["Spacing"],
-								desc = L["Tweak the space between bars for your %s"]:format(L["Focus"]),
-								min = -35, max = 35, step = 1,
-								order = 107,
-							},
-							nli = {
-								type = "description",
-								name = "",
-								order = 108,
-							},
-							icons = {
-								type = "toggle",
-								name = L["Show Icons"],
-								desc = L["Show icons on buffs and debuffs for your %s"]:format(L["Focus"]),
-								order = 109,
-							},
-							iconside = {
-								type = "select",
-								name = L["Icon Position"],
-								desc = L["Set the side of the buff bar that the icon appears on"],
-								values = {["left"] = L["Left"], ["right"] = L["Right"]},
-								order = 110,
-							},
-						},
 					},
 					target = {
 						type = "group",
@@ -506,7 +289,7 @@ do
 								type = "select",
 								name = L["Anchor Frame"],
 								desc = L["Select where to anchor the %s bars"]:format(L["Target"]),
-								values = {["player"] = L["Player"], ["free"] = L["Free"], ["target"] = L["Target"], ["focus"] = L["Focus"]},
+								values = {["player"] = L["Player"], ["free"] = L["Free"], ["target"] = L["Target"]},
 								order = 102,
 							},
 							-- free
@@ -786,18 +569,12 @@ function Buff:OnEnable()
 			for i, v in pairs(targetbars) do
 				v:SetStatusBarTexture(media:Fetch("statusbar", override))
 			end
-			for i, v in pairs(focusbars) do
-				v:SetStatusBarTexture(media:Fetch("statusbar", override))
-			end
 		end
 	end)
 
 	media.RegisterCallback(self, "LibSharedMedia_Registered", function(mtype, key)
 		if mtype == "statusbar" and key == self.config.bufftexture then
 			for i, v in pairs(targetbars) do
-				v:SetStatusBarTexture(media:Fetch("statusbar", self.config.bufftexture))
-			end
-			for i, v in pairs(focusbars) do
 				v:SetStatusBarTexture(media:Fetch("statusbar", self.config.bufftexture))
 			end
 		end
@@ -815,14 +592,6 @@ function Buff:OnDisable()
 		v:Hide()
 	end
 
-	focusbars[1].Hide = nil
-	focusbars[1]:EnableMouse(false)
-	focusbars[1]:SetScript("OnDragStart", nil)
-	focusbars[1]:SetScript("OnDragStop", nil)
-	for _, v in pairs(focusbars) do
-		v:Hide()
-	end
-
 	media.UnregisterCallback(self, "LibSharedMedia_SetGlobal")
 	media.UnregisterCallback(self, "LibSharedMedia_Registered")
 end
@@ -832,9 +601,6 @@ function Buff:UNIT_AURA(units)
 		if unit == "target" then
 			self:UpdateTargetBars()
 		end
-		if unit == "focus" or UnitIsUnit("focus", unit) then
-			self:UpdateFocusBars()
-		end
 	end
 end
 
@@ -842,14 +608,10 @@ function Buff:CheckForUpdate()
 	if targetbars[1]:IsShown() then
 		self:UpdateTargetBars()
 	end
-	if focusbars[1]:IsShown() then
-		self:UpdateFocusBars()
-	end
 end
 
 function Buff:UpdateBars()
 	self:UpdateTargetBars()
-	self:UpdateFocusBars()
 end
 
 do
@@ -989,115 +751,7 @@ do
 			if not self.autoUpdateTimer then
 				self.autoUpdateTimer = self:ScheduleRepeatingTimer("CheckForUpdate", 3)
 			end
-		elseif not focusbars[1]:IsShown() then
-			if self.autoUpdateTimer then
-				self:CancelTimer(self.autoUpdateTimer)
-				self.autoUpdateTimer = nil
-			end
-		end
-		called = false
-	end
-	function Buff:UpdateFocusBars()
-		if called then
-			return
-		end
-		called = true
-		if db.focus then
-			local currentTime = GetTime()
-			for k in pairs(tmp) do
-				tmp[k] = del(tmp[k])
-			end
-			if db.focusbuffs then
-				for i = 1, 32 do
-					local name, texture, applications, dispeltype, duration, expirationTime, caster = UnitBuff("focus", i)
-					local remaining =  expirationTime and (expirationTime - GetTime()) or nil
-					if not name then
-						break
-					end
-					if (caster=="player" or caster=="pet" or caster=="vehicle") and duration > 0 then
-						local t = new()
-						tmp[#tmp+1] = t
-						t.name = name
-						t.texture = texture
-						t.duration = duration
-						t.remaining = remaining
-						t.isbuff = true
-						t.applications = applications
-					end
-				end
-			end
-			if db.focusdebuffs then
-				for i = 1, 40 do
-					local name, texture, applications, dispeltype, duration, expirationTime, caster = UnitDebuff("focus", i)
-					local remaining =  expirationTime and (expirationTime - GetTime()) or nil
-					if not name then
-						break
-					end
-					if (caster=="player" or caster=="pet" or caster=="vehicle") and duration > 0 then
-						local t = new()
-						tmp[#tmp+1] = t
-						t.name = name
-						t.texture = texture
-						t.duration = duration
-						t.remaining = remaining
-						t.dispeltype = dispeltype
-						t.applications = applications
-					end
-				end
-			end
-			sort(tmp, mysort)
-			local maxindex = 0
-			for k=1,#tmp do
-				local v = tmp[k]
-				maxindex = k
-				local bar = focusbars[k]
-				if v.applications > 1 then
-					bar.text:SetFormattedText("%s (%s)", v.name, v.applications)
-				else
-					bar.text:SetText(v.name)
-				end
-				bar.icon:SetTexture(v.texture)
-				local elapsed = (v.duration - v.remaining)
-				local startTime, endTime = (currentTime - elapsed), (currentTime + v.remaining)
-				if db.focusfixedduration > 0 then
-					startTime = endTime - db.focusfixedduration
-				end
-				bar.startTime = startTime
-				bar.endTime = endTime
-				bar:SetMinMaxValues(startTime, endTime)
-				bar:Show()
-				if v.isbuff then
-					bar:SetStatusBarColor(unpack(db.buffcolor))
-				else
-					if db.debuffsbytype then
-						local dispeltype = v.dispeltype
-						if dispeltype then
-							bar:SetStatusBarColor(unpack(db[dispeltype]))
-						else
-							bar:SetStatusBarColor(unpack(db.debuffcolor))
-						end
-					else
-						bar:SetStatusBarColor(unpack(db.debuffcolor))
-					end
-				end
-			end
-			for i = maxindex+1, #focusbars do
-				focusbars[i]:Hide()
-			end
 		else
-			focusbars[1].Hide = nil
-			focusbars[1]:EnableMouse(false)
-			focusbars[1]:SetScript("OnDragStart", nil)
-			focusbars[1]:SetScript("OnDragStop", nil)
-			for i=1,#focusbars do
-				focusbars[i]:Hide()
-			end
-		end
-		if focusbars[1]:IsShown() then
-			if not self.autoUpdateTimer then
-				self.autoUpdateTimer = self:ScheduleRepeatingTimer("CheckForUpdate", 3)
-			end
-		elseif not targetbars[1]:IsShown() then
 			if self.autoUpdateTimer then
 				self:CancelTimer(self.autoUpdateTimer)
 				self.autoUpdateTimer = nil
@@ -1124,20 +778,6 @@ do
 			grow = db.targetgrowdirection
 			width = db.targetwidth
 			height = db.targetheight
-		else
-			bars = focusbars
-			position = db.focusposition
-			icons = db.focusicons
-			iconside = db.focusiconside
-			gap = db.focusgap
-			spacing = db.focusspacing
-			offset = db.focusoffset
-			anchor = db.focusanchor
-			x = db.focusx
-			y = db.focusy
-			grow = db.focusgrowdirection
-			width = db.focuswidth
-			height = db.focusheight
 		end
 		bar:ClearAllPoints()
 		bar:SetStatusBarTexture(media:Fetch("statusbar", db.bufftexture))
@@ -1164,9 +804,7 @@ do
 		else
 			if i == 1 then
 				local anchorframe
-				if anchor == "focus" and Focus and Focus.Bar then
-					anchorframe = Focus.Bar
-				elseif anchor == "target" and Target and Target.Bar then
+				if anchor == "target" and Target and Target.Bar then
 					anchorframe = Target.Bar
 				else -- L["Player"]
 					anchorframe = Player.Bar
@@ -1307,18 +945,8 @@ do
 				targetbars[1]:SetScript("OnDragStart", nil)
 				targetbars[1]:SetScript("OnDragStop", nil)
 			end
-			if db.focusanchor ~= "free" then
-				focusbars[1].Hide = nil
-				focusbars[1]:EnableMouse(false)
-				focusbars[1]:SetScript("OnDragStart", nil)
-				focusbars[1]:SetScript("OnDragStop", nil)
-			end
 			for i, v in pairs(targetbars) do
 				direction = apply("target", i, v, db, direction)
-			end
-			direction = nil
-			for i, v in pairs(focusbars) do
-				direction = apply("focus", i, v, db, direction)
 			end
 			self:UpdateBars()
 		end
