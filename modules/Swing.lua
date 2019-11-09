@@ -160,13 +160,30 @@ function Swing:STOP_AUTOREPEAT_SPELL()
 	end
 end
 
+function IsClassSwingAbility(spellName)
+	if playerclass == "WARRIOR" then
+		if spellName == "Heroic Strike" then
+			return true
+		end
+	end
+	if playerclass == "DRUID" then
+		if spellName == "Maul" then
+			return true
+		end
+	end
+
+	return false
+end
+
 function Swing:COMBAT_LOG_EVENT_UNFILTERED()
 	if swingmode ~= 0 then return end
 	local timestamp, combatevent, hideCaster, srcGUID, srcName, srcFlags, srcRaidFlags, dstName, dstGUID, dstFlags, dstRaidFlags, spellID, spellName = CombatLogGetCurrentEventInfo()
-	if (combatevent == "SWING_DAMAGE" or combatevent == "SWING_MISSED") and (bit_band(srcFlags, COMBATLOG_FILTER_ME) == COMBATLOG_FILTER_ME) then
+	if ((combatevent == "SWING_DAMAGE" or combatevent == "SWING_MISSED") or (combatevent == "SPELL_DAMAGE" and IsClassSwingAbility(spellName))) and (bit_band(srcFlags, COMBATLOG_FILTER_ME) == COMBATLOG_FILTER_ME) then
 		self:MeleeSwing()
 	elseif (combatevent == "SWING_MISSED") and (bit_band(dstFlags, COMBATLOG_FILTER_ME) == COMBATLOG_FILTER_ME) and spellID == "PARRY" and duration then
 		duration = duration * 0.6
+	elseif combatevent == "SPELL_MISSED" and IsClassSwingAbility(spellName) and (bit_band(dstFlags, COMBATLOG_FILTER_ME) == COMBATLOG_FILTER_ME) then
+		self:MeleeSwing()
 	end
 end
 
