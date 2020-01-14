@@ -36,6 +36,14 @@ local COMBATLOG_FILTER_ME = COMBATLOG_FILTER_ME
 local playerclass
 local autoshotname = GetSpellInfo(75)
 local slam = GetSpellInfo(1464)
+local WoWClassic = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
+
+local nextSwingSpells = {
+	[GetSpellInfo(78)] = WoWClassic, -- Heroic Strike (Warrior)
+	[GetSpellInfo(845)] = WoWClassic, -- Cleave (Warrior)
+	[GetSpellInfo(6807)] = WoWClassic, -- Maul (Druid)
+	[GetSpellInfo(2973)] = WoWClassic, -- Raptor Strike (Hunter)
+}
 
 local resetautoshotspells = {
 	--[GetSpellInfo(19434)] = true, -- Aimed Shot
@@ -164,6 +172,8 @@ function Swing:COMBAT_LOG_EVENT_UNFILTERED()
 	if swingmode ~= 0 then return end
 	local timestamp, combatevent, hideCaster, srcGUID, srcName, srcFlags, srcRaidFlags, dstName, dstGUID, dstFlags, dstRaidFlags, spellID, spellName = CombatLogGetCurrentEventInfo()
 	if (combatevent == "SWING_DAMAGE" or combatevent == "SWING_MISSED") and (bit_band(srcFlags, COMBATLOG_FILTER_ME) == COMBATLOG_FILTER_ME) then
+		self:MeleeSwing()
+	elseif (combatevent == "SPELL_DAMAGE" or combatevent == "SPELL_MISSED") and (bit_band(srcFlags, COMBATLOG_FILTER_ME) == COMBATLOG_FILTER_ME) and nextSwingSpells[spellName] then
 		self:MeleeSwing()
 	elseif (combatevent == "SWING_MISSED") and (bit_band(dstFlags, COMBATLOG_FILTER_ME) == COMBATLOG_FILTER_ME) and spellID == "PARRY" and duration then
 		duration = duration * 0.6
