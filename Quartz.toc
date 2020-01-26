@@ -15,10 +15,11 @@
 ## Notes-zhTW: 模組化施法條。
 
 ## SavedVariables: Quartz3DB
-## OptionalDeps: Ace3, LibSharedMedia-3.0, AceGUI-3.0-SharedMediaWidgets, SharedMedia
+## OptionalDeps: Ace3, LibDualSpec-1.0, LibSharedMedia-3.0, AceGUI-3.0-SharedMediaWidgets, SharedMedia
 
 #@no-lib-strip@
 libs\LibStub\LibStub.lua
+libs\LibDualSpec-1.0\LibDualSpec-1.0.lua
 libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
 libs\AceAddon-3.0\AceAddon-3.0.xml
 libs\AceGUI-3.0\AceGUI-3.0.xml
