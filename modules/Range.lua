@@ -57,11 +57,12 @@ do
 			if not castBar:IsVisible() or Player.Bar.fadeOut then
 				return f:SetScript("OnUpdate", nil)
 			end
-			if IsSpellInRange(spell, target) == 0 then
+			local inRange = IsSpellInRange(spell, target) == 1 and true
+			if not inRange and not modified then
 				r, g, b = castBar:GetStatusBarColor()
 				modified = true
 				castBar:SetStatusBarColor(unpack(db.rangecolor))
-			elseif modified then
+			elseif inRange and modified then
 				castBar:SetStatusBarColor(r,g,b)
 				modified, r, g, b = nil, nil, nil, nil
 			end
