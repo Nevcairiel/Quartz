@@ -1,12 +1,11 @@
-## Title: Quartz
+## Title: Modular Castbars
 ## Interface: 80300
 ## Notes: Modular casting bar.
-## Author: Nevcairiel, Nymbia
+## Author: Nevcairiel, Nymbia, IcyHawt
 ## Version: @project-version@
 ## X-License: GPL v2
 ## X-Credits: Ammo (some code based on PitBull_CastBar), kergoth (Tradeskill Merge module idea), Roartindon (Lag Embed mode for Latency module)
-## X-Curse-Project-ID: 4558
-## X-WoWI-ID: 7158
+## X-Curse-Project-ID: 394364
 
 ## Title-ruRU: Кварц
 ## Notes-ruRU: Модульная полоса применений.
