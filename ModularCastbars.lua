@@ -16,14 +16,14 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
-local Quartz3 = LibStub("AceAddon-3.0"):NewAddon("Quartz3", "AceConsole-3.0")
-local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
+local ModularCastbars3 = LibStub("AceAddon-3.0"):NewAddon("ModularCastbars3", "AceConsole-3.0")
+local L = LibStub("AceLocale-3.0"):GetLocale("ModularCastbars3")
 local media = LibStub("LibSharedMedia-3.0")
 local db
 
 ----------------------------
 -- Upvalues
--- GLOBALS: LibStub, QuartzDB
+-- GLOBALS: LibStub, ModularCastbarsDB
 local type, pairs, tonumber = type, pairs, tonumber
 
 local defaults = {
@@ -45,30 +45,30 @@ local defaults = {
 	},
 }
 
-media:Register("statusbar", "BantoBar", "Interface\\Addons\\Quartz\\textures\\BantoBar")
-media:Register("statusbar", "Frost", "Interface\\AddOns\\Quartz\\textures\\Frost")
-media:Register("statusbar", "Healbot", "Interface\\AddOns\\Quartz\\textures\\Healbot")
-media:Register("statusbar", "LiteStep", "Interface\\AddOns\\Quartz\\textures\\LiteStep")
-media:Register("statusbar", "Rocks", "Interface\\AddOns\\Quartz\\textures\\Rocks")
-media:Register("statusbar", "Runes", "Interface\\AddOns\\Quartz\\textures\\Runes")
-media:Register("statusbar", "Xeon", "Interface\\AddOns\\Quartz\\textures\\Xeon")
-media:Register("statusbar", "Minimalist", "Interface\\AddOns\\Quartz\\textures\\Minimalist")
-media:Register("border", "Tooltip enlarged", "Interface\\AddOns\\Quartz\\textures\\Tooltip-BigBorder")
+media:Register("statusbar", "BantoBar", "Interface\\Addons\\ModularCastbars\\textures\\BantoBar")
+media:Register("statusbar", "Frost", "Interface\\AddOns\\ModularCastbars\\textures\\Frost")
+media:Register("statusbar", "Healbot", "Interface\\AddOns\\ModularCastbars\\textures\\Healbot")
+media:Register("statusbar", "LiteStep", "Interface\\AddOns\\ModularCastbars\\textures\\LiteStep")
+media:Register("statusbar", "Rocks", "Interface\\AddOns\\ModularCastbars\\textures\\Rocks")
+media:Register("statusbar", "Runes", "Interface\\AddOns\\ModularCastbars\\textures\\Runes")
+media:Register("statusbar", "Xeon", "Interface\\AddOns\\ModularCastbars\\textures\\Xeon")
+media:Register("statusbar", "Minimalist", "Interface\\AddOns\\ModularCastbars\\textures\\Minimalist")
+media:Register("border", "Tooltip enlarged", "Interface\\AddOns\\ModularCastbars\\textures\\Tooltip-BigBorder")
 
-function Quartz3:OnInitialize()
-	self.db = LibStub("AceDB-3.0"):New("Quartz3DB", defaults, true)
+function ModularCastbars3:OnInitialize()
+	self.db = LibStub("AceDB-3.0"):New("ModularCastbars3DB", defaults, true)
 	db = self.db.profile
 
 	self:SetupOptions()
 end
 
-function Quartz3:OnEnable()
-	if QuartzDB then
-		QuartzDB = nil
+function ModularCastbars3:OnEnable()
+	if ModularCastbarsDB then
+		ModularCastbarsDB = nil
 		LibStub("AceTimer-3.0").ScheduleTimer(self, function()
-			self:Print(L["Congratulations! You've just upgraded Quartz from the old Ace2-based version to the new Ace3 version!"])
-			self:Print(L["Sadly, this also means your configuration was lost. You'll have to reconfigure Quartz using the new options integrated into the Interface Options Panel, quickly accessible with /quartz"])
-			self:Print(L["Sorry for the inconvenience, and thanks for using Quartz!"])
+			self:Print(L["Congratulations! You've just upgraded ModularCastbars from the old Ace2-based version to the new Ace3 version!"])
+			self:Print(L["Sadly, this also means your configuration was lost. You'll have to reconfigure ModularCastbars using the new options integrated into the Interface Options Panel, quickly accessible with /ModularCastbars"])
+			self:Print(L["Sorry for the inconvenience, and thanks for using ModularCastbars!"])
 		end, 1)
 	end
 	self.db.RegisterCallback(self, "OnProfileChanged", "ApplySettings")
@@ -79,7 +79,7 @@ function Quartz3:OnEnable()
 	media.RegisterCallback(self, "LibSharedMedia_SetGlobal", "ApplySettings")
 
 	CONFIGMODE_CALLBACKS = CONFIGMODE_CALLBACKS or {}
-	CONFIGMODE_CALLBACKS["Quartz3"] = function(action)
+	CONFIGMODE_CALLBACKS["ModularCastbars3"] = function(action)
 		if action == "ON" then
 			self:Unlock(false)
 		elseif action == "OFF" then
@@ -90,7 +90,7 @@ function Quartz3:OnEnable()
 	self:ApplySettings()
 end
 
-function Quartz3:ApplySettings()
+function ModularCastbars3:ApplySettings()
 	db = self.db.profile
 
 	for k,v in self:IterateModules() do
@@ -105,12 +105,12 @@ function Quartz3:ApplySettings()
 	end
 end
 
-function Quartz3:ToggleLock(showUI)
+function ModularCastbars3:ToggleLock(showUI)
 	local func = self.unlock and "Lock" or "Unlock"
 	self[func](self, showUI)
 end
 
-function Quartz3:Unlock(showUI)
+function ModularCastbars3:Unlock(showUI)
 	self.unlock = true
 	for k,v in self:IterateModules() do
 		if v:IsEnabled() and type(v.Unlock) == "function" then
@@ -122,7 +122,7 @@ function Quartz3:Unlock(showUI)
 	end
 end
 
-function Quartz3:Lock()
+function ModularCastbars3:Lock()
 	self.unlock = nil
 	for k,v in self:IterateModules() do
 		if v:IsEnabled() and type(v.Lock) == "function" then
@@ -132,9 +132,9 @@ function Quartz3:Lock()
 	if self.unlock_dialog then self.unlock_dialog:Hide() end
 end
 
-function Quartz3:ShowUnlockDialog()
+function ModularCastbars3:ShowUnlockDialog()
 	if not self.unlock_dialog then
-		local f = CreateFrame("Frame", "Quartz3UnlockDialog", UIParent)
+		local f = CreateFrame("Frame", "ModularCastbars3UnlockDialog", UIParent)
 		f:SetFrameStrata("DIALOG")
 		f:SetToplevel(true)
 		f:EnableMouse(true)
@@ -167,7 +167,7 @@ function Quartz3:ShowUnlockDialog()
 		local title = f:CreateFontString("ARTWORK")
 		title:SetFontObject("GameFontNormal")
 		title:SetPoint("TOP", header, "TOP", 0, -14)
-		title:SetText(L["Quartz3"])
+		title:SetText(L["ModularCastbars3"])
 
 		local desc = f:CreateFontString("ARTWORK")
 		desc:SetFontObject("GameFontHighlight")
@@ -177,12 +177,12 @@ function Quartz3:ShowUnlockDialog()
 		desc:SetPoint("BOTTOMRIGHT", -18, 48)
 		desc:SetText(L["Bars unlocked. Move them now and click Lock when you are done."])
 
-		local lockBars = CreateFrame("CheckButton", "Quartz3UnlockDialogLock", f, "OptionsButtonTemplate")
+		local lockBars = CreateFrame("CheckButton", "ModularCastbars3UnlockDialogLock", f, "OptionsButtonTemplate")
 		getglobal(lockBars:GetName() .. "Text"):SetText(L["Lock"])
 
 		lockBars:SetScript("OnClick", function(self)
-			Quartz3:Lock()
-			LibStub("AceConfigRegistry-3.0"):NotifyChange("Quartz3")
+			ModularCastbars3:Lock()
+			LibStub("AceConfigRegistry-3.0"):NotifyChange("ModularCastbars3")
 		end)
 
 		--position buttons
@@ -198,7 +198,7 @@ local copyExclude = {
 	y = true,
 }
 
-function Quartz3:CopySettings(from, to)
+function ModularCastbars3:CopySettings(from, to)
 	for k,v in pairs(from) do
 		if to[k] and not copyExclude[k] and type(v) ~= "table" then
 			to[k] = v
@@ -206,11 +206,11 @@ function Quartz3:CopySettings(from, to)
 	end
 end
 
-function Quartz3:GetModuleEnabled(module)
+function ModularCastbars3:GetModuleEnabled(module)
 	return db.modules[module]
 end
 
-function Quartz3:SetModuleEnabled(module, value)
+function ModularCastbars3:SetModuleEnabled(module, value)
 	local old = db.modules[module]
 	db.modules[module] = value
 	if old ~= value then
@@ -222,7 +222,7 @@ function Quartz3:SetModuleEnabled(module, value)
 	end
 end
 
-function Quartz3:Merge(source, target)
+function ModularCastbars3:Merge(source, target)
 	if type(target) ~= "table" then target = {} end
 	for k,v in pairs(source) do
 		if type(v) == "table" then
@@ -234,8 +234,8 @@ function Quartz3:Merge(source, target)
 	return target
 end
 
-Quartz3.Util = {}
-function Quartz3.Util.TimeFormat(num, isCastTime)
+ModularCastbars3.Util = {}
+function ModularCastbars3.Util.TimeFormat(num, isCastTime)
 	if num <= 10 or (isCastTime and num <= 60) then
 		return ("%%.%df"):format(db.casttimeprecision), num
 	elseif num <= 60 then

@@ -1,4 +1,4 @@
-package-as: Quartz
+package-as: ModularCastbars
 
 externals:
   libs/LibStub: https://repos.wowace.com/wow/libstub/tags/1.0

@@ -16,12 +16,12 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
-local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
-local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
+local ModularCastbars3 = LibStub("AceAddon-3.0"):GetAddon("ModularCastbars3")
+local L = LibStub("AceLocale-3.0"):GetLocale("ModularCastbars3")
 
 local MODNAME = "GCD"
-local GCD = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
-local Player = Quartz3:GetModule("Player")
+local GCD = ModularCastbars3:NewModule(MODNAME, "AceEvent-3.0")
+local Player = ModularCastbars3:GetModule("Player")
 
 ----------------------------
 -- Upvalues
@@ -72,11 +72,11 @@ local function OnShow()
 end
 
 function GCD:OnInitialize()
-	self.db = Quartz3.db:RegisterNamespace(MODNAME, defaults)
+	self.db = ModularCastbars3.db:RegisterNamespace(MODNAME, defaults)
 	db = self.db.profile
 	
-	self:SetEnabledState(Quartz3:GetModuleEnabled(MODNAME))
-	Quartz3:RegisterModuleOptions(MODNAME, getOptions, L["GCD"])
+	self:SetEnabledState(ModularCastbars3:GetModuleEnabled(MODNAME))
+	ModularCastbars3:RegisterModuleOptions(MODNAME, getOptions, L["GCD"])
 end
 
 function GCD:OnEnable()
@@ -84,7 +84,7 @@ function GCD:OnEnable()
 	self:RegisterEvent("UNIT_SPELLCAST_START","CheckGCD")
 	self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED","CheckGCD")
 	if not gcdbar then
-		gcdbar = CreateFrame("Frame", "Quartz3GCDBar", UIParent)
+		gcdbar = CreateFrame("Frame", "ModularCastbars3GCDBar", UIParent)
 		gcdbar:SetFrameStrata("HIGH")
 		gcdbar:SetScript("OnShow", OnShow)
 		gcdbar:SetScript("OnHide", OnHide)
@@ -189,10 +189,10 @@ do
 						name = L["Enable"],
 						desc = L["Enable"],
 						get = function()
-							return Quartz3:GetModuleEnabled(MODNAME)
+							return ModularCastbars3:GetModuleEnabled(MODNAME)
 						end,
 						set = function(info, v)
-							Quartz3:SetModuleEnabled(MODNAME, v)
+							ModularCastbars3:SetModuleEnabled(MODNAME, v)
 						end,
 						order = 100,
 					},

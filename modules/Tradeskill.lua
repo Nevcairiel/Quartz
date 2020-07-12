@@ -16,14 +16,14 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
-local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
-local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
+local ModularCastbars3 = LibStub("AceAddon-3.0"):GetAddon("ModularCastbars3")
+local L = LibStub("AceLocale-3.0"):GetLocale("ModularCastbars3")
 
 local MODNAME = "Tradeskill"
-local Tradeskill = Quartz3:NewModule(MODNAME, "AceEvent-3.0", "AceHook-3.0")
-local Player = Quartz3:GetModule("Player")
+local Tradeskill = ModularCastbars3:NewModule(MODNAME, "AceEvent-3.0", "AceHook-3.0")
+local Player = ModularCastbars3:GetModule("Player")
 
-local TimeFmt = Quartz3.Util.TimeFormat
+local TimeFmt = ModularCastbars3.Util.TimeFormat
 
 ----------------------------
 -- Upvalues
@@ -79,8 +79,8 @@ local function tradeskillOnUpdate()
 end
 
 function Tradeskill:OnInitialize()
-	self:SetEnabledState(Quartz3:GetModuleEnabled(MODNAME))
-	Quartz3:RegisterModuleOptions(MODNAME, getOptions, L["Tradeskill Merge"])
+	self:SetEnabledState(ModularCastbars3:GetModuleEnabled(MODNAME))
+	ModularCastbars3:RegisterModuleOptions(MODNAME, getOptions, L["Tradeskill Merge"])
 end
 
 
@@ -108,7 +108,7 @@ function Tradeskill:UNIT_SPELLCAST_START(object, bar, unit, guid, spellID)
 		bail = nil
 		Player.Bar.endTime = nil
 		
-		castBar:SetStatusBarColor(unpack(Quartz3.db.profile.castingcolor))
+		castBar:SetStatusBarColor(unpack(ModularCastbars3.db.profile.castingcolor))
 		castBar:SetMinMaxValues(0, totaltime)
 		
 		castBar:SetValue(0)
@@ -124,7 +124,7 @@ function Tradeskill:UNIT_SPELLCAST_START(object, bar, unit, guid, spellID)
 		end
 		castBarSpark:Show()
 
-		if (icon == "Interface\\Icons\\Temp" or icon == 136235) and Quartz3.db.profile.hidesamwise then
+		if (icon == "Interface\\Icons\\Temp" or icon == 136235) and ModularCastbars3.db.profile.hidesamwise then
 			icon = 136243
 		end
 		castBarIcon:SetTexture(icon)
@@ -185,10 +185,10 @@ do
 						name = L["Enable"],
 						desc = L["Enable"],
 						get = function()
-							return Quartz3:GetModuleEnabled(MODNAME)
+							return ModularCastbars3:GetModuleEnabled(MODNAME)
 						end,
 						set = function(info, v)
-							Quartz3:SetModuleEnabled(MODNAME, v)
+							ModularCastbars3:SetModuleEnabled(MODNAME, v)
 						end,
 					},
 				},

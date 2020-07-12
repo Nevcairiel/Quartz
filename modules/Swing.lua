@@ -16,12 +16,12 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
-local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
-local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
+local ModularCastbars3 = LibStub("AceAddon-3.0"):GetAddon("ModularCastbars3")
+local L = LibStub("AceLocale-3.0"):GetLocale("ModularCastbars3")
 
 local MODNAME = "Swing"
-local Swing = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
-local Player = Quartz3:GetModule("Player")
+local Swing = ModularCastbars3:NewModule(MODNAME, "AceEvent-3.0")
+local Player = ModularCastbars3:GetModule("Player")
 
 local media = LibStub("LibSharedMedia-3.0")
 local lsmlist = AceGUIWidgetLSMlists
@@ -87,11 +87,11 @@ local function OnShow()
 end
 
 function Swing:OnInitialize()
-	self.db = Quartz3.db:RegisterNamespace(MODNAME, defaults)
+	self.db = ModularCastbars3.db:RegisterNamespace(MODNAME, defaults)
 	db = self.db.profile
 	
-	self:SetEnabledState(Quartz3:GetModuleEnabled(MODNAME))
-	Quartz3:RegisterModuleOptions(MODNAME, getOptions, L["Swing"])
+	self:SetEnabledState(ModularCastbars3:GetModuleEnabled(MODNAME))
+	ModularCastbars3:RegisterModuleOptions(MODNAME, getOptions, L["Swing"])
 
 end
 
@@ -116,7 +116,7 @@ function Swing:OnEnable()
 	
 	self:RegisterEvent("UNIT_ATTACK")
 	if not swingbar then
-		swingbar = CreateFrame("Frame", "Quartz3SwingBar", UIParent)
+		swingbar = CreateFrame("Frame", "ModularCastbars3SwingBar", UIParent)
 		swingbar:SetFrameStrata("HIGH")
 		swingbar:SetScript("OnShow", OnShow)
 		swingbar:SetScript("OnHide", OnHide)
@@ -124,7 +124,7 @@ function Swing:OnEnable()
 		swingbar:RegisterForDrag("LeftButton")
 		swingbar:SetClampedToScreen(true)
 		
-		swingstatusbar = Quartz3:CreateStatusBar(nil, swingbar)
+		swingstatusbar = ModularCastbars3:CreateStatusBar(nil, swingbar)
 		
 		durationtext = swingstatusbar:CreateFontString(nil, "OVERLAY")
 		remainingtext = swingstatusbar:CreateFontString(nil, "OVERLAY")
@@ -343,10 +343,10 @@ do
 				name = L["Enable"],
 				desc = L["Enable"],
 				get = function()
-					return Quartz3:GetModuleEnabled(MODNAME)
+					return ModularCastbars3:GetModuleEnabled(MODNAME)
 				end,
 				set = function(info, v)
-					Quartz3:SetModuleEnabled(MODNAME, v)
+					ModularCastbars3:SetModuleEnabled(MODNAME, v)
 				end,
 				order = 100,
 			},

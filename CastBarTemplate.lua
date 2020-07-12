@@ -16,8 +16,8 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
-local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
-local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
+local ModularCastbars3 = LibStub("AceAddon-3.0"):GetAddon("ModularCastbars3")
+local L = LibStub("AceLocale-3.0"):GetLocale("ModularCastbars3")
 
 local media = LibStub("LibSharedMedia-3.0")
 local lsmlist = AceGUIWidgetLSMlists
@@ -31,7 +31,7 @@ local UnitName, UnitCastingInfo, UnitChannelInfo = UnitName, UnitCastingInfo, Un
 local CastBarTemplate = CreateFrame("Frame")
 local CastBarTemplate_MT = {__index = CastBarTemplate}
 
-local TimeFmt = Quartz3.Util.TimeFormat
+local TimeFmt = ModularCastbars3.Util.TimeFormat
 
 local playerName = UnitName("player")
 
@@ -154,14 +154,14 @@ local function ToggleCastNotInterruptible(self, notInterruptible, init)
 		a = db.noInterruptBorderAlpha
 	else
 		self.backdrop.edgeFile = media:Fetch("border", db.border)
-		r,g,b = unpack(Quartz3.db.profile.bordercolor)
-		a = Quartz3.db.profile.borderalpha
+		r,g,b = unpack(ModularCastbars3.db.profile.bordercolor)
+		a = ModularCastbars3.db.profile.borderalpha
 	end
 	self:SetBackdrop(self.backdrop)
 	self:SetBackdropBorderColor(r, g, b, a)
 
-	r, g, b = unpack(Quartz3.db.profile.backgroundcolor)
-	self:SetBackdropColor(r, g, b, Quartz3.db.profile.backgroundalpha)
+	r, g, b = unpack(ModularCastbars3.db.profile.backgroundcolor)
+	self:SetBackdropColor(r, g, b, ModularCastbars3.db.profile.backgroundalpha)
 
 	if self.Shield then
 		if notInterruptible and db.noInterruptShield and not db.hideicon then
@@ -221,7 +221,7 @@ function CastBarTemplate:UNIT_SPELLCAST_START(event, unit, guid, spellID)
 	self.delay = 0
 	self.fadeOut = nil
 
-	self.Bar:SetStatusBarColor(unpack(self.casting and Quartz3.db.profile.castingcolor or Quartz3.db.profile.channelingcolor))
+	self.Bar:SetStatusBarColor(unpack(self.casting and ModularCastbars3.db.profile.castingcolor or ModularCastbars3.db.profile.channelingcolor))
 
 	self.Bar:SetValue(self.casting and 0 or 1)
 	self:Show()
@@ -231,7 +231,7 @@ function CastBarTemplate:UNIT_SPELLCAST_START(event, unit, guid, spellID)
 
 	self.Spark:Show()
 
-	if (icon == "Interface\\Icons\\Temp" or icon == 136235) and Quartz3.db.profile.hidesamwise then
+	if (icon == "Interface\\Icons\\Temp" or icon == 136235) and ModularCastbars3.db.profile.hidesamwise then
 		icon = 136243
 	end
 	self.Icon:SetTexture(icon)
@@ -259,7 +259,7 @@ function CastBarTemplate:UNIT_SPELLCAST_STOP(event, unit)
 	end
 
 	self.Bar:SetValue(self.casting and 1.0 or 0)
-	self.Bar:SetStatusBarColor(unpack(Quartz3.db.profile.completecolor))
+	self.Bar:SetStatusBarColor(unpack(ModularCastbars3.db.profile.completecolor))
 
 	self.casting, self.channeling = nil, nil
 	self.fadeOut = true
@@ -280,7 +280,7 @@ function CastBarTemplate:UNIT_SPELLCAST_FAILED(event, unit)
 		self.stopTime = GetTime()
 	end
 	self.Bar:SetValue(1.0)
-	self.Bar:SetStatusBarColor(unpack(Quartz3.db.profile.failcolor))
+	self.Bar:SetStatusBarColor(unpack(ModularCastbars3.db.profile.failcolor))
 
 	self.TimeText:SetText("")
 
@@ -297,7 +297,7 @@ function CastBarTemplate:UNIT_SPELLCAST_INTERRUPTED(event, unit)
 		self.stopTime = GetTime()
 	end
 	self.Bar:SetValue(1.0)
-	self.Bar:SetStatusBarColor(unpack(Quartz3.db.profile.failcolor))
+	self.Bar:SetStatusBarColor(unpack(ModularCastbars3.db.profile.failcolor))
 
 	self.TimeText:SetText("")
 
@@ -413,7 +413,7 @@ function CastBarTemplate:ApplySettings()
 	self.TimeText:SetFont(media:Fetch("font", db.font), db.timefontsize)
 	self.TimeText:SetShadowColor( 0, 0, 0, 1)
 	self.TimeText:SetShadowOffset( 0.8, -0.8 )
-	self.TimeText:SetTextColor(unpack(Quartz3.db.profile.timetextcolor))
+	self.TimeText:SetTextColor(unpack(ModularCastbars3.db.profile.timetextcolor))
 	self.TimeText:SetNonSpaceWrap(false)
 	self.TimeText:SetHeight(db.h)
 
@@ -459,7 +459,7 @@ function CastBarTemplate:ApplySettings()
 	self.Text:SetFont(media:Fetch("font", db.font), db.fontsize)
 	self.Text:SetShadowColor( 0, 0, 0, 1)
 	self.Text:SetShadowOffset( 0.8, -0.8 )
-	self.Text:SetTextColor(unpack(Quartz3.db.profile.spelltextcolor))
+	self.Text:SetTextColor(unpack(ModularCastbars3.db.profile.spelltextcolor))
 	self.Text:SetNonSpaceWrap(false)
 	self.Text:SetHeight(db.h)
 
@@ -480,7 +480,7 @@ function CastBarTemplate:ApplySettings()
 	end
 
 	self.Spark:SetTexture("Interface\\CastingBar\\UI-CastingBar-Spark")
-	self.Spark:SetVertexColor(unpack(Quartz3.db.profile.sparkcolor))
+	self.Spark:SetVertexColor(unpack(ModularCastbars3.db.profile.sparkcolor))
 	self.Spark:SetBlendMode("ADD")
 	self.Spark:SetWidth(20)
 	self.Spark:SetHeight(db.h*2.2)
@@ -573,7 +573,7 @@ end
 
 do
 	local function getBar(info)
-		return Quartz3.CastBarTemplate.bars[info[1]]
+		return ModularCastbars3.CastBarTemplate.bars[info[1]]
 	end
 
 	local function hideiconoptions(info)
@@ -624,19 +624,19 @@ do
 
 	local function copySettings(info, v)
 		local bar = getBar(info)
-		local from = Quartz3:GetModule(v)
-		Quartz3:CopySettings(from.db.profile, bar.config)
+		local from = ModularCastbars3:GetModule(v)
+		ModularCastbars3:CopySettings(from.db.profile, bar.config)
 		bar:ApplySettings()
 	end
 
 	local function getEnabled(info)
 		local bar = getBar(info)
-		return Quartz3:GetModuleEnabled(bar.modName)
+		return ModularCastbars3:GetModuleEnabled(bar.modName)
 	end
 
 	local function setEnabled(info, v)
 		local bar = getBar(info)
-		return Quartz3:SetModuleEnabled(bar.modName, v)
+		return ModularCastbars3:SetModuleEnabled(bar.modName, v)
 	end
 
 	local function getOpt(info)
@@ -971,8 +971,8 @@ do
 	end
 end
 
-Quartz3.CastBarTemplate = {}
-Quartz3.CastBarTemplate.defaults = {
+ModularCastbars3.CastBarTemplate = {}
+ModularCastbars3.CastBarTemplate.defaults = {
 	--x =  -- applied automatically in applySettings()
 	y = 180,
 	h = 25,
@@ -1007,10 +1007,10 @@ Quartz3.CastBarTemplate.defaults = {
 	noInterruptColor = {1.0, 0.49, 0},
 	noInterruptShield = true,
 }
-Quartz3.CastBarTemplate.template = CastBarTemplate
-Quartz3.CastBarTemplate.bars = {}
-function Quartz3.CastBarTemplate:new(parent, unit, name, localizedName, config)
-	local frameName = "Quartz3CastBar" .. name
+ModularCastbars3.CastBarTemplate.template = CastBarTemplate
+ModularCastbars3.CastBarTemplate.bars = {}
+function ModularCastbars3.CastBarTemplate:new(parent, unit, name, localizedName, config)
+	local frameName = "ModularCastbars3CastBar" .. name
 	local bar = setmetatable(CreateFrame("Frame", frameName, UIParent), CastBarTemplate_MT)
 	bar.unit = unit
 	bar.parent = parent
@@ -1019,7 +1019,7 @@ function Quartz3.CastBarTemplate:new(parent, unit, name, localizedName, config)
 	bar.localizedName = localizedName
 	bar.locked = true
 
-	Quartz3.CastBarTemplate.bars[name] = bar
+	ModularCastbars3.CastBarTemplate.bars[name] = bar
 
 	bar:SetFrameStrata("MEDIUM")
 	bar:SetScript("OnShow", OnShow)
@@ -1030,7 +1030,7 @@ function Quartz3.CastBarTemplate:new(parent, unit, name, localizedName, config)
 	bar:RegisterForDrag("LeftButton")
 	bar:SetClampedToScreen(true)
 
-	bar.Bar      = Quartz3:CreateStatusBar(nil, bar) --CreateFrame("StatusBar", nil, bar)
+	bar.Bar      = ModularCastbars3:CreateStatusBar(nil, bar) --CreateFrame("StatusBar", nil, bar)
 	bar.Text     = bar.Bar:CreateFontString(nil, "OVERLAY")
 	bar.TimeText = bar.Bar:CreateFontString(nil, "OVERLAY")
 	bar.Icon     = bar.Bar:CreateTexture(nil, "DIALOG")

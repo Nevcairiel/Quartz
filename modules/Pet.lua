@@ -16,11 +16,11 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
-local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
-local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
+local ModularCastbars3 = LibStub("AceAddon-3.0"):GetAddon("ModularCastbars3")
+local L = LibStub("AceLocale-3.0"):GetLocale("ModularCastbars3")
 
 local MODNAME = "Pet"
-local Pet = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
+local Pet = ModularCastbars3:NewModule(MODNAME, "AceEvent-3.0")
 
 ----------------------------
 -- Upvalues
@@ -29,7 +29,7 @@ local Pet = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
 local db, getOptions
 
 local defaults = {
-	profile = Quartz3:Merge(Quartz3.CastBarTemplate.defaults,
+	profile = ModularCastbars3:Merge(ModularCastbars3.CastBarTemplate.defaults,
 	{
 		hideblizz = true,
 		
@@ -66,13 +66,13 @@ end
 
 
 function Pet:OnInitialize()
-	self.db = Quartz3.db:RegisterNamespace(MODNAME, defaults)
+	self.db = ModularCastbars3.db:RegisterNamespace(MODNAME, defaults)
 	db = self.db.profile
 
-	self:SetEnabledState(Quartz3:GetModuleEnabled(MODNAME))
-	Quartz3:RegisterModuleOptions(MODNAME, getOptions, L["Pet"])
+	self:SetEnabledState(ModularCastbars3:GetModuleEnabled(MODNAME))
+	ModularCastbars3:RegisterModuleOptions(MODNAME, getOptions, L["Pet"])
 
-	self.Bar = Quartz3.CastBarTemplate:new(self, "pet", MODNAME, L["Pet"], db)
+	self.Bar = ModularCastbars3.CastBarTemplate:new(self, "pet", MODNAME, L["Pet"], db)
 end
 
 function Pet:OnEnable()

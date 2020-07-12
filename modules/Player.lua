@@ -16,11 +16,11 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
-local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
-local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
+local ModularCastbars3 = LibStub("AceAddon-3.0"):GetAddon("ModularCastbars3")
+local L = LibStub("AceLocale-3.0"):GetLocale("ModularCastbars3")
 
 local MODNAME = "Player"
-local Player = Quartz3:NewModule(MODNAME)
+local Player = ModularCastbars3:NewModule(MODNAME)
 
 local UnitCastingInfo, UnitChannelInfo = UnitCastingInfo, UnitChannelInfo
 
@@ -33,7 +33,7 @@ local unpack = unpack
 local db, getOptions, castBar
 
 local defaults = {
-	profile = Quartz3:Merge(Quartz3.CastBarTemplate.defaults,
+	profile = ModularCastbars3:Merge(ModularCastbars3.CastBarTemplate.defaults,
 	{
 		hideblizz = true,
 		showticks = true,
@@ -81,13 +81,13 @@ do
 end
 
 function Player:OnInitialize()
-	self.db = Quartz3.db:RegisterNamespace(MODNAME, defaults)
+	self.db = ModularCastbars3.db:RegisterNamespace(MODNAME, defaults)
 	db = self.db.profile
 
-	self:SetEnabledState(Quartz3:GetModuleEnabled(MODNAME))
-	Quartz3:RegisterModuleOptions(MODNAME, getOptions, L["Player"])
+	self:SetEnabledState(ModularCastbars3:GetModuleEnabled(MODNAME))
+	ModularCastbars3:RegisterModuleOptions(MODNAME, getOptions, L["Player"])
 
-	self.Bar = Quartz3.CastBarTemplate:new(self, "player", MODNAME, L["Player"], db)
+	self.Bar = ModularCastbars3.CastBarTemplate:new(self, "player", MODNAME, L["Player"], db)
 	castBar = self.Bar.Bar
 end
 
@@ -146,7 +146,7 @@ end
 -- Cast Bar Hooks
 
 function Player:OnHide()
-	local Latency = Quartz3:GetModule("Latency", true)
+	local Latency = ModularCastbars3:GetModule("Latency", true)
 	if Latency then
 		if Latency:IsEnabled() and Latency.lagbox then
 			Latency.lagbox:Hide()
@@ -160,7 +160,7 @@ local sparkfactory = {
 		local spark = castBar:CreateTexture(nil, 'OVERLAY')
 		t[k] = spark
 		spark:SetTexture("Interface\\CastingBar\\UI-CastingBar-Spark")
-		spark:SetVertexColor(unpack(Quartz3.db.profile.sparkcolor))
+		spark:SetVertexColor(unpack(ModularCastbars3.db.profile.sparkcolor))
 		spark:SetBlendMode('ADD')
 		spark:SetWidth(20)
 		spark:SetHeight(db.h*2.2)

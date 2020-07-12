@@ -16,16 +16,16 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
-local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
-local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
+local ModularCastbars3 = LibStub("AceAddon-3.0"):GetAddon("ModularCastbars3")
+local L = LibStub("AceLocale-3.0"):GetLocale("ModularCastbars3")
 
 local MODNAME = "Mirror"
-local Mirror = Quartz3:NewModule(MODNAME, "AceHook-3.0", "AceEvent-3.0", "AceTimer-3.0")
-local Player = Quartz3:GetModule("Player")
-local Focus = Quartz3:GetModule("Focus", true)
-local Target = Quartz3:GetModule("Target", true)
+local Mirror = ModularCastbars3:NewModule(MODNAME, "AceHook-3.0", "AceEvent-3.0", "AceTimer-3.0")
+local Player = ModularCastbars3:GetModule("Player")
+local Focus = ModularCastbars3:GetModule("Focus", true)
+local Target = ModularCastbars3:GetModule("Target", true)
 
-local TimeFmt = Quartz3.Util.TimeFormat
+local TimeFmt = ModularCastbars3.Util.TimeFormat
 
 local media = LibStub("LibSharedMedia-3.0")
 local lsmlist = AceGUIWidgetLSMlists
@@ -194,7 +194,7 @@ end
 local mirrorbars = setmetatable({}, {
 	__index = function(t,k)
 		if k == nil then return nil end
-		local bar = Quartz3:CreateStatusBar("QuartzMirrorBar" .. tostring(k), UIParent)
+		local bar = ModularCastbars3:CreateStatusBar("ModularCastbarsMirrorBar" .. tostring(k), UIParent)
 		t[k] = bar
 		bar:SetFrameStrata("MEDIUM")
 		bar:Hide()
@@ -214,11 +214,11 @@ local mirrorbars = setmetatable({}, {
 })
 
 function Mirror:OnInitialize()
-	self.db = Quartz3.db:RegisterNamespace(MODNAME, defaults)
+	self.db = ModularCastbars3.db:RegisterNamespace(MODNAME, defaults)
 	db = self.db.profile
 	
-	self:SetEnabledState(Quartz3:GetModuleEnabled(MODNAME))
-	Quartz3:RegisterModuleOptions(MODNAME, getOptions, L["Mirror"])
+	self:SetEnabledState(ModularCastbars3:GetModuleEnabled(MODNAME))
+	ModularCastbars3:RegisterModuleOptions(MODNAME, getOptions, L["Mirror"])
 
 end
 
@@ -228,7 +228,7 @@ function Mirror:OnEnable()
 	self:RegisterEvent("MIRROR_TIMER_STOP", "UpdateBars")
 	self:RegisterEvent("PLAYER_UNGHOST", "UpdateBars")
 	self:RegisterEvent("PLAYER_ALIVE", "UpdateBars")
-	self:RegisterMessage("Quartz3Mirror_UpdateCustom", "UpdateBars")
+	self:RegisterMessage("ModularCastbars3Mirror_UpdateCustom", "UpdateBars")
 	self:RegisterEvent("CHAT_MSG_BG_SYSTEM_NEUTRAL")
 	self:RegisterEvent("LFG_PROPOSAL_SHOW")
 	self:RegisterEvent("LFG_PROPOSAL_FAILED", "LFG_PROPOSAL_End")
@@ -804,10 +804,10 @@ do
 						name = L["Enable"],
 						desc = L["Enable"],
 						get = function()
-							return Quartz3:GetModuleEnabled(MODNAME)
+							return ModularCastbars3:GetModuleEnabled(MODNAME)
 						end,
 						set = function(info, v)
-							Quartz3:SetModuleEnabled(MODNAME, v)
+							ModularCastbars3:SetModuleEnabled(MODNAME, v)
 						end,
 						order = 96,
 						width = "full",

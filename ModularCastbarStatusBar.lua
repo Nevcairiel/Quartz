@@ -16,20 +16,20 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
-local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
+local ModularCastbars3 = LibStub("AceAddon-3.0"):GetAddon("ModularCastbars3")
 
-local QuartzStatusBar = CreateFrame("Frame")
-local MetaTable = {__index = QuartzStatusBar}
+local ModularCastbarsStatusBar = CreateFrame("Frame")
+local MetaTable = {__index = ModularCastbarsStatusBar}
 
-QuartzStatusBar.__min = 0
-QuartzStatusBar.__max = 100
-QuartzStatusBar.__value = 0
-QuartzStatusBar.__orientation = "HORIZONTAL"
-QuartzStatusBar.__rotatesTexture = 1
+ModularCastbarsStatusBar.__min = 0
+ModularCastbarsStatusBar.__max = 100
+ModularCastbarsStatusBar.__value = 0
+ModularCastbarsStatusBar.__orientation = "HORIZONTAL"
+ModularCastbarsStatusBar.__rotatesTexture = 1
 
 local DrawBar, UpdateBarValue
 
-function Quartz3:CreateStatusBar(name, parent)
+function ModularCastbars3:CreateStatusBar(name, parent)
 	local bar = setmetatable(CreateFrame("Frame", name, parent), MetaTable)
 	bar.__texture = bar:CreateTexture(nil, "ARTWORK")
 	bar.__texture:SetTexture([[Interface\TargetingFrame\UI-StatusBar]])
@@ -70,58 +70,58 @@ function UpdateBarValue(self)
 	self.__texture:SetTexCoord(0, perc, 0, 1)
 end
 
-function QuartzStatusBar:GetMinMaxValues()
+function ModularCastbarsStatusBar:GetMinMaxValues()
 	return self.__min, self.__max
 end
 
-function QuartzStatusBar:SetMinMaxValues(min, max)
+function ModularCastbarsStatusBar:SetMinMaxValues(min, max)
 	if not tonumber(min) or not tonumber(max) then
-		return error(format("QuartzStatusBar:SetMinMaxValues(min, max): Invalid min or max specified! Values were: %q, %q", min, max), 2)
+		return error(format("ModularCastbarsStatusBar:SetMinMaxValues(min, max): Invalid min or max specified! Values were: %q, %q", min, max), 2)
 	end
 	self.__min = tonumber(min)
 	self.__max = tonumber(max)
 	UpdateBarValue(self)
 end
 
-function QuartzStatusBar:GetValue()
+function ModularCastbarsStatusBar:GetValue()
 	return self.__value
 end
 
-function QuartzStatusBar:SetValue(value)
+function ModularCastbarsStatusBar:SetValue(value)
 	if not tonumber(value) then
-		return error(format("QuartzStatusBar:SetValue(value): Invalid value specified! Value was: %q", value), 2)
+		return error(format("ModularCastbarsStatusBar:SetValue(value): Invalid value specified! Value was: %q", value), 2)
 	end
 	self.__value = tonumber(value)
 	UpdateBarValue(self)
 end
 
 
-function QuartzStatusBar:GetOrientation()
+function ModularCastbarsStatusBar:GetOrientation()
 	return self.__orientation
 end
 
-function QuartzStatusBar:SetOrientation(orientation)
+function ModularCastbarsStatusBar:SetOrientation(orientation)
 	if orientation ~= "HORIZONTAL" and orientation ~= "VERTICAL" then
-		return error("QuartzStatusBar:SetOrientation(orientation): Only HORIZONTAL and VERTICAL orientations supported!", 2)
+		return error("ModularCastbarsStatusBar:SetOrientation(orientation): Only HORIZONTAL and VERTICAL orientations supported!", 2)
 	end
 	self.__orientation = orientation
 	DrawBar(self)
 end
 
-function QuartzStatusBar:GetRotatesTexture()
+function ModularCastbarsStatusBar:GetRotatesTexture()
 	return self.__rotatesTexture
 end
 
-function QuartzStatusBar:SetRotatesTexture(rotate)
+function ModularCastbarsStatusBar:SetRotatesTexture(rotate)
 	self.__rotatesTexture = rotate and 1 or nil
 	DrawBar(self)
 end
 
-function QuartzStatusBar:GetStatusBarColor()
+function ModularCastbarsStatusBar:GetStatusBarColor()
 	return unpack(self.__color)
 end
 
-function QuartzStatusBar:SetStatusBarColor(r, g, b, a)
+function ModularCastbarsStatusBar:SetStatusBarColor(r, g, b, a)
 	if not (r and g and b) then
 		error("Usage: SetStatusBarColor(r, g, b[, a])", 2)
 	end
@@ -129,11 +129,11 @@ function QuartzStatusBar:SetStatusBarColor(r, g, b, a)
 	DrawBar(self)
 end
 
-function QuartzStatusBar:GetStatusBarTexture()
+function ModularCastbarsStatusBar:GetStatusBarTexture()
 	return self.__texture
 end
 
-function QuartzStatusBar:SetStatusBarTexture(texture, layer)
+function ModularCastbarsStatusBar:SetStatusBarTexture(texture, layer)
 	if type(texture) == "string" then
 		self.__texture:SetTexture(texture)
 	elseif type(texture) == "table" then

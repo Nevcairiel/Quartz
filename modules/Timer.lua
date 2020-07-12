@@ -16,12 +16,12 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
-local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
-local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
+local ModularCastbars3 = LibStub("AceAddon-3.0"):GetAddon("ModularCastbars3")
+local L = LibStub("AceLocale-3.0"):GetLocale("ModularCastbars3")
 
 local MODNAME = "Timer"
-local Timer = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
-local Mirror = Quartz3:GetModule("Mirror")
+local Timer = ModularCastbars3:NewModule(MODNAME, "AceEvent-3.0")
+local Mirror = ModularCastbars3:GetModule("Mirror")
 
 ----------------------------
 -- Upvalues
@@ -46,9 +46,9 @@ function Timer:ChatHandler(msg)
 						break
 					end
 				end
-				self:SendMessage("Quartz3Mirror_UpdateCustom")
+				self:SendMessage("ModularCastbars3Mirror_UpdateCustom")
 			else
-				return Quartz3:Print(L["Usage: /quartztimer timername 60 or /quartztimer kill timername"])
+				return ModularCastbars3:Print(L["Usage: /modularcastbarstimer timername 60 or /modularcastbarstimer kill timername"])
 			end
 		else
 		local duration = tonumber(msg:match("^(%d+)"))
@@ -58,12 +58,12 @@ function Timer:ChatHandler(msg)
 		else
 			duration = tonumber(msg:match("(%d+)$"))
 			if not duration then
-				return Quartz3:Print(L["Usage: /quartztimer timername 60 or /quartztimer 60 timername"])
+				return ModularCastbars3:Print(L["Usage: /modularcastbarstimer timername 60 or /modularcastbarstimer 60 timername"])
 			end
 			name = msg:match("^(.+) %d+$")
 		end
 		if not name then
-			return Quartz3:Print(L["Usage: /quartztimer timername 60 or /quartztimer kill timername"])
+			return ModularCastbars3:Print(L["Usage: /modularcastbarstimer timername 60 or /modularcastbarstimer kill timername"])
 		end
 
 		local currentTime = GetTime()
@@ -76,7 +76,7 @@ function Timer:ChatHandler(msg)
 				end
 			end
 			thistimers[#thistimers+1] = name
-			self:SendMessage("Quartz3Mirror_UpdateCustom")
+			self:SendMessage("ModularCastbars3Mirror_UpdateCustom")
 		end
 	end
 end
@@ -86,7 +86,7 @@ function Timer:OnDisable()
 		external[v] = nil
 		thistimers[k] = nil
 	end
-	self:SendMessage("Quartz3Mirror_UpdateCustom")
+	self:SendMessage("ModularCastbars3Mirror_UpdateCustom")
 end
 
 local function chatHandler(message)
@@ -94,12 +94,12 @@ local function chatHandler(message)
 end
 
 function Timer:OnInitialize()
-	self:SetEnabledState(Quartz3:GetModuleEnabled(MODNAME))
-	Quartz3:RegisterModuleOptions(MODNAME, getOptions, L["Timer"])
+	self:SetEnabledState(ModularCastbars3:GetModuleEnabled(MODNAME))
+	ModularCastbars3:RegisterModuleOptions(MODNAME, getOptions, L["Timer"])
 
-	Quartz3:RegisterChatCommand("qt", chatHandler)
-	Quartz3:RegisterChatCommand("quartzt", chatHandler)
-	Quartz3:RegisterChatCommand("quartztimer", chatHandler)
+	ModularCastbars3:RegisterChatCommand("mc", chatHandler)
+	ModularCastbars3:RegisterChatCommand("modularcastbarst", chatHandler)
+	ModularCastbars3:RegisterChatCommand("modularcastbarstimer", chatHandler)
 end
 
 
@@ -119,10 +119,10 @@ do
 						name = L["Enable"],
 						desc = L["Enable"],
 						get = function()
-							return Quartz3:GetModuleEnabled(MODNAME)
+							return ModularCastbars3:GetModuleEnabled(MODNAME)
 						end,
 						set = function(info, v)
-							Quartz3:SetModuleEnabled(MODNAME, v)
+							ModularCastbars3:SetModuleEnabled(MODNAME, v)
 						end,
 						order = 99,
 						width = "full",
@@ -167,7 +167,7 @@ do
 								end
 							end
 							thistimers[#thistimers+1] = newname
-							Timer:SendMessage("Quartz3Mirror_UpdateCustom")
+							Timer:SendMessage("ModularCastbars3Mirror_UpdateCustom")
 							newname = nil
 							newlength = nil
 						end,
@@ -197,7 +197,7 @@ do
 										break
 									end
 								end
-								Timer:SendMessage("Quartz3Mirror_UpdateCustom")
+								Timer:SendMessage("ModularCastbars3Mirror_UpdateCustom")
 							end
 						end,
 						values = thistimers,

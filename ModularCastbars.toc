@@ -13,7 +13,7 @@
 ## Notes-zhCN: 模块化施法条。
 ## Notes-zhTW: 模組化施法條。
 
-## SavedVariables: Quartz3DB
+## SavedVariables: ModularCastbars3DB
 ## OptionalDeps: Ace3, LibSharedMedia-3.0, AceGUI-3.0-SharedMediaWidgets, SharedMedia
 
 #@no-lib-strip@
@@ -37,10 +37,10 @@ libs\AceGUI-3.0-SharedMediaWidgets\widget.xml
 
 locale\locale.xml
 
-Quartz.lua
+ModularCastbars.lua
 Config.lua
 
-QuartzStatusBar.lua
+ModularCastbarsStatusBar.lua
 
 CastBarTemplate.lua
 

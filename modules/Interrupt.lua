@@ -16,12 +16,12 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
-local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
-local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
+local ModularCastbars3 = LibStub("AceAddon-3.0"):GetAddon("ModularCastbars3")
+local L = LibStub("AceLocale-3.0"):GetLocale("ModularCastbars3")
 
 local MODNAME = "Interrupt"
-local Interrupt = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
-local Player = Quartz3:GetModule("Player")
+local Interrupt = ModularCastbars3:NewModule(MODNAME, "AceEvent-3.0")
+local Player = ModularCastbars3:GetModule("Player")
 
 local db, getOptions
 
@@ -38,11 +38,11 @@ local defaults = {
 }
 
 function Interrupt:OnInitialize()
-	self.db = Quartz3.db:RegisterNamespace(MODNAME, defaults)
+	self.db = ModularCastbars3.db:RegisterNamespace(MODNAME, defaults)
 	db = self.db.profile
 	
-	self:SetEnabledState(Quartz3:GetModuleEnabled(MODNAME))
-	Quartz3:RegisterModuleOptions(MODNAME, getOptions, L["Interrupt"])
+	self:SetEnabledState(ModularCastbars3:GetModuleEnabled(MODNAME))
+	ModularCastbars3:RegisterModuleOptions(MODNAME, getOptions, L["Interrupt"])
 end
 
 function Interrupt:OnEnable()
@@ -74,10 +74,10 @@ do
 				type = "toggle",
 				name = L["Enable"],
 				get = function()
-					return Quartz3:GetModuleEnabled(MODNAME)
+					return ModularCastbars3:GetModuleEnabled(MODNAME)
 				end,
 				set = function(info, v)
-					Quartz3:SetModuleEnabled(MODNAME, v)
+					ModularCastbars3:SetModuleEnabled(MODNAME, v)
 				end,
 				order = 100,
 			},

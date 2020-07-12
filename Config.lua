@@ -16,8 +16,8 @@
 	with this program; if not, write to the Free Software Foundation, Inc.,
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
-local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
-local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
+local ModularCastbars3 = LibStub("AceAddon-3.0"):GetAddon("ModularCastbars3")
+local L = LibStub("AceLocale-3.0"):GetLocale("ModularCastbars3")
 local media = LibStub("LibSharedMedia-3.0")
 
 ----------------------------
@@ -29,13 +29,13 @@ local getOpt, setOpt, getColor, setColor
 do
 	function getOpt(info)
 		local key = info[#info] 
-		return Quartz3.db.profile[key]
+		return ModularCastbars3.db.profile[key]
 	end
 	
 	function setOpt(info, value)
 		local key = info[#info]
-		Quartz3.db.profile[key] = value
-		Quartz3:ApplySettings()
+		ModularCastbars3.db.profile[key] = value
+		ModularCastbars3:ApplySettings()
 	end
 	
 	function getColor(info)
@@ -63,7 +63,7 @@ local function getOptions()
 							name = L["Toggle Bar Lock"],
 							desc = L["Unlock the Bars to be able to move them around."],
 							func = function()
-								Quartz3:ToggleLock(true)
+								ModularCastbars3:ToggleLock(true)
 							end,
 							order = 50,
 						},
@@ -191,25 +191,25 @@ local function getOptions()
 	return options
 end
 
-function Quartz3:ChatCommand(input)
+function ModularCastbars3:ChatCommand(input)
 	if not input or input:trim() == "" then
-		InterfaceOptionsFrame_OpenToCategory(Quartz3.optFrames.Profiles)
-		InterfaceOptionsFrame_OpenToCategory(Quartz3.optFrames.Quartz3)
+		InterfaceOptionsFrame_OpenToCategory(ModularCastbars3.optFrames.Profiles)
+		InterfaceOptionsFrame_OpenToCategory(ModularCastbars3.optFrames.ModularCastbars3)
 	else
-		LibStub("AceConfigCmd-3.0").HandleCommand(Quartz3, "quartz", "Quartz3", input)
+		LibStub("AceConfigCmd-3.0").HandleCommand(ModularCastbars3, "modularcastbar", "ModularCastbars3", input)
 	end
 end
 
-function Quartz3:SetupOptions()
+function ModularCastbars3:SetupOptions()
 	self.optFrames = {}
-	LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("Quartz3", getOptions)
-	self.optFrames.Quartz3 = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Quartz3", "Quartz 3", nil, "general")
+	LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("ModularCastbars3", getOptions)
+	self.optFrames.ModularCastbars3 = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("ModularCastbars3", "ModularCastbars 3", nil, "general")
 	self:RegisterModuleOptions("Profiles", LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db), "Profiles")
-	self:RegisterChatCommand("quartz", "ChatCommand")
-	self:RegisterChatCommand("q3", "ChatCommand")
+	self:RegisterChatCommand("modularcastbars", "ChatCommand")
+	self:RegisterChatCommand("mc3", "ChatCommand")
 end
 
-function Quartz3:RegisterModuleOptions(name, optTable, displayName)
+function ModularCastbars3:RegisterModuleOptions(name, optTable, displayName)
 	moduleOptions[name] = optTable
-	self.optFrames[name] = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Quartz3", displayName or name, "Quartz 3", name)
+	self.optFrames[name] = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("ModularCastbars3", displayName or name, "ModularCastbars 3", name)
 end
