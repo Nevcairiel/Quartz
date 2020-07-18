@@ -1011,7 +1011,7 @@ Quartz3.CastBarTemplate.template = CastBarTemplate
 Quartz3.CastBarTemplate.bars = {}
 function Quartz3.CastBarTemplate:new(parent, unit, name, localizedName, config)
 	local frameName = "Quartz3CastBar" .. name
-	local bar = setmetatable(CreateFrame("Frame", frameName, UIParent), CastBarTemplate_MT)
+	local bar = setmetatable(CreateFrame("Frame", frameName, UIParent, BackdropTemplateMixin and "BackdropTemplate" or nil), CastBarTemplate_MT)
 	bar.unit = unit
 	bar.parent = parent
 	bar.config = config
