@@ -130,14 +130,13 @@ end
 ----------------------------
 -- Template Methods
 
-local function SetNameText(self, name)
+function CastBarTemplate:SetNameText(name)
 	if self.config.targetname and self.targetName and self.targetName ~= "" then
 		self.Text:SetFormattedText("%s -> %s", name, self.targetName)
 	else
 		self.Text:SetText(name)
 	end
 end
-CastBarTemplate.SetNameText = SetNameText
 
 local function ToggleCastNotInterruptible(self, notInterruptible, init)
 	if self.unit == "player" and not init then return end
@@ -227,7 +226,7 @@ function CastBarTemplate:UNIT_SPELLCAST_START(event, unit, guid, spellID)
 	self:Show()
 	self:SetAlpha(db.alpha)
 
-	SetNameText(self, displayName)
+	self:SetNameText(displayName)
 
 	self.Spark:Show()
 
