@@ -15,7 +15,7 @@
 ## Notes-zhTW: 模組化施法條。
 
 ## SavedVariables: Quartz3DB
-## OptionalDeps: Ace3, LibSharedMedia-3.0, AceGUI-3.0-SharedMediaWidgets, SharedMedia
+## OptionalDeps: Ace3, LibDualSpec-1.0, LibSharedMedia-3.0, AceGUI-3.0-SharedMediaWidgets, SharedMedia
 
 #@no-lib-strip@
 libs\LibStub\LibStub.lua
@@ -34,6 +34,7 @@ libs\AceHook-3.0\AceHook-3.0.xml
 
 libs\LibSharedMedia-3.0\lib.xml
 libs\AceGUI-3.0-SharedMediaWidgets\widget.xml
+libs\LibDualSpec-1.0\LibDualSpec-1.0.lua
 #@end-no-lib-strip@
 
 locale\locale.xml
