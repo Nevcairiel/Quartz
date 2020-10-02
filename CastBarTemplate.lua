@@ -370,7 +370,7 @@ function CastBarTemplate:ApplySettings()
 	if not db.x then
 		db.x = (UIParent:GetWidth() / 2 - (db.w * db.scale) / 2) / db.scale
 	end
-	self:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", db.x, db.y)
+	self:SetPoint(db.barAnchor, UIParent, db.screenAnchor, db.x, db.y)
 	self:SetWidth(db.w + 10)
 	self:SetHeight(db.h + 10)
 	self:SetAlpha(db.alpha)
@@ -534,9 +534,33 @@ do
 		self:StartMoving()
 	end
 
+	local function getpoint(frame, point)
+		if point == "TOP" then
+			return frame:GetLeft() + frame:GetWidth() / 2, frame:GetTop()
+		elseif point == "RIGHT" then
+			return frame:GetRight(), frame:GetBottom() + frame:GetHeight() / 2
+		elseif point == "BOTTOM" then
+			return frame:GetLeft() + frame:GetWidth() / 2, frame:GetBottom()
+		elseif point == "LEFT" then
+			return frame:GetLeft(), frame:GetBottom() + frame:GetHeight() / 2
+		elseif point == "TOPRIGHT" then
+			return frame:GetRight(), frame:GetTop()
+		elseif point == "TOPLEFT" then
+			return frame:GetLeft(), frame:GetTop()
+		elseif point == "BOTTOMLEFT" then
+			return frame:GetLeft(), frame:GetBottom()
+		elseif point == "BOTTOMRIGHT" then
+			return frame:GetRight(), frame:GetBottom()
+		elseif point == "CENTER" then
+			return frame:GetCenter()
+		end
+	end
+
 	local function dragstop(self)
-		self.config.x = self:GetLeft()-UIParent:GetLeft()
-		self.config.y = self:GetBottom()-UIParent:GetBottom()
+		local parent_x, parent_y = getpoint(UIParent, self.config.screenAnchor)
+		local bar_x, bar_y = getpoint(self, self.config.barAnchor)
+		self.config.x = bar_x - parent_x
+		self.config.y = bar_y - parent_y
 		self:StopMovingOrSizing()
 	end
 
@@ -715,6 +739,38 @@ do
 					isPercent = true,
 					min = 0.1, max = 1, bigStep = 0.025,
 					order = 202,
+				},
+				screenAnchor = {
+					type = "select",
+					name = L["Anchor point"],
+					values = {
+						["TOP"] = L["Top"],
+						["RIGHT"] = L["Right"],
+						["BOTTOM"] = L["Bottom"],
+						["LEFT"] = L["Left"],
+						["TOPRIGHT"] = L["Top Right"],
+						["TOPLEFT"] = L["Top Left"],
+						["BOTTOMLEFT"] = L["Bottom Left"],
+						["BOTTOMRIGHT"] = L["Bottom Right"],
+						["CENTER"] = L["Center"]
+					},
+					order = 203,
+				},
+				barAnchor = {
+					type = "select",
+					name = L["Relative point"],
+					values = {
+						["TOP"] = L["Top"],
+						["RIGHT"] = L["Right"],
+						["BOTTOM"] = L["Bottom"],
+						["LEFT"] = L["Left"],
+						["TOPRIGHT"] = L["Top Right"],
+						["TOPLEFT"] = L["Top Left"],
+						["BOTTOMLEFT"] = L["Bottom Left"],
+						["BOTTOMRIGHT"] = L["Bottom Right"],
+						["CENTER"] = L["Center"]
+					},
+					order = 204,
 				},
 				icon = {
 					type = "header",
@@ -980,6 +1036,8 @@ Quartz3.CastBarTemplate.defaults = {
 	texture = "Blizzard",
 	hideicon = false,
 	alpha = 1,
+	screenAnchor = "BOTTOMLEFT",
+	barAnchor = "BOTTOMLEFT",
 	iconalpha = 0.9,
 	iconposition = "left",
 	icongap = 1,
