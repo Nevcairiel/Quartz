@@ -156,7 +156,12 @@ local function ToggleCastNotInterruptible(self, notInterruptible, init)
 		r,g,b = unpack(Quartz3.db.profile.bordercolor)
 		a = Quartz3.db.profile.borderalpha
 	end
-	self:SetBackdrop(self.backdrop)
+
+	-- apply new backdrop
+	self.backdropInfo = self.backdrop
+	self:ApplyBackdrop()
+
+	-- setbackdrop colors
 	self:SetBackdropBorderColor(r, g, b, a)
 
 	r, g, b = unpack(Quartz3.db.profile.backgroundcolor)
