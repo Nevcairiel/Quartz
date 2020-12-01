@@ -115,8 +115,7 @@ end
 function Target:ApplySettings()
 	db = self.db.profile
 
-	-- obey the hideblizz setting no matter if disabled or not
-	if db.hideblizz then
+	if self:IsEnabled() and db.hideblizz then
 		TargetFrameSpellBar.RegisterEvent = function() end
 		TargetFrameSpellBar:UnregisterAllEvents()
 		TargetFrameSpellBar:Hide()
@@ -146,7 +145,7 @@ function Target:ApplySettings()
 end
 
 function Target:Target_Spellbar_OnEvent()
-	if db.hideblizz then
+	if self:IsEnabled() and db.hideblizz then
 		TargetFrameSpellBar.showCastbar = false
 		TargetFrameSpellBar:Hide()
 	end
