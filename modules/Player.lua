@@ -41,6 +41,7 @@ local defaults = {
 		noInterruptBorderChange = false,
 		noInterruptColorChange = false,
 		noInterruptShield = false,
+		targetnamestyle = "default"
 	})
 }
 
@@ -72,6 +73,14 @@ do
 				name = L["Show Target Name"],
 				desc = L["Display target name of spellcasts after spell name"],
 				disabled = function() return db.hidenametext end,
+				order = 402,
+			}
+			options.args.targetnamestyle = {
+				type = "select",
+				name = L["Target Name Style"],
+				desc = L["How to display target name of spellcasts after spell name"],
+				values = {["default"] = L["Spell -> Target"], ["on"] = L["Spell on Target"]},
+				disabled = function() return not db.targetname or db.hidenametext end,
 				order = 402,
 			}
 			options.args.noInterruptGroup = nil
