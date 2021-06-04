@@ -95,14 +95,13 @@ end
 
 
 function Player:OnEnable()
-	if not WoWBC then
-		self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED", "UpdateChannelingTicks")
-	end
-
 	self.Bar:RegisterEvents()
 	self:ApplySettings()
 
-	self:UpdateChannelingTicks()
+	if not WoWBC then
+		self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED", "UpdateChannelingTicks")
+		self:UpdateChannelingTicks()
+	end
 end
 
 function Player:OnDisable()
