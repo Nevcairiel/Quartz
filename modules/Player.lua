@@ -102,7 +102,9 @@ function Player:OnEnable()
 	self.Bar:RegisterEvents()
 	self:ApplySettings()
 
-	self:UpdateChannelingTicks()
+	if not WoWBC then
+		self:UpdateChannelingTicks()
+	end
 end
 
 function Player:OnDisable()
