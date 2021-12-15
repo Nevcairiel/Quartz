@@ -196,8 +196,16 @@ local function setBarTicks(ticknum, duration, ticks)
 	end
 end
 
-local channelingTicks = WoWBC and {} or
-{
+local channelingTicks = WoWBC and {
+	--- BCC
+	-- mage
+	[GetSpellInfo(5143)] = 5,  -- Arcane Missiles
+	[GetSpellInfo(12051)] = 4, -- Evocation
+	[GetSpellInfo(10)] = 8,    -- Blizzard
+	-- priest
+	[GetSpellInfo(15407)] = 3, -- Mind Flay
+} or {
+	--- Retail
 	-- warlock
 	[GetSpellInfo(234153)] = 5, -- drain life
 	[GetSpellInfo(198590)] = 5, -- drain soul
