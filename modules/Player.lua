@@ -24,6 +24,7 @@ local Player = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
 
 local UnitCastingInfo, UnitChannelInfo = UnitCastingInfo, UnitChannelInfo
 
+local WoWRetail = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
 local WoWBC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC)
 
 ----------------------------
@@ -95,7 +96,7 @@ end
 
 
 function Player:OnEnable()
-	if not WoWBC then
+	if WoWRetail then
 		self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED", "UpdateChannelingTicks")
 	end
 
@@ -204,7 +205,7 @@ local channelingTicks = WoWBC and {
 	[GetSpellInfo(10)] = 8,    -- Blizzard
 	-- priest
 	[GetSpellInfo(15407)] = 3, -- Mind Flay
-} or {
+} or WoWRetail and {
 	--- Retail
 	-- warlock
 	[GetSpellInfo(234153)] = 5, -- drain life
@@ -240,7 +241,7 @@ end
 
 function Player:UpdateChannelingTicks()
 	local playerClass = select(2, UnitClass("player"))
-	if not WoWBC then
+	if WoWRetail then
 		if playerClass == "PRIEST" then
 			-- Castigation talent adds a tick to penance
 			channelingTicks[GetSpellInfo(47540)] = isTalentKnown(19752) and 4 or 3
