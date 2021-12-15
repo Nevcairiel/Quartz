@@ -1,5 +1,6 @@
 ## Title: Quartz
-## Interface: 90100
+## Interface: 90105
+## Interface-Classic: 11401
 ## Interface-BCC: 20502
 ## Notes: Modular casting bar.
 ## Author: Nevcairiel, Nymbia
