@@ -164,11 +164,11 @@ end
 
 local sparkfactory = {
 	__index = function(t,k)
-		local spark = castBar:CreateTexture(nil, 'OVERLAY')
+		local spark = castBar:CreateTexture(nil, "OVERLAY")
 		t[k] = spark
 		spark:SetTexture("Interface\\CastingBar\\UI-CastingBar-Spark")
 		spark:SetVertexColor(unpack(Quartz3.db.profile.sparkcolor))
-		spark:SetBlendMode('ADD')
+		spark:SetBlendMode("ADD")
 		spark:SetWidth(20)
 		spark:SetHeight(db.h*2.2)
 		return spark
