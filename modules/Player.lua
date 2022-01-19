@@ -199,13 +199,28 @@ end
 
 local channelingTicks = WoWBC and {
 	--- BCC
+	-- druid
+	[GetSpellInfo(740)] = 4, -- tranquility
+	[GetSpellInfo(16914)] = 10, -- hurricane
+	-- hunter
+	[GetSpellInfo(1510)] = 6, -- volley
 	-- mage
-	[GetSpellInfo(5143)] = 5,  -- Arcane Missiles
-	[GetSpellInfo(12051)] = 4, -- Evocation
-	[GetSpellInfo(10)] = 8,    -- Blizzard
+	[GetSpellInfo(10)] = 8, -- blizzard
+	[5143] = 3, -- arcane missiles r1
+	[5144] = 4, -- arcane missiles r2
+	[GetSpellInfo(5145)] = 5, -- arcane missiles
 	-- priest
-	[GetSpellInfo(15407)] = 3, -- Mind Flay
-} or WoWRetail and {
+	[GetSpellInfo(15407)] = 3, -- mind flay
+	[GetSpellInfo(10797)] = 5, -- star shards
+	-- warlock
+	[GetSpellInfo(1949)] = 15, -- hellfire
+	[GetSpellInfo(5740)] = 4, -- rain of fire
+	[GetSpellInfo(5138)] = 5, -- drain mana
+	[GetSpellInfo(689)] = 5, -- drain life
+	[GetSpellInfo(1120)] = 5, -- drain soul
+	[GetSpellInfo(755)] = 10, -- health funnel
+} 
+or WoWRetail and {
 	--- Retail
 	-- warlock
 	[GetSpellInfo(234153)] = 5, -- drain life
@@ -227,12 +242,12 @@ local channelingTicks = WoWBC and {
 	[GetSpellInfo(115175)] = 8, -- soothing mist
 } or {}
 
-local function getChannelingTicks(spell)
+
+local function getChannelingTicks(spell, spellid)
 	if not db.showticks then
 		return 0
-	end
-	
-	return channelingTicks[spell] or 0
+	end	
+	return channelingTicks[spellid] or channelingTicks[spell] or 0
 end
 
 local function isTalentKnown(talentID)
@@ -251,10 +266,10 @@ end
 
 function Player:UNIT_SPELLCAST_START(bar, unit)
 	if bar.channeling then
-		local spell = UnitChannelInfo(unit)
+		local spell, _, _, _, _, _, _, spellid = UnitChannelInfo(unit)
 		bar.channelingEnd = bar.endTime
 		bar.channelingDuration = bar.endTime - bar.startTime
-		bar.channelingTicks = getChannelingTicks(spell)
+		bar.channelingTicks = getChannelingTicks(spell, spellid)
 		bar.channelingTickTime = bar.channelingTicks > 0 and (bar.channelingDuration / bar.channelingTicks) or 0
 		bar.ticks = bar.ticks or {}
 		for i = 1, bar.channelingTicks do
