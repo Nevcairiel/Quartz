@@ -140,8 +140,10 @@ function Focus:ApplySettings()
 		FocusFrameSpellBar:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
 		FocusFrameSpellBar:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
 		FocusFrameSpellBar:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
-		FocusFrameSpellBar:RegisterEvent("UNIT_SPELLCAST_INTERRUPTIBLE")
-		FocusFrameSpellBar:RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE")
+		if WoWRetail then
+			FocusFrameSpellBar:RegisterEvent("UNIT_SPELLCAST_INTERRUPTIBLE")
+			FocusFrameSpellBar:RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE")
+		end
 		FocusFrameSpellBar:RegisterEvent("PLAYER_ENTERING_WORLD")
 		FocusFrameSpellBar:RegisterEvent("PLAYER_FOCUS_CHANGED")
 		FocusFrameSpellBar:RegisterEvent("CVAR_UPDATE")
