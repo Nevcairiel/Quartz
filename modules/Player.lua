@@ -48,7 +48,7 @@ local defaults = {
 	})
 }
 
-do 
+do
 	local function setOpt(info, value)
 		db[info[#info]] = value
 		Player:ApplySettings()
@@ -122,7 +122,7 @@ end
 
 function Player:ApplySettings()
 	db = self.db.profile
-	
+
 	-- obey the hideblizz setting no matter if disabled or not
 	if db.hideblizz then
 		CastingBarFrame.RegisterEvent = function() end
@@ -143,7 +143,7 @@ function Player:ApplySettings()
 		CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE")
 		CastingBarFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 	end
-	
+
 	self.Bar:SetConfig(db)
 	if self:IsEnabled() then
 		self.Bar:ApplySettings()

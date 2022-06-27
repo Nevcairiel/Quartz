@@ -39,7 +39,7 @@ local defaults = {
 		w = 200,
 		texture = "LiteStep",
 		iconposition = "right",
-		
+
 		showfriendly = true,
 		showhostile = true,
 

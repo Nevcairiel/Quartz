@@ -23,4 +23,6 @@ tools-used:
   - localescrapper
 
 ignore:
-  - locale-export.lua
+  - .luacheckrc
+  - locale/find-locale-strings.lua
+  - locale/wowace-locale-import.sh

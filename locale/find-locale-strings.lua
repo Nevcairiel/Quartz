@@ -1,15 +1,14 @@
+-- Need to hardcode the project id here
 local TOC_FILE
+-- Automatically find the TOC in the given path, set to false to disable
 local AUTO_FIND_TOC = "./"
 -- Patterns that should not be scrapped, case-insensitive
 -- Anything between the no-lib-strip is automatically ignored
-local FILE_BLACKLIST = {"^localization", "^lib"}
+local FILE_BLACKLIST = {"^locale", "^libs"}
+
 
 -- No more modifying!
 local OS_TYPE = os.getenv("HOME") and "linux" or "windows"
-
-local function printerr(pattern, ...)
-	io.stderr:write(string.format(pattern .. "\n", ...))
-end
 
 -- Find the TOC now
 if( AUTO_FIND_TOC ) then
@@ -23,32 +22,18 @@ if( AUTO_FIND_TOC ) then
 		end
 
 		pipe:close()
-		if( not TOC_FILE ) then printerr("Failed to auto detect toc file.") end
+		if( not TOC_FILE ) then print("Failed to auto detect toc file.") end
 	else
-		printerr("Failed to auto find toc, cannot run dir /B or ls -1")
+		print("Failed to auto find toc, cannot run dir /B or ls -1")
 	end
 end
 
 if( not TOC_FILE ) then
-	while( not TOC_FILE ) do
-		io.stdout:write("TOC path: ")
-		TOC_FILE = io.stdin:read("*line")
-		TOC_FILE = TOC_FILE ~= "" and TOC_FILE or nil
-		if( TOC_FILE ) then
-			local file = io.open(TOC_FILE)
-			if( file ) then
-				file:close()
-				break
-			else
-				printerr("%s does not exist.", TOC_FILE)
-				return
-			end
-		end
-	end
+	return
 end
 
-printerr("Using TOC file %s", TOC_FILE)
-printerr("")
+print(string.format("Using TOC file %s", TOC_FILE))
+print("")
 
 -- Parse through the TOC file so we know what to scan
 local ignore
@@ -87,7 +72,7 @@ for line in io.lines(TOC_FILE) do
 				localizedKeys[match] = true
 			end
 			
-			printerr("%s (%d keys)", line, keys)
+			print(string.format("%s (%d keys)", line, keys))
 		end
 	end
 end
@@ -96,15 +81,17 @@ end
 local totalLocalizedKeys = 0
 local localization = ""
 for key in pairs(localizedKeys) do
-	localization = string.format("%s\nL[\"%s\"] = true", localization, key, key)
+	localization = string.format("%sL[\"%s\"] = true\n", localization, key, key)
 	totalLocalizedKeys = totalLocalizedKeys + 1
 end
 
 if( totalLocalizedKeys == 0 ) then
-	printerr("Warning, failed to find any localizations, perhaps you messed up a configuration variable?")
+	print("Warning, failed to find any localizations, perhaps you messed up a configuration variable?")
 	return
 end
 
-printerr("Found %d keys total", totalLocalizedKeys)
+local file = assert(io.open("exported-locale-strings.lua", "w", "Error opening file"))
+file:write(localization)
+file:close()
 
-print(localization)
+print(string.format("Written %d keys to exported-locale-strings.lua", totalLocalizedKeys))
