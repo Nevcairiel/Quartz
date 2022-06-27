@@ -233,6 +233,7 @@ local channelingTicks = WoWBC and {
 	-- warlock
 	[GetSpellInfo(234153)] = 5, -- drain life
 	[GetSpellInfo(198590)] = 5, -- drain soul
+	[GetSpellInfo(217979)] = 5, -- health funnel
 	-- druid
 	[GetSpellInfo(740)] = 4, -- tranquility
 	-- priest
@@ -241,9 +242,11 @@ local channelingTicks = WoWBC and {
 	[GetSpellInfo(47540)] = 3, -- penance
 	[GetSpellInfo(205065)] = 5, -- void torrent
 	[GetSpellInfo(48045)] = 6, -- mind sear
+	[GetSpellInfo(64901)] = 5, -- symbol of hope
 	-- mage
 	[GetSpellInfo(5143)] = 5, -- arcane missiles
 	[GetSpellInfo(205021)] = 5, -- ray of frost
+	[GetSpellInfo(314791)] = 4, -- covenant: shifting power
 	-- monk
 	[GetSpellInfo(117952)] = 4, -- crackling jade lightning
 	[GetSpellInfo(191837)] = 3, -- essence font
