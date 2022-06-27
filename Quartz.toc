@@ -40,6 +40,9 @@ libs\AceGUI-3.0-SharedMediaWidgets\widget.xml
 libs\LibDualSpec-1.0\LibDualSpec-1.0.lua
 #@end-retail@
 libs\LibWindow-1.1\LibWindow-1.1.lua
+#@version-classic@
+libs\LibClassicCasterino\LibClassicCasterino.lua
+#@end-version-classic@
 #@end-no-lib-strip@
 
 locale\locale.xml

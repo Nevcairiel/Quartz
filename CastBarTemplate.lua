@@ -24,12 +24,25 @@ local media = LibStub("LibSharedMedia-3.0")
 local lsmlist = AceGUIWidgetLSMlists
 
 local WoWRetail = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
+local WoWClassic = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
+
+local LibClassicCasterino = WoWClassic and LibStub("LibClassicCasterino", true)
 
 ----------------------------
 -- Upvalues
 local min, type, format, unpack, setmetatable = math.min, type, string.format, unpack, setmetatable
 local CreateFrame, GetTime, UIParent = CreateFrame, GetTime, UIParent
 local UnitName, UnitCastingInfo, UnitChannelInfo = UnitName, UnitCastingInfo, UnitChannelInfo
+
+if LibClassicCasterino then
+	UnitCastingInfo = function(unit)
+		return LibClassicCasterino:UnitCastingInfo(unit)
+	end
+
+	UnitChannelInfo = function(unit)
+		return LibClassicCasterino:UnitChannelInfo(unit)
+	end
+end
 
 local CastBarTemplate = CreateFrame("Frame")
 local CastBarTemplate_MT = {__index = CastBarTemplate}
@@ -516,17 +529,32 @@ function CastBarTemplate:RegisterEvents()
 	if self.unit == "player" then
 		self:RegisterEvent("UNIT_SPELLCAST_SENT")
 	end
-	self:RegisterEvent("UNIT_SPELLCAST_START")
-	self:RegisterEvent("UNIT_SPELLCAST_STOP")
-	self:RegisterEvent("UNIT_SPELLCAST_FAILED")
-	self:RegisterEvent("UNIT_SPELLCAST_DELAYED")
-	self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
-	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
-	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
-	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
-	if self.unit ~= "player" and WoWRetail then
-		self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTIBLE")
-		self:RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE")
+
+	if LibClassicCasterino then
+		local CastbarEventHandler = function(event, ...)
+			return self[event](self, event, ...)
+		end
+		LibClassicCasterino.RegisterCallback(self, "UNIT_SPELLCAST_START", CastbarEventHandler)
+		LibClassicCasterino.RegisterCallback(self, "UNIT_SPELLCAST_STOP", CastbarEventHandler)
+		LibClassicCasterino.RegisterCallback(self, "UNIT_SPELLCAST_FAILED", CastbarEventHandler)
+		LibClassicCasterino.RegisterCallback(self, "UNIT_SPELLCAST_DELAYED", CastbarEventHandler)
+		LibClassicCasterino.RegisterCallback(self, "UNIT_SPELLCAST_INTERRUPTED", CastbarEventHandler)
+		LibClassicCasterino.RegisterCallback(self, "UNIT_SPELLCAST_CHANNEL_START", CastbarEventHandler)
+		LibClassicCasterino.RegisterCallback(self, "UNIT_SPELLCAST_CHANNEL_UPDATE", CastbarEventHandler)
+		LibClassicCasterino.RegisterCallback(self, "UNIT_SPELLCAST_CHANNEL_STOP", CastbarEventHandler)
+	else
+		self:RegisterEvent("UNIT_SPELLCAST_START")
+		self:RegisterEvent("UNIT_SPELLCAST_STOP")
+		self:RegisterEvent("UNIT_SPELLCAST_FAILED")
+		self:RegisterEvent("UNIT_SPELLCAST_DELAYED")
+		self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
+		self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
+		self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
+		self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
+		if self.unit ~= "player" and WoWRetail then
+			self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTIBLE")
+			self:RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE")
+		end
 	end
 
 	media.RegisterCallback(self, "LibSharedMedia_SetGlobal", function(mtype, override)
@@ -546,6 +574,9 @@ function CastBarTemplate:UnregisterEvents()
 	self:UnregisterAllEvents()
 	media.UnregisterCallback(self, "LibSharedMedia_SetGlobal")
 	media.UnregisterCallback(self, "LibSharedMedia_Registered")
+	if LibClassicCasterino then
+		LibClassicCasterino.UnregisterAllCallbacks(self)
+	end
 end
 
 do
