@@ -228,8 +228,7 @@ local channelingTicks = WoWBC and {
 	[GetSpellInfo(689)] = 5, -- drain life
 	[GetSpellInfo(1120)] = 5, -- drain soul
 	[GetSpellInfo(755)] = 10, -- health funnel
-} 
-or WoWRetail and {
+} or WoWRetail and {
 	--- Retail
 	-- warlock
 	[GetSpellInfo(234153)] = 5, -- drain life
@@ -255,7 +254,7 @@ or WoWRetail and {
 local function getChannelingTicks(spell, spellid)
 	if not db.showticks then
 		return 0
-	end	
+	end
 	return channelingTicks[spellid] or channelingTicks[spell] or 0
 end
 
