@@ -136,7 +136,7 @@ end
 function CastBarTemplate:SetNameText(name)
 	if self.config.targetname and self.targetName and self.targetName ~= "" then
 		if self.config.targetnamestyle == "on" then
-			self.Text:SetFormattedText("%s on %s", name, self.targetName)
+			self.Text:SetFormattedText(L["%s on %s"], name, self.targetName)
 		else
 			self.Text:SetFormattedText("%s -> %s", name, self.targetName)
 		end
