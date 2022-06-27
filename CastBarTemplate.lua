@@ -256,7 +256,7 @@ function CastBarTemplate:UNIT_SPELLCAST_START(event, unit, guid, spellID)
 	self:Show()
 	self:SetAlpha(db.alpha)
 
-	self:SetNameText(displayName)
+	self:SetNameText(displayName or spell)
 
 	self.Spark:Show()
 
