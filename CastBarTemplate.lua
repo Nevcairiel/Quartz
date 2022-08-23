@@ -422,6 +422,8 @@ function CastBarTemplate:ApplySettings()
 
 	LibWindow.RestorePosition(self)
 
+	self:SetFrameStrata(db.strata)
+
 	ToggleCastNotInterruptible(self, self.lastNotInterruptible, true)
 
 	local iconwidth = db.h + db.icongap
@@ -804,6 +806,26 @@ do
 					},
 					order = 205,
 				},
+				strata = {
+					type = "select",
+					name = L["Strata"],
+					desc = L["Set the bar in front of or behind other UI elements."],
+					values = {
+						["BACKGROUND"] = L["BACKGROUND"],
+						["LOW"] = L["LOW"],
+						["MEDIUM"] = L["MEDIUM"],
+						["HIGH"] = L["HIGH"],
+						["DIALOG"] = L["DIALOG"],
+					},
+					sorting = {
+						"BACKGROUND",
+						"LOW",
+						"MEDIUM",
+						"HIGH",
+						"DIALOG",
+					},
+					order = 206,
+				},
 				icon = {
 					type = "header",
 					name = L["Icon"],
@@ -1063,6 +1085,7 @@ Quartz3.CastBarTemplate.defaults = {
 	--x =  -- applied automatically in applySettings()
 	y = 180,
 	point = "BOTTOMLEFT",
+	strata = "MEDIUM",
 	h = 25,
 	w = 250,
 	scale = 1,
@@ -1110,7 +1133,6 @@ function Quartz3.CastBarTemplate:new(parent, unit, name, localizedName, config)
 
 	Quartz3.CastBarTemplate.bars[name] = bar
 
-	bar:SetFrameStrata("MEDIUM")
 	bar:SetScript("OnShow", OnShow)
 	bar:SetScript("OnHide", OnHide)
 	bar:SetScript("OnUpdate", OnUpdate)
