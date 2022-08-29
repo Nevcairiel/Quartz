@@ -44,6 +44,7 @@ read_globals = {
 	"CreateFrame",
 	"CombatLogGetCurrentEventInfo",
 	"GetActiveSpecGroup",
+	"GetBuildInfo",
 	"GetCombatRatingBonus",
 	"GetCorpseRecoveryDelay",
 	"GetCVar",
