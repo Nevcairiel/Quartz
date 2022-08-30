@@ -210,7 +210,28 @@ local function setBarTicks(ticknum, duration, ticks)
 	end
 end
 
-local channelingTicks = WoWBC and {
+local channelingTicks = WoWWrath and {
+	--- Wrath
+	-- druid
+	[GetSpellInfo(740)] = 4, -- tranquility
+	[GetSpellInfo(16914)] = 10, -- hurricane
+	-- hunter
+	[GetSpellInfo(1510)] = 6, -- volley
+	-- mage
+	[GetSpellInfo(10)] = 8, -- blizzard
+	[5143] = 3, -- arcane missiles r1
+	[5144] = 4, -- arcane missiles r2
+	[GetSpellInfo(5145)] = 5, -- arcane missiles
+	-- priest
+	[GetSpellInfo(15407)] = 3, -- mind flay
+	-- warlock
+	[GetSpellInfo(1949)] = 15, -- hellfire
+	[GetSpellInfo(5740)] = 4, -- rain of fire
+	[GetSpellInfo(5138)] = 5, -- drain mana
+	[GetSpellInfo(689)] = 5, -- drain life
+	[GetSpellInfo(1120)] = 5, -- drain soul
+	[GetSpellInfo(755)] = 10, -- health funnel
+} or WoWBC and {
 	--- BCC
 	-- druid
 	[GetSpellInfo(740)] = 4, -- tranquility
