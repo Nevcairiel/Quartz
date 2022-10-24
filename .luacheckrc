@@ -24,6 +24,7 @@ globals = {
 	"CastingBarFrame",
 	"FocusFrameSpellBar",
 	"PetCastingBarFrame",
+	"PlayerCastingBarFrame",
 	"TargetFrameSpellBar",
 }
 

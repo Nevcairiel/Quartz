@@ -126,26 +126,49 @@ function Player:ApplySettings()
 	db = self.db.profile
 
 	-- obey the hideblizz setting no matter if disabled or not
-	if db.hideblizz then
-		CastingBarFrame.RegisterEvent = function() end
-		CastingBarFrame:UnregisterAllEvents()
-		CastingBarFrame:Hide()
-	else
-		CastingBarFrame.RegisterEvent = nil
-		CastingBarFrame:UnregisterAllEvents()
-		CastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")
-		CastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_STOP", "player")
-		CastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_FAILED", "player")
-		CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
-		CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_DELAYED")
-		CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
-		CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
-		CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
-		if WoWRetail then
-			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTIBLE")
-			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE")
+	if PlayerCastingBarFrame then
+		if db.hideblizz then
+			PlayerCastingBarFrame.RegisterEvent = function() end
+			PlayerCastingBarFrame:UnregisterAllEvents()
+			PlayerCastingBarFrame:Hide()
+		else
+			self:RegisterUnitEvent("UNIT_SPELLCAST_INTERRUPTED", "player")
+			self:RegisterUnitEvent("UNIT_SPELLCAST_DELAYED", "player")
+			self:RegisterUnitEvent("UNIT_SPELLCAST_CHANNEL_START", "player")
+			self:RegisterUnitEvent("UNIT_SPELLCAST_CHANNEL_UPDATE", "player")
+			self:RegisterUnitEvent("UNIT_SPELLCAST_CHANNEL_STOP", "player")
+			self:RegisterUnitEvent("UNIT_SPELLCAST_EMPOWER_START", "player")
+			self:RegisterUnitEvent("UNIT_SPELLCAST_EMPOWER_UPDATE", "player")
+			self:RegisterUnitEvent("UNIT_SPELLCAST_EMPOWER_STOP", "player")
+			self:RegisterUnitEvent("UNIT_SPELLCAST_INTERRUPTIBLE", "player")
+			self:RegisterUnitEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE", "player")
+			self:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")
+			self:RegisterUnitEvent("UNIT_SPELLCAST_STOP", "player")
+			self:RegisterUnitEvent("UNIT_SPELLCAST_FAILED", "player")
+			self:RegisterEvent("PLAYER_ENTERING_WORLD")
 		end
-		CastingBarFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+	else
+		if db.hideblizz then
+			CastingBarFrame.RegisterEvent = function() end
+			CastingBarFrame:UnregisterAllEvents()
+			CastingBarFrame:Hide()
+		else
+			CastingBarFrame.RegisterEvent = nil
+			CastingBarFrame:UnregisterAllEvents()
+			CastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")
+			CastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_STOP", "player")
+			CastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_FAILED", "player")
+			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
+			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_DELAYED")
+			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
+			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
+			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
+			if WoWRetail then
+				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTIBLE")
+				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE")
+			end
+			CastingBarFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+		end
 	end
 
 	self.Bar:SetConfig(db)
