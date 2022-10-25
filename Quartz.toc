@@ -1,5 +1,5 @@
 ## Title: Quartz
-## Interface: 90205
+## Interface: 100000
 ## Interface-Classic: 11403
 ## Interface-BCC: 20504
 ## Interface-Wrath: 30400
