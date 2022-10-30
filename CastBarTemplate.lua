@@ -74,12 +74,12 @@ end
 -- OnUpdate handles the bar movement and the text updates
 local function OnUpdate(self)
 	local currentTime = GetTime()
-	local startTime, endTime, delay = self.startTime, self.endTime, self.delay
+	local startTime, endTime, delay, showTime = self.startTime, self.endTime, self.delay, 0
 	local db = self.config
 	if self.channeling or self.casting then
 		local perc, remainingTime, delayFormat, delayFormatTime
 		if self.casting then
-			local showTime = min(currentTime, endTime)
+			showTime = min(currentTime, endTime)
 			remainingTime = endTime - showTime
 			perc = (showTime - startTime) / (endTime - startTime)
 
@@ -94,18 +94,24 @@ local function OnUpdate(self)
 		self.Bar:SetValue(perc)
 		self.Spark:ClearAllPoints()
 		self.Spark:SetPoint("CENTER", self.Bar, "LEFT", perc * self.Bar:GetWidth(), 0)
+		local timeTextValue
+		if (db.casttimecountup) then
+			timeTextValue = showTime - startTime
+		else
+			timeTextValue = remainingTime
+		end
 
 		if delay and delay ~= 0 then
 			if db.hidecasttime then
-				self.TimeText:SetFormattedText(delayFormat, delay, format(TimeFmt(remainingTime)))
+				self.TimeText:SetFormattedText(delayFormat, delay, format(TimeFmt(timeTextValue)))
 			else
-				self.TimeText:SetFormattedText(delayFormatTime, delay, format(TimeFmt(remainingTime)), format(TimeFmt(endTime - startTime, true)))
+				self.TimeText:SetFormattedText(delayFormatTime, delay, format(TimeFmt(timeTextValue)), format(TimeFmt(endTime - startTime, true)))
 			end
 		else
 			if db.hidecasttime then
-				self.TimeText:SetFormattedText(TimeFmt(remainingTime))
+				self.TimeText:SetFormattedText(TimeFmt(timeTextValue))
 			else
-				self.TimeText:SetFormattedText("%s / %s", format(TimeFmt(remainingTime)), format(TimeFmt(endTime - startTime, true)))
+				self.TimeText:SetFormattedText("%s / %s", format(TimeFmt(timeTextValue)), format(TimeFmt(endTime - startTime, true)))
 			end
 		end
 
@@ -927,6 +933,13 @@ do
 					min = -35, max = 35, step = 1,
 					disabled = hidetimetextoptions,
 					order = 417,
+				},
+				casttimecountup = {
+					type = "toggle",
+					name = L["Cast Time Count Up"],
+					desc = L["Count up from zero instead of down from the cast duration"],
+					disabled = hidetimetextoptions,
+					order = 418,
 				},
 				textureheader = {
 					type = "header",
