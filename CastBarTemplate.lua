@@ -95,17 +95,18 @@ local function OnUpdate(self)
 		self.Spark:ClearAllPoints()
 		self.Spark:SetPoint("CENTER", self.Bar, "LEFT", perc * self.Bar:GetWidth(), 0)
 
+		local timeTextValue = db.casttimecountup and ((endTime - startTime) - remainingTime) or remainingTime
 		if delay and delay ~= 0 then
 			if db.hidecasttime then
-				self.TimeText:SetFormattedText(delayFormat, delay, format(TimeFmt(remainingTime)))
+				self.TimeText:SetFormattedText(delayFormat, delay, format(TimeFmt(timeTextValue)))
 			else
-				self.TimeText:SetFormattedText(delayFormatTime, delay, format(TimeFmt(remainingTime)), format(TimeFmt(endTime - startTime, true)))
+				self.TimeText:SetFormattedText(delayFormatTime, delay, format(TimeFmt(timeTextValue)), format(TimeFmt(endTime - startTime, true)))
 			end
 		else
 			if db.hidecasttime then
-				self.TimeText:SetFormattedText(TimeFmt(remainingTime))
+				self.TimeText:SetFormattedText(TimeFmt(timeTextValue))
 			else
-				self.TimeText:SetFormattedText("%s / %s", format(TimeFmt(remainingTime)), format(TimeFmt(endTime - startTime, true)))
+				self.TimeText:SetFormattedText("%s / %s", format(TimeFmt(timeTextValue)), format(TimeFmt(endTime - startTime, true)))
 			end
 		end
 
@@ -967,6 +968,13 @@ do
 					min = -35, max = 35, step = 1,
 					disabled = hidetimetextoptions,
 					order = 417,
+				},
+				casttimecountup = {
+					type = "toggle",
+					name = L["Cast Time Count Up"],
+					desc = L["Count up from zero instead of down from the cast duration"],
+					disabled = hidetimetextoptions,
+					order = 418,
 				},
 				textureheader = {
 					type = "header",
