@@ -771,7 +771,7 @@ do
 					type = "range",
 					name = L["Scale"],
 					desc = L["Scale"],
-					min = 0.2, max = 1, bigStep = 0.025,
+					min = 0.2, max = 1.5, bigStep = 0.025,
 					order = 201,
 				},
 				alpha = {
