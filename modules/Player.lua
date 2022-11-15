@@ -418,9 +418,9 @@ function Player:AddStages(bar, numStages)
 	local sumDuration = 0
 	local stageMaxValue = (bar.endTime - bar.startTime) * 1000
 
-	local castBarLeft = bar:GetLeft()
-	local castBarRight = bar:GetRight()
-	local castBarWidth = bar:GetWidth()
+	local castBarLeft = bar.Bar:GetLeft()
+	local castBarRight = bar.Bar:GetRight()
+	local castBarWidth = castBarRight - castBarLeft
 
 	for i = 1, bar.NumStages-1, 1 do
 		local duration = self:GetStageDuration(bar, i)
