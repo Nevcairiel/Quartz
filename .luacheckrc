@@ -80,6 +80,7 @@ read_globals = {
 
 	-- FrameXML Frames
 	"UIParent",
+	"ProfessionsFrame.CraftingPage",
 
 	-- FrameXML Misc
 	"StaticPopupDialogs",
