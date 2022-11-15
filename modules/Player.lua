@@ -307,6 +307,8 @@ local channelingTicks = WoWWrath and {
 	[GetSpellInfo(117952)] = 4, -- crackling jade lightning
 	[GetSpellInfo(191837)] = 3, -- essence font
 	[GetSpellInfo(115175)] = 8, -- soothing mist
+	-- evoker
+	[GetSpellInfo(356995)] = 3, -- disintegrate
 } or {}
 
 
