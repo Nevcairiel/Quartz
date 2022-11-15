@@ -55,6 +55,8 @@ read_globals = {
 	"GetSpellInfo",
 	"GetTalentInfoByID",
 	"GetTime",
+	"GetUnitEmpowerHoldAtMaxTime",
+	"GetUnitEmpowerStageDuration",
 	"IsInInstance",
 	"IsSpellInRange",
 	"LoadAddOn",

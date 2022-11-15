@@ -222,17 +222,12 @@ function CastBarTemplate:UNIT_SPELLCAST_START(event, unit, guid, spellID)
 		return
 	end
 	local db = self.config
-	if event == "UNIT_SPELLCAST_START" then
-		self.casting, self.channeling = true, nil
-	else
-		self.casting, self.channeling = nil, true
-	end
 
-	local spell, displayName, icon, startTime, endTime, _, notInterruptible
-	if self.casting then
+	local spell, displayName, icon, startTime, endTime, _, notInterruptible, numStages
+	if event == "UNIT_SPELLCAST_START" then
 		spell, displayName, icon, startTime, endTime, _, _, notInterruptible = UnitCastingInfo(unit)
 	else -- self.channeling
-		spell, displayName, icon, startTime, endTime, _, notInterruptible = UnitChannelInfo(unit)
+		spell, displayName, icon, startTime, endTime, _, notInterruptible, _, _, numStages = UnitChannelInfo(unit)
 		-- channeling spells sometimes just display "Channeling" - this is not wanted
 		displayName = spell
 	end
@@ -244,12 +239,27 @@ function CastBarTemplate:UNIT_SPELLCAST_START(event, unit, guid, spellID)
 		notInterruptible = false
 	end
 
+	local isChargeSpell = numStages and numStages > 0
+
+	if isChargeSpell then
+		endTime = endTime + GetUnitEmpowerHoldAtMaxTime(self.unit)
+	end
+
+	if event == "UNIT_SPELLCAST_START" then
+		self.casting, self.channeling, self.chargeSpell = true, nil, nil
+	elseif isChargeSpell then
+		self.casting, self.channeling, self.chargeSpell = true, nil, true
+	else
+		self.casting, self.channeling, self.chargeSpell = nil, true, nil
+	end
+
 	startTime = startTime / 1000
 	endTime = endTime / 1000
 	self.startTime = startTime
 	self.endTime = endTime
 	self.delay = 0
 	self.fadeOut = nil
+	self.numStages = numStages
 
 	self.Bar:SetStatusBarColor(unpack(self.casting and Quartz3.db.profile.castingcolor or Quartz3.db.profile.channelingcolor))
 
@@ -282,6 +292,7 @@ function CastBarTemplate:UNIT_SPELLCAST_START(event, unit, guid, spellID)
 	call(self, "UNIT_SPELLCAST_START", unit, guid, spellID)
 end
 CastBarTemplate.UNIT_SPELLCAST_CHANNEL_START = CastBarTemplate.UNIT_SPELLCAST_START
+CastBarTemplate.UNIT_SPELLCAST_EMPOWER_START = CastBarTemplate.UNIT_SPELLCAST_START
 
 function CastBarTemplate:UNIT_SPELLCAST_STOP(event, unit)
 	if not (self.channeling or self.casting) or (unit ~= self.unit and not (self.unit == "player" and unit == "vehicle")) then
@@ -300,6 +311,7 @@ function CastBarTemplate:UNIT_SPELLCAST_STOP(event, unit)
 	call(self, "UNIT_SPELLCAST_STOP", unit)
 end
 CastBarTemplate.UNIT_SPELLCAST_CHANNEL_STOP = CastBarTemplate.UNIT_SPELLCAST_STOP
+CastBarTemplate.UNIT_SPELLCAST_EMPOWER_STOP = CastBarTemplate.UNIT_SPELLCAST_STOP
 
 function CastBarTemplate:UNIT_SPELLCAST_FAILED(event, unit)
 	if self.channeling or self.casting or (unit ~= self.unit and not (self.unit == "player" and unit == "vehicle")) then
@@ -321,7 +333,7 @@ function CastBarTemplate:UNIT_SPELLCAST_INTERRUPTED(event, unit)
 	if unit ~= self.unit and not (self.unit == "player" and unit == "vehicle") then
 		return
 	end
-	self.casting, self.channeling = nil, nil
+	self.casting, self.channeling, self.chargeSpell = nil, nil, nil
 	self.fadeOut = true
 	if not self.stopTime then
 		self.stopTime = GetTime()
@@ -340,7 +352,7 @@ function CastBarTemplate:UNIT_SPELLCAST_DELAYED(event, unit)
 	end
 	local oldStart = self.startTime
 	local _, startTime, endTime
-	if self.casting then
+	if self.casting and not self.chargeSpell then
 		_, _, _, startTime, endTime = UnitCastingInfo(unit)
 	else
 		_, _, _, startTime, endTime = UnitChannelInfo(unit)
@@ -355,7 +367,7 @@ function CastBarTemplate:UNIT_SPELLCAST_DELAYED(event, unit)
 	self.startTime = startTime
 	self.endTime = endTime
 
-	if self.casting then
+	if self.casting and not self.chargeSpell then
 		self.delay = (self.delay or 0) + (startTime - (oldStart or startTime))
 	else
 		self.delay = (self.delay or 0) + ((oldStart or startTime) - startTime)
@@ -364,6 +376,7 @@ function CastBarTemplate:UNIT_SPELLCAST_DELAYED(event, unit)
 	call(self, "UNIT_SPELLCAST_DELAYED", unit)
 end
 CastBarTemplate.UNIT_SPELLCAST_CHANNEL_UPDATE = CastBarTemplate.UNIT_SPELLCAST_DELAYED
+CastBarTemplate.UNIT_SPELLCAST_EMPOWER_UPDATE = CastBarTemplate.UNIT_SPELLCAST_DELAYED
 
 
 function CastBarTemplate:UNIT_SPELLCAST_INTERRUPTIBLE(event, unit)
@@ -555,6 +568,11 @@ function CastBarTemplate:RegisterEvents()
 		if self.unit ~= "player" and WoWRetail then
 			self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTIBLE")
 			self:RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE")
+		end
+		if WoWRetail then
+			self:RegisterEvent("UNIT_SPELLCAST_EMPOWER_START")
+			self:RegisterEvent("UNIT_SPELLCAST_EMPOWER_STOP")
+			self:RegisterEvent("UNIT_SPELLCAST_EMPOWER_UPDATE")
 		end
 	end
 
