@@ -73,12 +73,17 @@ do
 				desc = L["Show damage / mana ticks while channeling spells like Drain Life or Blizzard"],
 				order = 102,
 			}
+			options.args.nlttargetname = {
+				type = "description",
+				name = "",
+				order = 408.0,
+			}
 			options.args.targetname = {
 				type = "toggle",
 				name = L["Show Target Name"],
 				desc = L["Display target name of spellcasts after spell name"],
 				disabled = function() return db.hidenametext end,
-				order = 402,
+				order = 408.1,
 			}
 			options.args.targetnamestyle = {
 				type = "select",
@@ -86,7 +91,7 @@ do
 				desc = L["How to display target name of spellcasts after spell name"],
 				values = {["default"] = L["Spell -> Target"], ["on"] = L["Spell on Target"]},
 				disabled = function() return not db.targetname or db.hidenametext end,
-				order = 402,
+				order = 409,
 			}
 			options.args.noInterruptGroup = nil
 		end

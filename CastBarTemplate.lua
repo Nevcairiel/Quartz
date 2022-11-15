@@ -748,11 +748,9 @@ do
 					order = 99,
 					width = "full",
 				},
-				h = {
-					type = "range",
-					name = L["Height"],
-					desc = L["Height"],
-					min = 10, max = 50, step = 1,
+				nlstart = {
+					type = "description",
+					name = "",
 					order = 200,
 				},
 				w = {
@@ -760,7 +758,14 @@ do
 					name = L["Width"],
 					desc = L["Width"],
 					min = 50, max = 1500, bigStep = 5,
-					order = 200,
+					order = 200.1,
+				},
+				h = {
+					type = "range",
+					name = L["Height"],
+					desc = L["Height"],
+					min = 10, max = 50, step = 1,
+					order = 200.2,
 				},
 				scale = {
 					type = "range",
@@ -887,11 +892,6 @@ do
 					desc = L["Disable the text that displays the spell name"],
 					order = 401,
 				},
-				nlname = {
-					type = "description",
-					name = "",
-					order = 403,
-				},
 				nametextposition = {
 					type = "select",
 					name = L["Spell Name Position"],
@@ -924,6 +924,11 @@ do
 					disabled = hidenametextoptions,
 					order = 407,
 				},
+				nltimetext = {
+					type = "description",
+					name = "",
+					order = 410,
+				},
 				hidetimetext = {
 					type = "toggle",
 					name = L["Hide Time Text"],
@@ -937,6 +942,14 @@ do
 					disabled = hidetimetextoptions,
 					order = 412,
 				},
+				timetextposition = {
+					type = "select",
+					name = L["Time Text Position"],
+					desc = L["Set the alignment of the time text"],
+					values = {["left"] = L["Left"], ["right"] = L["Right"], ["center"] = L["Center (CastBar)"], ["centerback"] = L["Center (Backdrop)"], ["caststart"] = L["Cast Start Side"], ["castend"] = L["Cast End Side"]},
+					disabled = hidetimetextoptions,
+					order = 413,
+				},
 				timefontsize = {
 					type = "range",
 					name = L["Time Font Size"],
@@ -944,14 +957,6 @@ do
 					min = 7, max = 20, step = 1,
 					order = 414,
 					disabled = hidetimetextoptions,
-				},
-				timetextposition = {
-					type = "select",
-					name = L["Time Text Position"],
-					desc = L["Set the alignment of the time text"],
-					values = {["left"] = L["Left"], ["right"] = L["Right"], ["center"] = L["Center (CastBar)"], ["centerback"] = L["Center (Backdrop)"], ["caststart"] = L["Cast Start Side"], ["castend"] = L["Cast End Side"]},
-					disabled = hidetimetextoptions,
-					order = 415,
 				},
 				timetextx = {
 					type = "range",
