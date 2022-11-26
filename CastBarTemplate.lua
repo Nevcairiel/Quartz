@@ -913,7 +913,7 @@ do
 					name = L["Spell Name Font Outline"],
 					desc = L["Set the Font Outline of the spell name"],
 					values = {["NONE"] = L["NONE"], ["OUTLINE"] = L["OUTLINE"], ["THICKOUTLINE"] = L["THICKOUTLINE"]},
-					disabled = hidetimetextoptions,
+					disabled = hidenametextoptions,
 					order = 406,
 				},
 				nametextx = {
