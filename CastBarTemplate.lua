@@ -458,7 +458,7 @@ function CastBarTemplate:ApplySettings()
 			self.TimeText:SetJustifyH("RIGHT")
 		end -- L["Cast Start Side"], L["Cast End Side"] -- handled at runtime
 	end
-	self.TimeText:SetFont(media:Fetch("font", db.font), db.timefontsize)
+	self.TimeText:SetFont(media:Fetch("font", db.font), db.timefontsize, db.timefontoutline)
 	self.TimeText:SetShadowColor( 0, 0, 0, 1)
 	self.TimeText:SetShadowOffset( 0.8, -0.8 )
 	self.TimeText:SetTextColor(unpack(Quartz3.db.profile.timetextcolor))
@@ -504,7 +504,7 @@ function CastBarTemplate:ApplySettings()
 			end
 		end
 	end
-	self.Text:SetFont(media:Fetch("font", db.font), db.fontsize)
+	self.Text:SetFont(media:Fetch("font", db.font), db.fontsize, db.fontoutline)
 	self.Text:SetShadowColor( 0, 0, 0, 1)
 	self.Text:SetShadowOffset( 0.8, -0.8 )
 	self.Text:SetTextColor(unpack(Quartz3.db.profile.spelltextcolor))
@@ -908,13 +908,21 @@ do
 					order = 405,
 					disabled = hidenametextoptions,
 				},
+				fontoutline = {
+					type = "select",
+					name = L["Spell Name Font Outline"],
+					desc = L["Set the Font Outline of the spell name"],
+					values = {["NONE"] = L["NONE"], ["OUTLINE"] = L["OUTLINE"], ["THICKOUTLINE"] = L["THICKOUTLINE"]},
+					disabled = hidetimetextoptions,
+					order = 406,
+				},
 				nametextx = {
 					type = "range",
 					name = L["Spell Name X Offset"],
 					desc = L["Adjust the X position of the spell name text"],
 					min = -35, max = 35, step = 1,
 					disabled = hidenametextoptions,
-					order = 406,
+					order = 407,
 				},
 				nametexty = {
 					type = "range",
@@ -922,7 +930,7 @@ do
 					desc = L["Adjust the Y position of the name text"],
 					min = -35, max = 35, step = 1,
 					disabled = hidenametextoptions,
-					order = 407,
+					order = 408,
 				},
 				nltimetext = {
 					type = "description",
@@ -957,6 +965,14 @@ do
 					min = 7, max = 20, step = 1,
 					order = 414,
 					disabled = hidetimetextoptions,
+				},
+				timefontoutline = {
+					type = "select",
+					name = L["Time Font Outline"],
+					desc = L["Set the Font Outline of the time text"],
+					values = {["NONE"] = L["NONE"], ["OUTLINE"] = L["OUTLINE"], ["THICKOUTLINE"] = L["THICKOUTLINE"]},
+					disabled = hidetimetextoptions,
+					order = 415,
 				},
 				timetextx = {
 					type = "range",
@@ -1113,9 +1129,11 @@ Quartz3.CastBarTemplate.defaults = {
 	timetextposition = "right",
 	font = "Friz Quadrata TT",
 	fontsize = 14,
+	fontoutline = "NONE",
 	hidetimetext = false,
 	hidecasttime = false,
 	timefontsize = 12,
+	timefontoutline = "NONE",
 	targetname = false,
 	border = "Blizzard Tooltip",
 	nametextx = 3,
