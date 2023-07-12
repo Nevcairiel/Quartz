@@ -30,6 +30,8 @@ local TimeFmt = Quartz3.Util.TimeFormat
 local media = LibStub("LibSharedMedia-3.0")
 local lsmlist = AceGUIWidgetLSMlists
 
+local MIRRORTIMER_NUMTIMERS = MIRRORTIMER_NUMTIMERS or 3
+
 ----------------------------
 -- Upvalues
 -- GLOBALS: MIRRORTIMER_NUMTIMERS
@@ -267,11 +269,19 @@ function Mirror:OnDisable()
 		v:SetScript("OnUpdate", nil)
 	end
 
-	for i = 1, 3 do
-		_G["MirrorTimer"..i]:RegisterEvent("MIRROR_TIMER_PAUSE")
-		_G["MirrorTimer"..i]:RegisterEvent("MIRROR_TIMER_STOP")
+	if MirrorTimerContainer then
+		MirrorTimerContainer:Show()
+		MirrorTimerContainer:RegisterEvent("PLAYER_ENTERING_WORLD")
+		MirrorTimerContainer:RegisterEvent("MIRROR_TIMER_START")
+		MirrorTimerContainer:RegisterEvent("MIRROR_TIMER_STOP")
+		MirrorTimerContainer:RegisterEvent("MIRROR_TIMER_PAUSE")
+	else
+		for i = 1, 3 do
+			_G["MirrorTimer"..i]:RegisterEvent("MIRROR_TIMER_PAUSE")
+			_G["MirrorTimer"..i]:RegisterEvent("MIRROR_TIMER_STOP")
+		end
+		UIParent:RegisterEvent("MIRROR_TIMER_START")
 	end
-	UIParent:RegisterEvent("MIRROR_TIMER_START")
 
 	media.UnregisterCallback(self, "LibSharedMedia_SetGlobal")
 	media.UnregisterCallback(self, "LibSharedMedia_Registered")
@@ -702,17 +712,29 @@ do
 				direction = apply(i, v, direction)
 			end
 			if db.hideblizzmirrors then
-				for i = 1, 3 do
-					_G["MirrorTimer"..i]:UnregisterAllEvents()
-					_G["MirrorTimer"..i]:Hide()
+				if MirrorTimerContainer then
+					MirrorTimerContainer:UnregisterAllEvents()
+				else
+					for i = 1, 3 do
+						_G["MirrorTimer"..i]:UnregisterAllEvents()
+						_G["MirrorTimer"..i]:Hide()
+					end
+					UIParent:UnregisterEvent("MIRROR_TIMER_START")
 				end
-				UIParent:UnregisterEvent("MIRROR_TIMER_START")
 			else
-				for i = 1, 3 do
-					_G["MirrorTimer"..i]:RegisterEvent("MIRROR_TIMER_PAUSE")
-					_G["MirrorTimer"..i]:RegisterEvent("MIRROR_TIMER_STOP")
+				if MirrorTimerContainer then
+					MirrorTimerContainer:Show()
+					MirrorTimerContainer:RegisterEvent("PLAYER_ENTERING_WORLD")
+					MirrorTimerContainer:RegisterEvent("MIRROR_TIMER_START")
+					MirrorTimerContainer:RegisterEvent("MIRROR_TIMER_STOP")
+					MirrorTimerContainer:RegisterEvent("MIRROR_TIMER_PAUSE")
+				else
+					for i = 1, 3 do
+						_G["MirrorTimer"..i]:RegisterEvent("MIRROR_TIMER_PAUSE")
+						_G["MirrorTimer"..i]:RegisterEvent("MIRROR_TIMER_STOP")
+					end
+					UIParent:RegisterEvent("MIRROR_TIMER_START")
 				end
-				UIParent:RegisterEvent("MIRROR_TIMER_START")
 			end
 			db.RESURRECT_NO_TIMER = db.RESURRECT_NO_SICKNESS
 			self:UpdateBars()

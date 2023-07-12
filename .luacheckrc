@@ -79,6 +79,7 @@ read_globals = {
 	"InterfaceOptionsFrame_OpenToCategory",
 
 	-- FrameXML Frames
+	"MirrorTimerContainer",
 	"UIParent",
 	"ProfessionsFrame.CraftingPage",
 
