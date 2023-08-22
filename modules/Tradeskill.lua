@@ -92,11 +92,21 @@ function Tradeskill:OnEnable()
 	self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 	self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
 	if WoWRetail then
-		self:SecureHook(ProfessionsFrame.CraftingPage, "CreateInternal", "DoTradeSkill")
+		if ProfessionsFrame then
+			self:SecureHook(ProfessionsFrame.CraftingPage, "CreateInternal", "DoTradeSkill")
+		else
+			self:RegisterEvent("ADDON_LOADED")
+		end
 	elseif C_TradeSkillUI then
 		self:SecureHook(C_TradeSkillUI, "CraftRecipe", "DoTradeSkillClassic")
 	else
 		self:SecureHook("DoTradeSkill", "DoTradeSkillClassic")
+	end
+end
+
+function Tradeskill:ADDON_LOADED(event, addon)
+	if addon == "Blizzard_Professions" then
+		self:SecureHook(ProfessionsFrame.CraftingPage, "CreateInternal", "DoTradeSkill")
 	end
 end
 
