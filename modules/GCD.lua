@@ -83,6 +83,7 @@ function GCD:OnEnable()
 	--self:RegisterEvent("UNIT_SPELLCAST_SENT","CheckGCD")
 	self:RegisterEvent("UNIT_SPELLCAST_START","CheckGCD")
 	self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED","CheckGCD")
+	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED", "CLEUHandler")
 	if not gcdbar then
 		gcdbar = CreateFrame("Frame", "Quartz3GCDBar", UIParent, "BackdropTemplate")
 		gcdbar:SetFrameStrata("HIGH")
@@ -106,6 +107,21 @@ function GCD:CheckGCD(event, unit, guid, spell)
 	if unit == "player" then
 		local start, dur = GetSpellCooldown(spell)
 		if dur and dur > 0 and dur <= 1.5 then
+			starttime = start
+			duration = dur
+			gcdbar:Show()
+		end
+	end
+end
+
+function GCD:CLEUHandler()
+	local playerGUID = UnitGUID("player")
+	local timestamp, event, hideCaster, sGUID, sName, sFlags, sRaidFlags, dGUID, dName, dFlags, dRaidFlags, spellId, spellName = CombatLogGetCurrentEventInfo()
+
+	if playerGUID == sGUID and event == "SPELL_CAST_SUCCESS" and spellName == "Shoot" then
+		local start = GetTime()
+		local dur = UnitRangedDamage("player")
+		if dur and dur > 0 then
 			starttime = start
 			duration = dur
 			gcdbar:Show()
