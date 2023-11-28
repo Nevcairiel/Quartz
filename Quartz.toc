@@ -1,8 +1,7 @@
 ## Title: Quartz
-## Interface: 100105
-## Interface-Classic: 11403
-## Interface-BCC: 20504
-## Interface-Wrath: 30400
+## Interface: 100200
+## Interface-Classic: 11500
+## Interface-Wrath: 30403
 ## Notes: Modular casting bar.
 ## Author: Nevcairiel, Nymbia
 ## Version: @project-version@
