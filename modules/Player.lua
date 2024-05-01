@@ -28,6 +28,7 @@ local WOW_INTERFACE_VER = select(4, GetBuildInfo())
 local WoWRetail = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
 local WoWBC = (WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE) and WOW_INTERFACE_VER >= 20500 and WOW_INTERFACE_VER < 30000
 local WoWWrath = (WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE) and WOW_INTERFACE_VER >= 30400 and WOW_INTERFACE_VER < 40000
+local WoWCata = (WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE) and WOW_INTERFACE_VER >= 40400 and WOW_INTERFACE_VER < 50000
 
 ----------------------------
 -- Upvalues
@@ -269,6 +270,26 @@ local channelingTicks = WoWWrath and {
 	[GetSpellInfo(1949)] = 15, -- hellfire
 	[GetSpellInfo(5740)] = 4, -- rain of fire
 	[GetSpellInfo(5138)] = 5, -- drain mana
+	[GetSpellInfo(689)] = 5, -- drain life
+	[GetSpellInfo(1120)] = 5, -- drain soul
+	[GetSpellInfo(755)] = 10, -- health funnel
+} or WoWCata and {
+	--- Wrath
+	-- druid
+	[GetSpellInfo(740)] = 4, -- tranquility
+	[GetSpellInfo(16914)] = 10, -- hurricane
+	-- mage
+	[GetSpellInfo(10)] = 8, -- blizzard
+	[GetSpellInfo(5143)] = 5, -- arcane missiles
+	-- priest
+	[GetSpellInfo(15407)] = 3, -- mind flay
+	[GetSpellInfo(48045)] = 5, -- mind sear
+	[GetSpellInfo(47540)] = 2, -- penance
+	[GetSpellInfo(64843)] = 4, -- divine hymn
+	[GetSpellInfo(64901)] = 4, -- hymn of hope
+	-- warlock
+	[GetSpellInfo(1949)] = 15, -- hellfire
+	[GetSpellInfo(5740)] = 4, -- rain of fire
 	[GetSpellInfo(689)] = 5, -- drain life
 	[GetSpellInfo(1120)] = 5, -- drain soul
 	[GetSpellInfo(755)] = 10, -- health funnel
