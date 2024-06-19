@@ -30,6 +30,8 @@ local WoWBC = (WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE) and WOW_INTERFACE_VER >= 
 local WoWWrath = (WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE) and WOW_INTERFACE_VER >= 30400 and WOW_INTERFACE_VER < 40000
 local WoWCata = (WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE) and WOW_INTERFACE_VER >= 40400 and WOW_INTERFACE_VER < 50000
 
+local GetSpellInfo = GetSpellInfo or C_Spell.GetSpellInfo
+
 ----------------------------
 -- Upvalues
 -- GLOBALS: CastingBarFrame

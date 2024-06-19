@@ -41,7 +41,9 @@ read_globals = {
 	"InFlight", "InFlightBar",
 
 	-- API functions
+	"C_Spell",
 	"C_TradeSkillUI",
+	"C_UnitAuras",
 	"CreateFrame",
 	"CombatLogGetCurrentEventInfo",
 	"GetActiveSpecGroup",
@@ -62,12 +64,10 @@ read_globals = {
 	"LoadAddOn",
 	"PlaySound",
 	"UnitAttackSpeed",
-	"UnitBuff",
 	"UnitCastingInfo",
 	"UnitChannelInfo",
 	"UnitClass",
 	"UnitDamage",
-	"UnitDebuff",
 	"UnitHealth",
 	"UnitIsEnemy",
 	"UnitIsFriend",

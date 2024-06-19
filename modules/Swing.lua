@@ -33,6 +33,8 @@ local UnitClass, UnitDamage, UnitAttackSpeed, UnitRangedDamage = UnitClass, Unit
 local math_abs, bit_band, unpack = math.abs, bit.band, unpack
 local COMBATLOG_FILTER_ME = COMBATLOG_FILTER_ME
 
+local GetSpellInfo = GetSpellInfo or C_Spell.GetSpellInfo
+
 local playerclass
 local autoshotname = GetSpellInfo(75)
 local slam = GetSpellInfo(1464)

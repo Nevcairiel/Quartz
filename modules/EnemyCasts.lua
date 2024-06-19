@@ -31,6 +31,8 @@ local TimeFmt = Quartz3.Util.TimeFormat
 local media = LibStub("LibSharedMedia-3.0")
 local lsmlist = AceGUIWidgetLSMlists
 
+local GetSpellInfo = GetSpellInfo or C_Spell.GetSpellInfo
+
 ----------------------------
 -- Upvalues
 -- GLOBALS: CastingBarFrame
