@@ -65,6 +65,7 @@ local defaults = {
 		height = 16,
 		font = "Friz Quadrata TT",
 		fontsize = 10,
+		fontoutline = "NONE",
 		alpha = 1,
 
 		textcolor = {1, 1, 1},
@@ -364,7 +365,7 @@ do
 		else
 			timetext:Hide()
 		end
-		timetext:SetFont(media:Fetch("font", db.font), db.fontsize)
+		timetext:SetFont(media:Fetch("font", db.font), db.fontsize, db.fontoutline)
 		timetext:SetShadowColor( 0, 0, 0, 1)
 		timetext:SetShadowOffset( 0.8, -0.8 )
 		timetext:SetTextColor(unpack(db.textcolor))
@@ -390,7 +391,7 @@ do
 		else
 			text:Hide()
 		end
-		text:SetFont(media:Fetch("font", db.font), db.fontsize)
+		text:SetFont(media:Fetch("font", db.font), db.fontsize, db.fontoutline)
 		text:SetShadowColor( 0, 0, 0, 1)
 		text:SetShadowOffset( 0.8, -0.8 )
 		text:SetTextColor(unpack(db.textcolor))
@@ -704,13 +705,20 @@ do
 								min = 3, max = 15, step = 1,
 								order = 123,
 							},
+							fontoutline = {
+								type = "select",
+								name = L["Font Outline"],
+								desc = L["Set the Font Outline"],
+								values = {["NONE"] = L["NONE"], ["OUTLINE"] = L["OUTLINE"], ["THICKOUTLINE"] = L["THICKOUTLINE"]},
+								order = 124,
+							},
 							textcolor = {
 								type = "color",
 								name = L["Text Color"],
 								desc = L["Set the color of the text for the bars"],
 								get = getColor,
 								set = setColor,
-								order = 124,
+								order = 125,
 							},
 						}
 					},
