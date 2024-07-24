@@ -41,6 +41,7 @@ read_globals = {
 	"InFlight", "InFlightBar",
 
 	-- API functions
+	"C_AddOns",
 	"C_Spell",
 	"C_TradeSkillUI",
 	"C_UnitAuras",
@@ -61,7 +62,6 @@ read_globals = {
 	"GetUnitEmpowerStageDuration",
 	"IsInInstance",
 	"IsSpellInRange",
-	"LoadAddOn",
 	"PlaySound",
 	"UnitAttackSpeed",
 	"UnitCastingInfo",
