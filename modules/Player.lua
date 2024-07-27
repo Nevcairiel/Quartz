@@ -126,6 +126,7 @@ end
 function Player:OnEnable()
 	if WoWRetail then
 		self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED", "UpdateChannelingTicks")
+		self:RegisterEvent("TRAIT_CONFIG_UPDATED", "UpdateChannelingTicks")
 	end
 
 	self.Bar:RegisterEvents()
@@ -328,9 +329,15 @@ local channelingTicks = WoWWrath and {
 	-- priest
 	[GetSpellName(64843)] = 4, -- divine hymn
 	[GetSpellName(15407)] = 6, -- mind flay
+	[GetSpellName(391403)] = 4, -- mind flay: insanity
 	[GetSpellName(47540)] = 3, -- penance
 	[GetSpellName(205065)] = 5, -- void torrent
 	[GetSpellName(64901)] = 5, -- symbol of hope
+	[GetSpellInfo(64843)] = 4, -- divine hymn
+	[GetSpellInfo(15407)] = 6, -- mind flay
+	[GetSpellInfo(47540)] = 3, -- penance
+	[GetSpellInfo(205065)] = 5, -- void torrent
+	[GetSpellInfo(64901)] = 5, -- symbol of hope
 	-- mage
 	[GetSpellName(5143)] = 5, -- arcane missiles
 	[GetSpellName(205021)] = 5, -- ray of frost
@@ -360,7 +367,7 @@ function Player:UpdateChannelingTicks()
 	if WoWRetail then
 		if playerClass == "PRIEST" then
 			-- Castigation talent adds a tick to penance
-			channelingTicks[GetSpellName(47540)] = isTalentKnown(19752) and 4 or 3
+			channelingTicks[GetSpellName(47540)] = IsPlayerSpell(193134) and 4 or 3
 		end
 	end
 end

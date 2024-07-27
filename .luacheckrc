@@ -61,6 +61,7 @@ read_globals = {
 	"GetUnitEmpowerHoldAtMaxTime",
 	"GetUnitEmpowerStageDuration",
 	"IsInInstance",
+	"IsPlayerSpell",
 	"IsSpellInRange",
 	"PlaySound",
 	"UnitAttackSpeed",
