@@ -98,7 +98,7 @@ function Flight:ApplySettings()
 end
 
 function Flight:TAXIMAP_OPENED()
-	local loaded = LoadAddOn("InFlight")
+	local loaded = C_AddOns.LoadAddOn("InFlight")
 	if loaded then
 		function Flight.OnEnable(_self)
 			self:SecureHook(InFlight, "StartTimer")

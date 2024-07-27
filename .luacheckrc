@@ -41,7 +41,10 @@ read_globals = {
 	"InFlight", "InFlightBar",
 
 	-- API functions
+	"C_AddOns",
+	"C_Spell",
 	"C_TradeSkillUI",
+	"C_UnitAuras",
 	"CreateFrame",
 	"CombatLogGetCurrentEventInfo",
 	"GetActiveSpecGroup",
@@ -59,15 +62,12 @@ read_globals = {
 	"GetUnitEmpowerStageDuration",
 	"IsInInstance",
 	"IsSpellInRange",
-	"LoadAddOn",
 	"PlaySound",
 	"UnitAttackSpeed",
-	"UnitBuff",
 	"UnitCastingInfo",
 	"UnitChannelInfo",
 	"UnitClass",
 	"UnitDamage",
-	"UnitDebuff",
 	"UnitHealth",
 	"UnitIsEnemy",
 	"UnitIsFriend",
@@ -77,6 +77,7 @@ read_globals = {
 
 	-- FrameXML functions
 	"InterfaceOptionsFrame_OpenToCategory",
+	"Settings.OpenToCategory",
 
 	-- FrameXML Frames
 	"MirrorTimerContainer",
@@ -101,5 +102,6 @@ read_globals = {
 	"WOW_PROJECT_CLASSIC",
 	"WOW_PROJECT_MAINLINE",
 	"WOW_PROJECT_WRATH_CLASSIC",
+	"WOW_PROJECT_CATACLYSM_CLASSIC",
 
 }

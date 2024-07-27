@@ -194,8 +194,12 @@ end
 
 function Quartz3:ChatCommand(input)
 	if not input or input:trim() == "" then
-		InterfaceOptionsFrame_OpenToCategory(Quartz3.optFrames.Profiles)
-		InterfaceOptionsFrame_OpenToCategory(Quartz3.optFrames.Quartz3)
+		if InterfaceOptionsFrame_OpenToCategory then
+			InterfaceOptionsFrame_OpenToCategory(Quartz3.optFrames.Profiles)
+			InterfaceOptionsFrame_OpenToCategory(Quartz3.optFrames.Quartz3)
+		else
+			Settings.OpenToCategory("Quartz 3")
+		end
 	else
 		LibStub("AceConfigCmd-3.0").HandleCommand(Quartz3, "quartz", "Quartz3", input)
 	end

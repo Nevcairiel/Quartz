@@ -97,7 +97,7 @@ function Tradeskill:OnEnable()
 		else
 			self:RegisterEvent("ADDON_LOADED")
 		end
-	elseif C_TradeSkillUI then
+	elseif C_TradeSkillUI and C_TradeSkillUI.CraftRecipe then
 		self:SecureHook(C_TradeSkillUI, "CraftRecipe", "DoTradeSkillClassic")
 	else
 		self:SecureHook("DoTradeSkill", "DoTradeSkillClassic")

@@ -34,7 +34,7 @@ local lsmlist = AceGUIWidgetLSMlists
 -- Upvalues
 -- GLOBALS:
 local CreateFrame, GetTime, UIParent = CreateFrame, GetTime, UIParent
-local UnitIsUnit, UnitBuff, UnitDebuff = UnitIsUnit, UnitBuff, UnitDebuff
+local UnitIsUnit = UnitIsUnit
 local unpack, pairs, next, sort = unpack, pairs, next, sort
 
 local targetlocked = true
@@ -892,39 +892,39 @@ do
 			end
 			if db.targetbuffs then
 				for i = 1, 32 do
-					local name, texture, applications, _, duration, expirationTime, caster = UnitBuff("target", i)
-					local remaining = expirationTime and (expirationTime - GetTime()) or nil
-					if not name then
+					local auraData = C_UnitAuras.GetBuffDataByIndex("target", i)
+					if (not auraData) or (not auraData.name) then
 						break
 					end
-					if (caster=="player" or caster=="pet" or caster=="vehicle") and duration > 0 then
+					local remaining = auraData.expirationTime and (auraData.expirationTime - GetTime()) or nil
+					if (auraData.sourceUnit == "player" or auraData.sourceUnit == "pet" or auraData.sourceUnit == "vehicle") and auraData.duration > 0 then
 						local t = new()
 						tmp[#tmp+1] = t
-						t.name = name
-						t.texture = texture
-						t.duration = duration
+						t.name = auraData.name
+						t.texture = auraData.icon
+						t.duration = auraData.duration
 						t.remaining = remaining
 						t.isbuff = true
-						t.applications = applications
+						t.applications = auraData.applications
 					end
 				end
 			end
 			if db.targetdebuffs then
 				for i = 1, 40 do
-					local name, texture, applications, dispeltype, duration, expirationTime, caster = UnitDebuff("target", i)
-					local remaining =  expirationTime and (expirationTime - GetTime()) or nil
-					if not name then
+					local auraData = C_UnitAuras.GetDebuffDataByIndex("target", i)
+					if (not auraData) or (not auraData.name) then
 						break
 					end
-					if (caster=="player" or caster=="pet" or caster=="vehicle") and duration > 0 then
+					local remaining = auraData.expirationTime and (auraData.expirationTime - GetTime()) or nil
+					if (auraData.sourceUnit == "player" or auraData.sourceUnit == "pet" or auraData.sourceUnit == "vehicle") and auraData.duration > 0 then
 						local t = new()
 						tmp[#tmp+1] = t
-						t.name = name
-						t.texture = texture
-						t.duration = duration
+						t.name = auraData.name
+						t.texture = auraData.icon
+						t.duration = auraData.duration
 						t.remaining = remaining
-						t.dispeltype = dispeltype
-						t.applications = applications
+						t.dispeltype = auraData.dispelName
+						t.applications = auraData.applications
 					end
 				end
 			end
@@ -1000,39 +1000,39 @@ do
 			end
 			if db.focusbuffs then
 				for i = 1, 32 do
-					local name, texture, applications, dispeltype, duration, expirationTime, caster = UnitBuff("focus", i)
-					local remaining =  expirationTime and (expirationTime - GetTime()) or nil
-					if not name then
+					local auraData = C_UnitAuras.GetBuffDataByIndex("focus", i)
+					if (not auraData) or (not auraData.name) then
 						break
 					end
-					if (caster=="player" or caster=="pet" or caster=="vehicle") and duration > 0 then
+					local remaining = auraData.expirationTime and (auraData.expirationTime - GetTime()) or nil
+					if (auraData.sourceUnit == "player" or auraData.sourceUnit == "pet" or auraData.sourceUnit == "vehicle") and auraData.duration > 0 then
 						local t = new()
 						tmp[#tmp+1] = t
-						t.name = name
-						t.texture = texture
-						t.duration = duration
+						t.name = auraData.name
+						t.texture = auraData.icon
+						t.duration = auraData.duration
 						t.remaining = remaining
 						t.isbuff = true
-						t.applications = applications
+						t.applications = auraData.applications
 					end
 				end
 			end
 			if db.focusdebuffs then
 				for i = 1, 40 do
-					local name, texture, applications, dispeltype, duration, expirationTime, caster = UnitDebuff("focus", i)
-					local remaining =  expirationTime and (expirationTime - GetTime()) or nil
-					if not name then
+					local auraData = C_UnitAuras.GetDebuffDataByIndex("focus", i)
+					if (not auraData) or (not auraData.name) then
 						break
 					end
-					if (caster=="player" or caster=="pet" or caster=="vehicle") and duration > 0 then
+					local remaining = auraData.expirationTime and (auraData.expirationTime - GetTime()) or nil
+					if (auraData.sourceUnit == "player" or auraData.sourceUnit == "pet" or auraData.sourceUnit == "vehicle") and auraData.duration > 0 then
 						local t = new()
 						tmp[#tmp+1] = t
-						t.name = name
-						t.texture = texture
-						t.duration = duration
+						t.name = auraData.name
+						t.texture = auraData.icon
+						t.duration = auraData.duration
 						t.remaining = remaining
-						t.dispeltype = dispeltype
-						t.applications = applications
+						t.dispeltype = auraData.dispelName
+						t.applications = auraData.applications
 					end
 				end
 			end
