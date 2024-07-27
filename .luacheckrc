@@ -77,7 +77,7 @@ read_globals = {
 
 	-- FrameXML functions
 	"InterfaceOptionsFrame_OpenToCategory",
-	"Settings.OpenToCategory".
+	"Settings.OpenToCategory",
 
 	-- FrameXML Frames
 	"MirrorTimerContainer",
