@@ -333,11 +333,6 @@ local channelingTicks = WoWWrath and {
 	[GetSpellName(47540)] = 3, -- penance
 	[GetSpellName(205065)] = 5, -- void torrent
 	[GetSpellName(64901)] = 5, -- symbol of hope
-	[GetSpellInfo(64843)] = 4, -- divine hymn
-	[GetSpellInfo(15407)] = 6, -- mind flay
-	[GetSpellInfo(47540)] = 3, -- penance
-	[GetSpellInfo(205065)] = 5, -- void torrent
-	[GetSpellInfo(64901)] = 5, -- symbol of hope
 	-- mage
 	[GetSpellName(5143)] = 5, -- arcane missiles
 	[GetSpellName(205021)] = 5, -- ray of frost
