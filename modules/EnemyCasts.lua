@@ -171,12 +171,21 @@ function Enemy:CLEUHandler()
 		if not casts[sGUID] then
 			casts[sGUID] = new()
 		end
-		local _, _, texture, castTime = GetSpellInfo(spellId)
+		local texture, castTime, _
+		if C_Spell and C_Spell.GetSpellInfo then
+			local info = C_Spell.GetSpellInfo(spellId)
+			if info then
+				texture = info.iconID
+				castTime = info.castTime
+			end
+		else
+			texture, castTime = select(3, GetSpellInfo(spellId))
+		end
 		casts[sGUID].name = sName
 		casts[sGUID].spellName = spellName
 		casts[sGUID].spellId = spellId
 		casts[sGUID].texture = texture
-		casts[sGUID].duration = castTime / 1000 * (1 + (GetCombatRatingBonus(CR_HASTE_SPELL) / 100))
+		casts[sGUID].duration = castTime / 1000 * (1 + (CR_HASTE_SPELL and (GetCombatRatingBonus(CR_HASTE_SPELL) / 100) or 0))
 		casts[sGUID].startTime = GetTime()
 		casts[sGUID].endTime = casts[sGUID].startTime + casts[sGUID].duration
 

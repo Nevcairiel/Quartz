@@ -25,7 +25,7 @@ local Player = Quartz3:GetModule("Player")
 
 ----------------------------
 -- Upvalues
-local CreateFrame, GetTime, UIParent, GetSpellCooldown = CreateFrame, GetTime, UIParent, GetSpellCooldown
+local CreateFrame, GetTime, UIParent = CreateFrame, GetTime, UIParent
 local unpack = unpack
 
 local gcdbar, gcdbar_width, gcdspark
@@ -104,7 +104,15 @@ end
 
 function GCD:CheckGCD(event, unit, guid, spell)
 	if unit == "player" then
-		local start, dur = GetSpellCooldown(spell)
+		local start, dur
+		if C_Spell and C_Spell.GetSpellCooldown then
+			local cooldown = C_Spell.GetSpellCooldown(spell)
+			if cooldown then
+				start, dur = cooldown.startTime, cooldown.duration
+			end
+		else
+			start, dur = GetSpellCooldown(spell)
+		end
 		if dur and dur > 0 and dur <= 1.5 then
 			starttime = start
 			duration = dur

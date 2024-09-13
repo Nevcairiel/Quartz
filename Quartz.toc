@@ -1,7 +1,7 @@
 ## Title: Quartz
-## Interface: 100200
-## Interface-Classic: 11500
-## Interface-Wrath: 30403
+## Interface: 110000,110002
+## Interface-Classic: 11503
+## Interface-Cata: 40400
 ## Notes: Modular casting bar.
 ## Author: Nevcairiel, Nymbia
 ## Version: @project-version@
@@ -36,9 +36,7 @@ libs\AceHook-3.0\AceHook-3.0.xml
 
 libs\LibSharedMedia-3.0\lib.xml
 libs\AceGUI-3.0-SharedMediaWidgets\widget.xml
-#@retail@
 libs\LibDualSpec-1.0\LibDualSpec-1.0.lua
-#@end-retail@
 libs\LibWindow-1.1\LibWindow-1.1.lua
 #@version-classic@
 libs\LibClassicCasterino\LibClassicCasterino.lua
