@@ -24,11 +24,11 @@ local Player = Quartz3:NewModule(MODNAME, "AceEvent-3.0", "AceHook-3.0")
 
 local UnitCastingInfo, UnitChannelInfo = UnitCastingInfo, UnitChannelInfo
 
-local WOW_INTERFACE_VER = select(4, GetBuildInfo())
 local WoWRetail = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
-local WoWBC = (WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE) and WOW_INTERFACE_VER >= 20500 and WOW_INTERFACE_VER < 30000
-local WoWWrath = (WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE) and WOW_INTERFACE_VER >= 30400 and WOW_INTERFACE_VER < 40000
-local WoWCata = (WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE) and WOW_INTERFACE_VER >= 40400 and WOW_INTERFACE_VER < 50000
+local WoWClassicEra = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
+local WoWBC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC)
+local WoWWrath = (WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC)
+local WoWCata = (WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC)
 
 local GetSpellName = C_Spell and C_Spell.GetSpellName or GetSpellInfo
 
@@ -311,6 +311,26 @@ local channelingTicks = WoWWrath and {
 	-- priest
 	[GetSpellName(15407)] = 3, -- mind flay
 	[GetSpellName(10797)] = 5, -- star shards
+	-- warlock
+	[GetSpellName(1949)] = 15, -- hellfire
+	[GetSpellName(5740)] = 4, -- rain of fire
+	[GetSpellName(5138)] = 5, -- drain mana
+	[GetSpellName(689)] = 5, -- drain life
+	[GetSpellName(1120)] = 5, -- drain soul
+	[GetSpellName(755)] = 10, -- health funnel
+} or WoWClassicEra and {
+	-- druid
+	[GetSpellName(740)] = 5, -- tranquility
+	[GetSpellName(16914)] = 10, -- hurricane
+	-- hunter
+	[GetSpellName(136)] = 5, -- mend pet
+	[GetSpellName(1510)] = 6, -- volley
+	-- mage
+	[GetSpellName(10)] = 8, -- blizzard
+	[GetSpellName(5143)] = 3, -- arcane missiles
+	-- priest
+	[GetSpellName(15407)] = 3, -- mind flay
+	[GetSpellName(10797)] = 6, -- star shards
 	-- warlock
 	[GetSpellName(1949)] = 15, -- hellfire
 	[GetSpellName(5740)] = 4, -- rain of fire
