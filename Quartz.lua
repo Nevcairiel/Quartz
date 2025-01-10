@@ -179,7 +179,7 @@ function Quartz3:ShowUnlockDialog()
 		desc:SetPoint("BOTTOMRIGHT", -18, 48)
 		desc:SetText(L["Bars unlocked. Move them now and click Lock when you are done."])
 
-		local lockBars = CreateFrame("CheckButton", "Quartz3UnlockDialogLock", f, WoW10 and "UIPanelButtonTemplate" or "OptionsButtonTemplate")
+		local lockBars = CreateFrame("CheckButton", "Quartz3UnlockDialogLock", f, "UIPanelButtonTemplate")
 		lockBars:SetWidth(150)
 		_G[lockBars:GetName() .. "Text"]:SetText(L["Lock"])
 
