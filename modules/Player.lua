@@ -297,6 +297,7 @@ local channelingTicks = WoWMists and {
 	[GetSpellName(5143)] = 5, -- arcane missiles
 	-- priest
 	[GetSpellName(15407)] = 3, -- mind flay
+	[GetSpellName(129197)] = 3, -- mind flay insanity
 	[GetSpellName(48045)] = 5, -- mind sear
 	[GetSpellName(47540)] = 2, -- penance
 	[GetSpellName(64843)] = 4, -- divine hymn
