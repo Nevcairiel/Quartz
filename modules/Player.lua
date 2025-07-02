@@ -29,6 +29,7 @@ local WoWClassicEra = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
 local WoWBC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC)
 local WoWWrath = (WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC)
 local WoWCata = (WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC)
+local WoWMists = (WOW_PROJECT_ID == WOW_PROJECT_MISTS_CLASSIC)
 
 local GetSpellName = C_Spell and C_Spell.GetSpellName or GetSpellInfo
 
@@ -273,6 +274,26 @@ local channelingTicks = WoWWrath and {
 	[GetSpellName(1949)] = 15, -- hellfire
 	[GetSpellName(5740)] = 4, -- rain of fire
 	[GetSpellName(5138)] = 5, -- drain mana
+	[GetSpellName(689)] = 5, -- drain life
+	[GetSpellName(1120)] = 5, -- drain soul
+	[GetSpellName(755)] = 10, -- health funnel
+} or WoWMists and {
+	--- Mists
+	-- druid
+	[GetSpellName(740)] = 4, -- tranquility
+	[GetSpellName(16914)] = 10, -- hurricane
+	-- mage
+	[GetSpellName(10)] = 8, -- blizzard
+	[GetSpellName(5143)] = 5, -- arcane missiles
+	-- priest
+	[GetSpellName(15407)] = 3, -- mind flay
+	[GetSpellName(48045)] = 5, -- mind sear
+	[GetSpellName(47540)] = 2, -- penance
+	[GetSpellName(64843)] = 4, -- divine hymn
+	[GetSpellName(64901)] = 4, -- hymn of hope
+	-- warlock
+	[GetSpellName(1949)] = 15, -- hellfire
+	[GetSpellName(5740)] = 4, -- rain of fire
 	[GetSpellName(689)] = 5, -- drain life
 	[GetSpellName(1120)] = 5, -- drain soul
 	[GetSpellName(755)] = 10, -- health funnel
