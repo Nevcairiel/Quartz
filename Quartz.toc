@@ -1,6 +1,7 @@
 ## Title: Quartz
-## Interface: 110107,50500
+## Interface: 110107
 ## Interface-Classic: 11507
+## Interface-Mists: 50500
 ## Notes: Modular casting bar.
 ## Author: Nevcairiel, Nymbia
 ## Version: @project-version@
