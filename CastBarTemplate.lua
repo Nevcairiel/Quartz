@@ -160,9 +160,9 @@ function CastBarTemplate:SetNameText(name)
 end
 
 local function ToggleCastNotInterruptible(self, notInterruptible, init)
-	if self.unit == "player" and not init then return end
+	
 	local db = self.config
-
+	
 	if notInterruptible and db.noInterruptChangeColor then
 		self.Bar:SetStatusBarColor(unpack(db.noInterruptColor))
 	end
