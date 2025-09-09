@@ -1,5 +1,5 @@
 ## Title: Quartz
-## Interface: 110107
+## Interface: 110200,110205
 ## Interface-Classic: 11507
 ## Interface-Mists: 50500
 ## Notes: Modular casting bar.
