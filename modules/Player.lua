@@ -97,7 +97,7 @@ do
 				disabled = function() return not db.targetname or db.hidenametext end,
 				order = 409,
 			}
-			options.args.noInterruptGroup = nil
+			
 		end
 		return options
 	end
