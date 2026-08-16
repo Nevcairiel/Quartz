@@ -403,6 +403,8 @@ local channelingTicks = WoWWrath and {
 	[GetSpellName(117952)] = 4, -- crackling jade lightning
 	[GetSpellName(115175)] = 8, -- soothing mist
 	[GetSpellName(443028)] = 4, -- celestial conduit
+	-- hunter
+	[GetSpellName(257044)] = 7, -- rapid fire
 	-- evoker
 	[GetSpellName(356995)] = 3, -- disintegrate
 	[GetSpellName(370960)] = 5, -- emerald communion
@@ -438,6 +440,9 @@ function Player:UpdateChannelingTicks()
 		elseif playerClass == "EVOKER" then
 			-- Azure Celerity adds a tick to Disintegrate
 			channelingTicks[GetSpellName(356995)] = IsPlayerSpell(1219723) and 4 or 3
+		elseif playerClass == "HUNTER" then
+			-- Quick Draw adds 3 more ticks of Rapid Fire
+			channelingTicks[GetSpellName(257044)] = IsPlayerSpell(459794) and 10 or 7
 		end
 	end
 end
