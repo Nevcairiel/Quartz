@@ -43,6 +43,32 @@ local resetautoshotspells = {
 	--[GetSpellName(19434)] = true, -- Aimed Shot
 }
 
+local nextmeleeattacks = {}
+
+local function RegisterNextMeleeAttacks(spells)
+	for _, spellID in ipairs(spells) do
+		nextmeleeattacks[spellID] = true
+		local spellName = GetSpellName(spellID)
+		if spellName then
+			nextmeleeattacks[spellName] = true
+		end
+	end
+end
+
+-- These abilities became instant attacks in Cataclysm.
+if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC or WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC then
+	RegisterNextMeleeAttacks({
+		-- Heroic Strike (Warrior)
+		78, 284, 285, 1608, 11564, 11565, 11566, 11567, 25286, 29707, 30324,
+		-- Cleave (Warrior)
+		845, 7369, 11608, 11609, 20569, 25231,
+		-- Maul (Druid)
+		6807, 6808, 6809, 8972, 9745, 9880, 9881, 26996,
+		-- Raptor Strike (Hunter)
+		2973, 14260, 14261, 14262, 14263, 14264, 14265, 14266, 27014,
+	})
+end
+
 local swingbar, swingbar_width, swingstatusbar, remainingtext, durationtext
 local swingmode -- nil is none, 0 is meleeing, 1 is autoshooting
 local starttime, duration
@@ -166,6 +192,11 @@ function Swing:COMBAT_LOG_EVENT_UNFILTERED()
 	if swingmode ~= 0 then return end
 	local timestamp, combatevent, hideCaster, srcGUID, srcName, srcFlags, srcRaidFlags, dstName, dstGUID, dstFlags, dstRaidFlags, spellID, spellName = CombatLogGetCurrentEventInfo()
 	if (combatevent == "SWING_DAMAGE" or combatevent == "SWING_MISSED") and (bit_band(srcFlags, COMBATLOG_FILTER_ME) == COMBATLOG_FILTER_ME) then
+		self:MeleeSwing()
+	-- On-next-swing attacks replace the white hit and therefore do not emit
+	-- SWING_DAMAGE/SWING_MISSED. Their SPELL_CAST_SUCCESS fires when the
+	-- queued swing actually goes off, not when the ability is queued.
+	elseif combatevent == "SPELL_CAST_SUCCESS" and (bit_band(srcFlags, COMBATLOG_FILTER_ME) == COMBATLOG_FILTER_ME) and (nextmeleeattacks[spellID] or nextmeleeattacks[spellName]) then
 		self:MeleeSwing()
 	elseif (combatevent == "SWING_MISSED") and (bit_band(dstFlags, COMBATLOG_FILTER_ME) == COMBATLOG_FILTER_ME) and spellID == "PARRY" and duration then
 		duration = duration * 0.6
