@@ -30,6 +30,7 @@ local WoWBC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC)
 local WoWWrath = (WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC)
 local WoWCata = (WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC)
 local WoWMists = (WOW_PROJECT_ID == WOW_PROJECT_MISTS_CLASSIC)
+local WoWForever = (WOW_PROJECT_ID == WOW_PROJECT_CAMELOT)
 
 local GetSpellName = C_Spell and C_Spell.GetSpellName or GetSpellInfo
 
@@ -354,7 +355,7 @@ local channelingTicks = WoWWrath and {
 	[GetSpellName(689)] = 5, -- drain life
 	[GetSpellName(1120)] = 5, -- drain soul
 	[GetSpellName(755)] = 10, -- health funnel
-} or WoWClassicEra and {
+} or (WoWClassicEra or WoWForever) and {
 	-- druid
 	[GetSpellName(740)] = 5, -- tranquility
 	[GetSpellName(16914)] = 10, -- hurricane

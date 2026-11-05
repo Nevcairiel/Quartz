@@ -30,6 +30,7 @@ local Focus = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
 local UnitIsEnemy, UnitIsFriend, UnitIsUnit = UnitIsEnemy, UnitIsFriend, UnitIsUnit
 
 local WoWRetail = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
+local WoWForever = (WOW_PROJECT_ID == WOW_PROJECT_CAMELOT)
 
 local db, getOptions
 
@@ -142,7 +143,7 @@ function Focus:ApplySettings()
 		FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_CHANNEL_START", "focus")
 		FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_CHANNEL_UPDATE", "focus")
 		FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_CHANNEL_STOP", "focus")
-		if WoWRetail then
+		if WoWRetail or WoWForever then
 			FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_EMPOWER_START", "focus")
 			FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_EMPOWER_UPDATE", "focus")
 			FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_EMPOWER_STOP", "focus")
