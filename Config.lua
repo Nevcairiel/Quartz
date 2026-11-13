@@ -192,23 +192,19 @@ local function getOptions()
 	return options
 end
 
+local optionsPanelID
 function Quartz3:ChatCommand(input)
 	if not input or input:trim() == "" then
-		if InterfaceOptionsFrame_OpenToCategory then
-			InterfaceOptionsFrame_OpenToCategory(Quartz3.optFrames.Profiles)
-			InterfaceOptionsFrame_OpenToCategory(Quartz3.optFrames.Quartz3)
-		else
-			Settings.OpenToCategory("Quartz 3")
-		end
+		Settings.OpenToCategory(optionsPanelID)
 	else
 		LibStub("AceConfigCmd-3.0").HandleCommand(Quartz3, "quartz", "Quartz3", input)
 	end
 end
 
 function Quartz3:SetupOptions()
-	self.optFrames = {}
 	LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("Quartz3", getOptions)
-	self.optFrames.Quartz3 = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Quartz3", "Quartz 3", nil, "general")
+	local _optFrame
+	_optFrame, optionsPanelID = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Quartz3", "Quartz 3", nil, "general")
 	self:RegisterChatCommand("quartz", "ChatCommand")
 	self:RegisterChatCommand("q3", "ChatCommand")
 
@@ -223,5 +219,5 @@ end
 
 function Quartz3:RegisterModuleOptions(name, optTable, displayName)
 	moduleOptions[name] = optTable
-	self.optFrames[name] = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Quartz3", displayName or name, "Quartz 3", name)
+	LibStub("AceConfigDialog-3.0"):AddToBlizOptions("Quartz3", displayName or name, "Quartz 3", name)
 end
