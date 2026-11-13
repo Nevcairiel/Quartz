@@ -113,8 +113,10 @@ end
 function Latency:UNIT_SPELLCAST_START(object, bar, unit, guid, spellID)
 	self.hooks[object].UNIT_SPELLCAST_START(object, bar, unit, guid, spellID)
 
-	local startTime, endTime = bar.startTime, bar.endTime
-	if not sendTime or not endTime then return end
+	-- the latency is shown relative to the cast times, which is only possible if they are not secret
+	local duration = bar.duration
+	if not sendTime or not duration or duration:HasSecretValues() then return end
+	local startTime, endTime = duration:GetStartTime(), duration:GetEndTime()
 
 	timeDiff = GetTime() - sendTime
 	local castlength = endTime - startTime
@@ -132,10 +134,10 @@ function Latency:UNIT_SPELLCAST_START(object, bar, unit, guid, spellID)
 			lagbox:SetTexCoord(1-perc,1,0,1)
 		end
 
+		-- the bar follows its duration, shifting it moves the bar
 		startTime = startTime - timeDiff + db.lagpadding
-		bar.startTime = startTime
 		endTime = endTime - timeDiff + db.lagpadding
-		bar.endTime = endTime
+		duration:SetTimeSpan(startTime, endTime)
 	else
 		if bar.casting then
 			side = "RIGHT"
@@ -188,11 +190,11 @@ end
 function Latency:UNIT_SPELLCAST_DELAYED(object, bar, unit)
 	self.hooks[object].UNIT_SPELLCAST_DELAYED(object, bar, unit)
 
-	if db.lagembed and timeDiff then
-		local startTime = bar.startTime - timeDiff + db.lagpadding
-		bar.startTime = startTime
-		local endTime = bar.endTime - timeDiff + db.lagpadding
-		bar.endTime = endTime
+	local duration = bar.duration
+	if db.lagembed and timeDiff and duration and not duration:HasSecretValues() then
+		local startTime = duration:GetStartTime() - timeDiff + db.lagpadding
+		local endTime = duration:GetEndTime() - timeDiff + db.lagpadding
+		duration:SetTimeSpan(startTime, endTime)
 	end
 end
 

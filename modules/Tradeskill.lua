@@ -124,7 +124,6 @@ function Tradeskill:UNIT_SPELLCAST_START(object, bar, unit, guid, spellID)
 		Player.Bar.fadeOut = nil
 		castSpellID = spellID
 		bail = nil
-		Player.Bar.endTime = nil
 
 		castBar:SetStatusBarColor(unpack(Quartz3.db.profile.castingcolor))
 		castBar:SetMinMaxValues(0, totaltime)
@@ -149,7 +148,6 @@ function Tradeskill:UNIT_SPELLCAST_START(object, bar, unit, guid, spellID)
 
 		Player:ClearStages(bar)
 	else
-		castBar:SetMinMaxValues(0, 1)
 		return self.hooks[object].UNIT_SPELLCAST_START(object, bar, unit, guid, spellID)
 	end
 end

@@ -137,26 +137,15 @@ end]]
 function Flight:BeginFlight(duration, destination)
 	if not Player:IsEnabled() then return end
 
-	Player.Bar.casting = true
-	Player.Bar.startTime = GetTime()
-	Player.Bar.endTime = GetTime() + duration
-	Player.Bar.delay = 0
-	Player.Bar.fadeOut = nil
-	if db.deplete then
-		Player.Bar.casting = nil
-		Player.Bar.channeling = true
-	else
-		Player.Bar.casting = true
-		Player.Bar.channeling = nil
-	end
+	local flightDuration = C_DurationUtil.CreateDuration()
+	flightDuration:SetTimeFromStart(GetTime(), duration)
 
 	Player.Bar.Bar:SetStatusBarColor(unpack(db.color))
 
-	Player.Bar.Bar:SetValue(0)
+	Player.Bar:StartTimer(flightDuration, db.deplete)
 	Player.Bar:Show()
 	Player.Bar:SetAlpha(Player.db.profile.alpha)
 
-	Player.Bar.Spark:Show()
 	if WoWClassic then
 		Player.Bar.Icon:SetTexture("Interface\\Icons\\ability_eyeoftheowl")
 	else

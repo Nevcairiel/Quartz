@@ -104,7 +104,7 @@ do
 end
 
 local function OnUpdate(self)
-	if self.casting and self.chargeSpell then
+	if self.casting and self.chargeSpell and self.NumStages and self.NumStages > 0 then
 		Player:UpdateStage(self)
 	end
 end
@@ -442,10 +442,12 @@ function Player:UpdateChannelingTicks()
 end
 
 function Player:UNIT_SPELLCAST_START(bar, unit)
-	if bar.channeling then
+	-- ticks and stages are calculated from the cast times, which is only possible if they are not secret
+	local secret = bar.duration:HasSecretValues()
+	if bar.channeling and not secret then
 		local spell, _, _, _, _, _, _, spellid = UnitChannelInfo(unit)
-		bar.channelingEnd = bar.endTime
-		bar.channelingDuration = bar.endTime - bar.startTime
+		bar.channelingEnd = bar.duration:GetEndTime()
+		bar.channelingDuration = bar.duration:GetTotalDuration()
 		bar.channelingTicks = getChannelingTicks(spell, spellid)
 		bar.channelingTickTime = bar.channelingTicks > 0 and (bar.channelingDuration / bar.channelingTicks) or 0
 		bar.ticks = bar.ticks or {}
@@ -458,7 +460,7 @@ function Player:UNIT_SPELLCAST_START(bar, unit)
 		bar.channelingDuration = nil
 	end
 
-	if bar.casting and bar.chargeSpell and bar.numStages and bar.numStages > 1 then
+	if bar.casting and bar.chargeSpell and bar.numStages and bar.numStages > 1 and not secret then
 		self:AddStages(bar, bar.numStages)
 	else
 		self:ClearStages(bar)
@@ -481,9 +483,12 @@ function Player:UNIT_SPELLCAST_INTERRUPTED(bar, unit)
 end
 
 function Player:UNIT_SPELLCAST_DELAYED(bar, unit)
-	if bar.channeling and bar.endTime > bar.channelingEnd then
-		local duration = bar.endTime - bar.startTime
-		if bar.channelingDuration and duration > bar.channelingDuration and bar.channelingTicks > 0 then
+	if not bar.channeling or not bar.channelingDuration or bar.duration:HasSecretValues() then return end
+
+	local endTime = bar.duration:GetEndTime()
+	if endTime > bar.channelingEnd then
+		local duration = bar.duration:GetTotalDuration()
+		if duration > bar.channelingDuration and bar.channelingTicks > 0 then
 			local extraTime = (duration - bar.channelingDuration)
 			for i = 1, bar.channelingTicks do
 				bar.ticks[i] = bar.ticks[i] + extraTime
@@ -493,7 +498,7 @@ function Player:UNIT_SPELLCAST_DELAYED(bar, unit)
 				bar.ticks[bar.channelingTicks] = bar.ticks[bar.channelingTicks-1] - bar.channelingTickTime
 			end
 			bar.channelingDuration = duration
-			bar.channelingEnd = bar.endTime
+			bar.channelingEnd = endTime
 			setBarTicks(bar.channelingTicks, bar.channelingDuration, bar.ticks)
 		end
 	end
@@ -515,7 +520,7 @@ function Player:AddStages(bar, numStages)
 	bar.StageTiers = {}
 
 	local sumDuration = 0
-	local stageMaxValue = (bar.endTime - bar.startTime) * 1000
+	local stageMaxValue = bar.duration:GetTotalDuration() * 1000
 
 	local castBarLeft = bar.Bar:GetLeft()
 	local castBarRight = bar.Bar:GetRight()
@@ -597,7 +602,7 @@ end
 
 function Player:UpdateStage(bar)
 	local maxStage = 0;
-	local stageValue = bar.Bar:GetValue() * (bar.endTime - bar.startTime) * 1000
+	local stageValue = bar.duration:GetElapsedDuration() * 1000
 	for i = 1, bar.NumStages do
 		if bar.StagePoints[i] then
 			if stageValue > bar.StagePoints[i] then

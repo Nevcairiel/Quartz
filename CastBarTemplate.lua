@@ -48,6 +48,38 @@ local CastBarTemplate = CreateFrame("Frame")
 local CastBarTemplate_MT = {__index = CastBarTemplate}
 
 local TimeFmt = Quartz3.Util.TimeFormat
+local GetTimeFormatter = Quartz3.Util.GetTimeFormatter
+
+local issecretvalue = issecretvalue or function() return false end
+
+local TIMER_ELAPSED = Enum.StatusBarTimerDirection.ElapsedTime
+local TIMER_REMAINING = Enum.StatusBarTimerDirection.RemainingTime
+local TIMER_IMMEDIATE = Enum.StatusBarInterpolation.Immediate
+
+-- Returns a DurationObject for the units current cast ("cast"), channel ("channel") or empowered cast ("empower")
+-- The duration of units other than the player can hold secret values.
+local function GetUnitDuration(unit, kind)
+	if LibClassicCasterino then
+		local _, startTime, endTime
+		if kind == "cast" then
+			_, _, _, startTime, endTime = UnitCastingInfo(unit)
+		else
+			_, _, _, startTime, endTime = UnitChannelInfo(unit)
+		end
+		if not startTime or not endTime then return nil end
+
+		local duration = C_DurationUtil.CreateDuration()
+		duration:SetTimeSpan(startTime / 1000, endTime / 1000)
+		return duration
+	elseif kind == "cast" then
+		return UnitCastingDuration(unit)
+	elseif kind == "empower" then
+		-- includes the time the spell can be held at the maximum stage
+		return UnitEmpoweredChannelDuration(unit, true)
+	else
+		return UnitChannelDuration(unit)
+	end
+end
 
 local playerName = UnitName("player")
 
@@ -70,49 +102,38 @@ local function OnHide(self)
 	call(self, "OnHide")
 end
 
--- OnUpdate handles the bar movement and the text updates
+-- OnUpdate handles the text updates and the end of the cast, the bar itself is driven by its duration
 local function OnUpdate(self)
 	local currentTime = GetTime()
-	local startTime, endTime, delay = self.startTime, self.endTime, self.delay
 	local db = self.config
 	if self.channeling or self.casting then
-		local perc, remainingTime, delayFormat, delayFormatTime
-		local duration = endTime - startTime
-		if self.casting then
-			local showTime = min(currentTime, endTime)
-			remainingTime = endTime - showTime
-			-- a zero-length cast is complete
-			perc = duration > 0 and ((showTime - startTime) / duration) or 1
+		local duration, delay = self.duration, self.delay
 
-			delayFormat, delayFormatTime = "|cffff0000+%.1f|cffffffff %s", "|cffff0000+%.1f|cffffffff %s / %s"
-		elseif self.channeling then
-			remainingTime = endTime - currentTime
-			-- a zero-length channel is empty
-			perc = duration > 0 and (remainingTime / duration) or 0
-
-			delayFormat, delayFormatTime = "|cffff0000-%.1f|cffffffff %s", "|cffff0000-%.1f|cffffffff %s / %s"
+		-- formatting goes through the duration, so that it also works when its values are secret
+		local timeText
+		if db.casttimecountup then
+			timeText = duration:FormatElapsedDuration(GetTimeFormatter())
+		else
+			timeText = duration:FormatRemainingDuration(GetTimeFormatter())
 		end
 
-		self.Bar:SetValue(perc)
-		self.Spark:ClearAllPoints()
-		self.Spark:SetPoint("CENTER", self.Bar, "LEFT", perc * self.Bar:GetWidth(), 0)
-
-		local timeTextValue = db.casttimecountup and ((endTime - startTime) - remainingTime) or remainingTime
 		if delay and delay ~= 0 then
+			local sign = self.casting and "+" or "-"
 			if db.hidecasttime then
-				self.TimeText:SetFormattedText(delayFormat, delay, format(TimeFmt(timeTextValue)))
+				self.TimeText:SetFormattedText("|cffff0000%s%.1f|cffffffff %s", sign, delay, timeText)
 			else
-				self.TimeText:SetFormattedText(delayFormatTime, delay, format(TimeFmt(timeTextValue)), format(TimeFmt(endTime - startTime, true)))
+				self.TimeText:SetFormattedText("|cffff0000%s%.1f|cffffffff %s / %s", sign, delay, timeText, duration:FormatTotalDuration(GetTimeFormatter(true)))
 			end
 		else
 			if db.hidecasttime then
-				self.TimeText:SetFormattedText(TimeFmt(timeTextValue))
+				self.TimeText:SetText(timeText)
 			else
-				self.TimeText:SetFormattedText("%s / %s", format(TimeFmt(timeTextValue)), format(TimeFmt(endTime - startTime, true)))
+				self.TimeText:SetFormattedText("%s / %s", timeText, duration:FormatTotalDuration(GetTimeFormatter(true)))
 			end
 		end
 
-		if currentTime > endTime then
+		-- a duration with secret values can not tell us if it expired, those casts end through their events
+		if not duration:HasSecretValues() and duration:HasExpired() then
 			self.casting, self.channeling = nil, nil
 			self.fadeOut = true
 			self.stopTime = currentTime
@@ -149,6 +170,44 @@ end
 
 ----------------------------
 -- Template Methods
+
+-- Sets a fixed fill on the bar, which also stops a running duration
+local function SetBarValue(self, value)
+	self.Bar:SetMinMaxValues(0, 1)
+	self.Bar:SetValue(value)
+end
+
+-- Runs the bar on a DurationObject. The bar follows the object, changing it later moves the bar.
+function CastBarTemplate:SetDuration(duration)
+	self.duration = duration
+
+	-- the spark follows the edge of the bar
+	self.Spark:ClearAllPoints()
+	self.Spark:SetPoint("CENTER", self.Bar:GetStatusBarTexture(), "RIGHT", 0, 0)
+
+	if not duration:HasSecretValues() and duration:IsZero() then
+		-- nothing to run: a zero-length cast is complete, a zero-length channel is empty
+		SetBarValue(self, self.casting and 1 or 0)
+	else
+		self.Bar:SetTimerDuration(duration, TIMER_IMMEDIATE, self.channeling and TIMER_REMAINING or TIMER_ELAPSED)
+	end
+end
+
+-- Starts a timer that is not a spell cast on the bar, filling up, or depleting like a channel
+function CastBarTemplate:StartTimer(duration, deplete)
+	if deplete then
+		self.casting, self.channeling, self.chargeSpell = nil, true, nil
+	else
+		self.casting, self.channeling, self.chargeSpell = true, nil, nil
+	end
+	self.delay = 0
+	self.fadeOut = nil
+	self.stopTime = nil
+	self.numStages = nil
+
+	self:SetDuration(duration)
+	self.Spark:Show()
+end
 
 function CastBarTemplate:SetNameText(name)
 	if self.config.targetname and self.targetName and self.targetName ~= "" then
@@ -226,27 +285,34 @@ function CastBarTemplate:UNIT_SPELLCAST_START(event, unit, guid, spellID)
 	end
 	local db = self.config
 
-	local spell, displayName, icon, startTime, endTime, _, notInterruptible, numStages
+	local spell, displayName, icon, _, notInterruptible, numStages
 	if event == "UNIT_SPELLCAST_START" then
-		spell, displayName, icon, startTime, endTime, _, _, notInterruptible = UnitCastingInfo(unit)
+		spell, displayName, icon, _, _, _, _, notInterruptible = UnitCastingInfo(unit)
 	else -- self.channeling
-		spell, displayName, icon, startTime, endTime, _, notInterruptible, _, _, numStages = UnitChannelInfo(unit)
+		spell, displayName, icon, _, _, _, notInterruptible, _, _, numStages = UnitChannelInfo(unit)
 		-- channeling spells sometimes just display "Channeling" - this is not wanted
 		displayName = spell
 	end
 	-- in case this returned nothing
-	if not startTime or not endTime then return end
+	if not spell then return end
 
 	-- this property doesn't exist in BC, and aliases with the spellID
-	if WoWClassic then
+	-- a secret value can not be tested, treat those casts as interruptible
+	if WoWClassic or issecretvalue(notInterruptible) then
 		notInterruptible = false
 	end
 
 	local isChargeSpell = numStages and numStages > 0
 
-	if isChargeSpell then
-		endTime = endTime + GetUnitEmpowerHoldAtMaxTime(self.unit)
+	local duration
+	if event == "UNIT_SPELLCAST_START" then
+		duration = GetUnitDuration(unit, "cast")
+	elseif isChargeSpell then
+		duration = GetUnitDuration(unit, "empower")
+	else
+		duration = GetUnitDuration(unit, "channel")
 	end
+	if not duration then return end
 
 	if event == "UNIT_SPELLCAST_START" then
 		self.casting, self.channeling, self.chargeSpell = true, nil, nil
@@ -256,17 +322,13 @@ function CastBarTemplate:UNIT_SPELLCAST_START(event, unit, guid, spellID)
 		self.casting, self.channeling, self.chargeSpell = nil, true, nil
 	end
 
-	startTime = startTime / 1000
-	endTime = endTime / 1000
-	self.startTime = startTime
-	self.endTime = endTime
 	self.delay = 0
 	self.fadeOut = nil
 	self.numStages = numStages
 
 	self.Bar:SetStatusBarColor(unpack(self.casting and Quartz3.db.profile.castingcolor or Quartz3.db.profile.channelingcolor))
 
-	self.Bar:SetValue(self.casting and 0 or 1)
+	self:SetDuration(duration)
 	self:Show()
 	self:SetAlpha(db.alpha)
 
@@ -274,7 +336,7 @@ function CastBarTemplate:UNIT_SPELLCAST_START(event, unit, guid, spellID)
 
 	self.Spark:Show()
 
-	if (icon == "Interface\\Icons\\Temp" or icon == 136235) and Quartz3.db.profile.hidesamwise then
+	if not issecretvalue(icon) and (icon == "Interface\\Icons\\Temp" or icon == 136235) and Quartz3.db.profile.hidesamwise then
 		icon = 136243
 	end
 	self.Icon:SetTexture(icon)
@@ -302,7 +364,7 @@ function CastBarTemplate:UNIT_SPELLCAST_STOP(event, unit)
 		return
 	end
 
-	self.Bar:SetValue(self.casting and 1.0 or 0)
+	SetBarValue(self, self.casting and 1.0 or 0)
 	self.Bar:SetStatusBarColor(unpack(Quartz3.db.profile.completecolor))
 
 	self.casting, self.channeling = nil, nil
@@ -324,7 +386,7 @@ function CastBarTemplate:UNIT_SPELLCAST_FAILED(event, unit)
 	if not self.stopTime then
 		self.stopTime = GetTime()
 	end
-	self.Bar:SetValue(1.0)
+	SetBarValue(self, 1.0)
 	self.Bar:SetStatusBarColor(unpack(Quartz3.db.profile.failcolor))
 
 	self.TimeText:SetText("")
@@ -341,7 +403,7 @@ function CastBarTemplate:UNIT_SPELLCAST_INTERRUPTED(event, unit)
 	if not self.stopTime then
 		self.stopTime = GetTime()
 	end
-	self.Bar:SetValue(1.0)
+	SetBarValue(self, 1.0)
 	self.Bar:SetStatusBarColor(unpack(Quartz3.db.profile.failcolor))
 
 	self.TimeText:SetText("")
@@ -353,28 +415,31 @@ function CastBarTemplate:UNIT_SPELLCAST_DELAYED(event, unit)
 	if unit ~= self.unit and not (self.unit == "player" and unit == "vehicle") or call(self, "PreShowCondition", unit) then
 		return
 	end
-	local oldStart = self.startTime
-	local _, startTime, endTime
+	local oldDuration = self.duration
+	local duration
 	if self.casting and not self.chargeSpell then
-		_, _, _, startTime, endTime = UnitCastingInfo(unit)
+		duration = GetUnitDuration(unit, "cast")
+	elseif self.chargeSpell then
+		duration = GetUnitDuration(unit, "empower")
 	else
-		_, _, _, startTime, endTime = UnitChannelInfo(unit)
+		duration = GetUnitDuration(unit, "channel")
 	end
 
-	if not startTime or not endTime then
+	if not duration then
 		return self:Hide()
 	end
 
-	startTime = startTime / 1000
-	endTime = endTime / 1000
-	self.startTime = startTime
-	self.endTime = endTime
-
-	if self.casting and not self.chargeSpell then
-		self.delay = (self.delay or 0) + (startTime - (oldStart or startTime))
-	else
-		self.delay = (self.delay or 0) + ((oldStart or startTime) - startTime)
+	-- the pushback can only be calculated when the times are not secret
+	if oldDuration and not oldDuration:HasSecretValues() and not duration:HasSecretValues() then
+		local oldStart, startTime = oldDuration:GetStartTime(), duration:GetStartTime()
+		if self.casting and not self.chargeSpell then
+			self.delay = (self.delay or 0) + (startTime - oldStart)
+		else
+			self.delay = (self.delay or 0) + (oldStart - startTime)
+		end
 	end
+
+	self:SetDuration(duration)
 
 	call(self, "UNIT_SPELLCAST_DELAYED", unit)
 end
@@ -437,7 +502,12 @@ function CastBarTemplate:ApplySettings()
 	self.Bar:SetWidth(castbarwidth)
 	self.Bar:SetHeight(db.h)
 	self.Bar:SetStatusBarTexture(media:Fetch("statusbar", db.texture))
-	self.Bar:SetMinMaxValues(0, 1)
+	if (self.casting or self.channeling) and self.duration then
+		-- keep a running cast going
+		self:SetDuration(self.duration)
+	else
+		self.Bar:SetMinMaxValues(0, 1)
+	end
 
 	if db.hidetimetext then
 		self.TimeText:Hide()
@@ -467,14 +537,15 @@ function CastBarTemplate:ApplySettings()
 	self.TimeText:SetNonSpaceWrap(false)
 	self.TimeText:SetHeight(db.h)
 
-	local temptext = self.TimeText:GetText()
+	-- the width of the time text is measured on a separate font string,
+	-- the measurements of the time text itself are secret once it showed a secret time
+	self.MeasureText:SetFont(media:Fetch("font", db.font), db.timefontsize)
 	if db.hidecasttime then
-		self.TimeText:SetFormattedText(TimeFmt(10))
+		self.MeasureText:SetFormattedText(TimeFmt(10))
 	else
-		self.TimeText:SetFormattedText("%s / %s", format(TimeFmt(10)), format(TimeFmt(10, true)))
+		self.MeasureText:SetFormattedText("%s / %s", format(TimeFmt(10)), format(TimeFmt(10, true)))
 	end
-	local normaltimewidth = self.TimeText:GetStringWidth()
-	self.TimeText:SetText(temptext)
+	local normaltimewidth = self.MeasureText:GetStringWidth()
 
 	if db.hidenametext then
 		self.Text:Hide()
@@ -1161,6 +1232,8 @@ function Quartz3.CastBarTemplate:new(parent, unit, name, localizedName, config)
 	bar.TimeText = bar.Bar:CreateFontString(nil, "OVERLAY")
 	bar.Icon     = bar.Bar:CreateTexture(nil, "ARTWORK")
 	bar.Spark    = bar.Bar:CreateTexture(nil, "OVERLAY")
+	bar.MeasureText = bar:CreateFontString(nil, "OVERLAY")
+	bar.MeasureText:Hide()
 	if unit ~= "player" then
 		bar.Shield = bar.Bar:CreateTexture(nil, "ARTWORK")
 		bar.Shield:SetTexture("Interface\\CastingBar\\UI-CastingBar-Small-Shield")

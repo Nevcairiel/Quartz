@@ -43,7 +43,9 @@ read_globals = {
 
 	-- API functions
 	"C_AddOns",
+	"C_DurationUtil",
 	"C_Spell",
+	"C_StringUtil",
 	"C_TradeSkillUI",
 	"C_UnitAuras",
 	"CreateFrame",
@@ -64,10 +66,14 @@ read_globals = {
 	"IsInInstance",
 	"IsPlayerSpell",
 	"IsSpellInRange",
+	"issecretvalue",
 	"PlaySound",
 	"UnitAttackSpeed",
+	"UnitCastingDuration",
 	"UnitCastingInfo",
+	"UnitChannelDuration",
 	"UnitChannelInfo",
+	"UnitEmpoweredChannelDuration",
 	"UnitClass",
 	"UnitDamage",
 	"UnitHealth",
@@ -90,6 +96,7 @@ read_globals = {
 	"StaticPopupDialogs",
 
 	-- FrameXML Constants
+	"Enum",
 	"CR_HASTE_SPELL",
 	"COMBATLOG_FILTER_ME",
 	"COMBATLOG_OBJECT_CONTROL_NPC",

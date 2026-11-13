@@ -249,3 +249,29 @@ function Quartz3.Util.TimeFormat(num, isCastTime)
 		return "%d:%02d", num / 3600, (num % 3600) / 60
 	end
 end
+
+-- Returns a NumericFormatter that formats seconds the same way as TimeFormat.
+-- A formatter can format secret values, which TimeFormat can not.
+do
+	local formatters = { [true] = {}, [false] = {} }
+	function Quartz3.Util.GetTimeFormatter(isCastTime)
+		isCastTime = isCastTime and true or false
+		local precision = db.casttimeprecision
+		local formatter = formatters[isCastTime][precision]
+		if not formatter then
+			local breakpoints = {
+				{ threshold = 0, format = ("%%.%df"):format(precision) },
+			}
+			if not isCastTime then
+				breakpoints[#breakpoints + 1] = { threshold = 10, format = "%d" }
+			end
+			breakpoints[#breakpoints + 1] = { threshold = 60, format = "%d:%02d", components = { { div = 60 }, { mod = 60 } } }
+			breakpoints[#breakpoints + 1] = { threshold = 3600, format = "%d:%02d", components = { { div = 3600 }, { div = 60, mod = 60 } } }
+
+			formatter = C_StringUtil.CreateNumericRuleFormatter()
+			formatter:SetBreakpoints(breakpoints)
+			formatters[isCastTime][precision] = formatter
+		end
+		return formatter
+	end
+end
