@@ -13,6 +13,7 @@ ignore = {
 	"211/L", -- Unused local variable "L"
 	"212", -- Unused argument
 	"213", -- Unused loop variable
+	"231/_.*", -- Unused variables
 	"311", -- Value assigned to a local variable is unused
 	"542", -- empty if branch
 }
