@@ -58,9 +58,9 @@ modules\GCD.lua
 modules\Buff.lua
 modules\Mirror.lua
 modules\Timer.lua
-modules\Range.lua
 modules\Flight.lua
 
 modules\Swing.lua [ExcludeLoadGameType mainline]
+modules\Range.lua [ExcludeLoadGameType mainline]
 modules\Interrupt.lua [ExcludeLoadGameType mainline]
 modules\EnemyCasts.lua [ExcludeLoadGameType mainline]

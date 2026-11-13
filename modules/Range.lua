@@ -26,10 +26,10 @@ local Player = Quartz3:GetModule("Player")
 ----------------------------
 -- Upvalues
 local CreateFrame, UIParent = CreateFrame, UIParent
-local UnitCastingInfo, UnitChannelInfo, UnitName = UnitCastingInfo, UnitChannelInfo, UnitName
+local UnitName = UnitName
 local unpack = unpack
 
-local IsSpellInRange = IsSpellInRange or C_Spell.IsSpellInRange
+local IsSpellInRange = C_Spell.IsSpellInRange
 
 local f, OnUpdate, db, getOptions, spell, target, modified, r, g, b, castBar
 
@@ -49,7 +49,8 @@ do
 			if not castBar:IsVisible() or Player.Bar.fadeOut then
 				return f:SetScript("OnUpdate", nil)
 			end
-			if IsSpellInRange(spell, target) == 0 then
+			-- nil if the range can not be checked
+			if IsSpellInRange(spell, target) == false then
 				r, g, b = castBar:GetStatusBarColor()
 				modified = true
 				castBar:SetStatusBarColor(unpack(db.rangecolor))
@@ -81,7 +82,7 @@ function Range:ApplySettings()
 	db = self.db.profile
 end
 
-function Range:UNIT_SPELLCAST_START(event, unit)
+function Range:UNIT_SPELLCAST_START(event, unit, guid, spellID)
 	if unit ~= "player" then
 		return
 	end
@@ -89,25 +90,12 @@ function Range:UNIT_SPELLCAST_START(event, unit)
 		castBar = Player.Bar.Bar
 	end
 	if target then
-		spell = UnitCastingInfo(unit)
+		spell = spellID
 		modified, r, g, b = nil, nil, nil, nil
 		f:SetScript("OnUpdate", OnUpdate)
 	end
 end
-
-function Range:UNIT_SPELLCAST_CHANNEL_START(event, unit)
-	if unit ~= "player" then
-		return
-	end
-	if not castBar then
-		castBar = Player.Bar.Bar
-	end
-	if target then
-		spell = UnitChannelInfo(unit)
-		modified, r, g, b = nil, nil, nil, nil
-		f:SetScript("OnUpdate", OnUpdate)
-	end
-end
+Range.UNIT_SPELLCAST_CHANNEL_START = Range.UNIT_SPELLCAST_START
 
 function Range:UNIT_SPELLCAST_SENT(event, unit, name)
 	if unit ~= "player" then
