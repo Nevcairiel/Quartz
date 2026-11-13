@@ -30,6 +30,7 @@ local WoWBC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC)
 local WoWWrath = (WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC)
 local WoWCata = (WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC)
 local WoWMists = (WOW_PROJECT_ID == WOW_PROJECT_MISTS_CLASSIC)
+local WoWForever = (WOW_PROJECT_ID == WOW_PROJECT_CAMELOT)
 
 local GetSpellName = C_Spell and C_Spell.GetSpellName or GetSpellInfo
 
@@ -409,6 +410,26 @@ local channelingTicks = WoWWrath and {
 	-- demon hunter
 	[GetSpellName(212084)] = 10, -- fel devastation
 	[GetSpellName(452486)] = 10, -- fel desolation
+} or WoWForever and {
+	-- druid
+	[GetSpellName(740)] = 5, -- tranquility
+	[GetSpellName(16914)] = 10, -- hurricane
+	-- hunter
+	[GetSpellName(136)] = 5, -- mend pet
+	[GetSpellName(1510)] = 6, -- volley
+	-- mage
+	[GetSpellName(10)] = 8, -- blizzard
+	[GetSpellName(5143)] = 3, -- arcane missiles
+	-- priest
+	[GetSpellName(15407)] = 3, -- mind flay
+	[GetSpellName(10797)] = 6, -- star shards
+	-- warlock
+	[GetSpellName(1949)] = 15, -- hellfire
+	[GetSpellName(5740)] = 4, -- rain of fire
+	[GetSpellName(5138)] = 5, -- drain mana
+	[GetSpellName(689)] = 5, -- drain life
+	[GetSpellName(1120)] = 5, -- drain soul
+	[GetSpellName(755)] = 10, -- health funnel
 } or {}
 
 
