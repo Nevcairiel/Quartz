@@ -682,6 +682,64 @@ local function toggleGCDRecording()
 end
 ns.commands.gcd = toggleGCDRecording
 
+----------------------------
+-- Recording UNIT_SPELLCAST_SENT, for the range module
+
+local sentFrame
+local sentRecording = false
+local MAX_SENT_RECORDS = 20
+
+local function recordSent(event, ...)
+	QuartzTestDB = QuartzTestDB or {}
+	QuartzTestDB.sent = QuartzTestDB.sent or {}
+	local records = QuartzTestDB.sent
+	if #records >= MAX_SENT_RECORDS then return end
+
+	local lines = {}
+	local function log(key, value)
+		lines[#lines + 1] = key .. " = " .. tostring(value)
+	end
+	records[#records + 1] = { event = event, time = ("%.3f"):format(GetTime()), lines = lines }
+
+	-- unit, target, castGUID, spellID
+	log("arguments", describeResults(true, ...))
+	log("InCombatLockdown", tostring(InCombatLockdown()))
+	local _, _, _, spellID = ...
+	for _, unit in ipairs({ "player", "target", "focus", "mouseover" }) do
+		log(unit .. " UnitExists", try(UnitExists, unit))
+		log(unit .. " UnitName", try(UnitName, unit))
+		log(unit .. " C_Spell.IsSpellInRange(spellID, unit)", try(C_Spell.IsSpellInRange, spellID, unit))
+	end
+	log("C_Spell.IsSpellInRange(spellID) without a unit", try(C_Spell.IsSpellInRange, spellID))
+	log("global IsSpellInRange", type(IsSpellInRange))
+	log("C_Spell.SpellHasRange(spellID)", try(C_Spell.SpellHasRange, spellID))
+
+	print(("|cff40c0ffQuartz sent:|r recorded (%d/%d)"):format(#records, MAX_SENT_RECORDS))
+end
+
+local function toggleSentRecording()
+	sentRecording = not sentRecording
+	if not sentFrame then
+		sentFrame = CreateFrame("Frame")
+		sentFrame:SetScript("OnEvent", function(_, event, ...)
+			local ok, err = pcall(recordSent, event, ...)
+			if not ok then
+				print("|cffff4040Quartz sent error:|r " .. tostring(err))
+			end
+		end)
+	end
+	if sentRecording then
+		QuartzTestDB = QuartzTestDB or {}
+		QuartzTestDB.sent = {}
+		sentFrame:RegisterUnitEvent("UNIT_SPELLCAST_SENT", "player")
+		print("|cff40c0ffQuartz sent:|r on. Cast at yourself, at an NPC target in and out of range, and at a focus, then /qtest sent again and /reload.")
+	else
+		sentFrame:UnregisterAllEvents()
+		print("|cff40c0ffQuartz sent:|r off. /reload to write the records to disk.")
+	end
+end
+ns.commands.sent = toggleSentRecording
+
 function ns.HideProbe()
 	if probeHolder then probeHolder:Hide() end
 end

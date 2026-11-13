@@ -386,6 +386,6 @@ SlashCmdList["QUARTZTEST"] = function(msg)
 	elseif ns.commands and ns.commands[msg] then
 		ns.commands[msg]()
 	else
-		print("|cff40c0ffQuartz tests:|r /qtest, /qtest probe, /qtest record, /qtest gcd, /qtest baseline, /qtest hide")
+		print("|cff40c0ffQuartz tests:|r /qtest, /qtest probe, /qtest record, /qtest gcd, /qtest sent, /qtest baseline, /qtest hide")
 	end
 end
