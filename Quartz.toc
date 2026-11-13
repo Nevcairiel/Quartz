@@ -55,11 +55,12 @@ modules\Pet.lua
 modules\Latency.lua
 modules\Tradeskill.lua
 modules\GCD.lua
-modules\Buff.lua
 modules\Mirror.lua
 modules\Timer.lua
 modules\Flight.lua
 
+modules\Buff.lua [ExcludeLoadGameType mainline]
+modules\BuffContainer.lua [AllowLoadGameType mainline]
 modules\Swing.lua [ExcludeLoadGameType mainline]
 modules\Range.lua [ExcludeLoadGameType mainline]
 modules\Interrupt.lua [ExcludeLoadGameType mainline]

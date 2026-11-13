@@ -46,10 +46,12 @@ read_globals = {
 	"C_AddOns",
 	"C_CurveUtil",
 	"C_DurationUtil",
+	"C_Secrets",
 	"C_Spell",
 	"C_StringUtil",
 	"C_TradeSkillUI",
 	"C_UnitAuras",
+	"CreateColor",
 	"CreateFrame",
 	"CombatLogGetCurrentEventInfo",
 	"GetActiveSpecGroup",
@@ -95,6 +97,11 @@ read_globals = {
 
 	-- FrameXML Misc
 	"StaticPopupDialogs",
+
+	-- FrameXML Misc
+	"AnchorUtil",
+	"AuraContainerSortDirection",
+	"AuraContainerSortMethod",
 
 	-- FrameXML Constants
 	"Enum",
