@@ -5,4 +5,6 @@
 ## SavedVariables: QuartzTestDB
 
 CastBarTests.lua
+BaselineTests.lua
+ProbeTests.lua
 StatusBarTests.lua

@@ -326,7 +326,8 @@ local function finish()
 	print(("|cff40c0ffQuartz tests:|r %d passed, %d failed, %d info. /reload to write the results to disk, /qtest hide to remove the bars."):format(counts.PASS, counts.FAIL, counts.INFO))
 
 	local version, build, _, interface = GetBuildInfo()
-	QuartzTestDB = {
+	QuartzTestDB = QuartzTestDB or {}
+	QuartzTestDB.statusbar = {
 		client = ("%s (%s) interface %s"):format(tostring(version), tostring(build), tostring(interface)),
 		date = date("%Y-%m-%d %H:%M:%S"),
 		passed = counts.PASS,
@@ -376,9 +377,15 @@ end
 
 SLASH_QUARTZTEST1 = "/qtest"
 SlashCmdList["QUARTZTEST"] = function(msg)
-	if msg and msg:lower():trim() == "hide" then
+	msg = (msg or ""):lower():trim()
+	if msg == "hide" then
 		if holder then holder:Hide() end
-	else
+		if ns.HideProbe then ns.HideProbe() end
+	elseif msg == "" then
 		run()
+	elseif ns.commands and ns.commands[msg] then
+		ns.commands[msg]()
+	else
+		print("|cff40c0ffQuartz tests:|r /qtest, /qtest probe, /qtest record, /qtest baseline, /qtest hide")
 	end
 end
