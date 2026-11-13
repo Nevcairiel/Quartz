@@ -1,5 +1,5 @@
 ## Title: Quartz
-## Interface: 11508,20505,50503,110207
+## Interface: 11508,20505,50503,120105
 ## Notes: Modular casting bar.
 ## Author: Nevcairiel, Nymbia
 ## Version: @project-version@
@@ -58,8 +58,9 @@ modules\GCD.lua
 modules\Buff.lua
 modules\Mirror.lua
 modules\Timer.lua
-modules\Swing.lua
-modules\Interrupt.lua
 modules\Range.lua
 modules\Flight.lua
-modules\EnemyCasts.lua
+
+modules\Swing.lua [ExcludeLoadGameType mainline]
+modules\Interrupt.lua [ExcludeLoadGameType mainline]
+modules\EnemyCasts.lua [ExcludeLoadGameType mainline]
