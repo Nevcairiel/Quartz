@@ -20,8 +20,11 @@ local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
 local MODNAME = "Timer"
-local Timer = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
+local Timer = Quartz3:NewModule(MODNAME)
 local Mirror = Quartz3:GetModule("Mirror")
+
+-- the message to update the timers is sent through AceEvent, other addons can send it as well
+local AceEvent = LibStub("AceEvent-3.0")
 
 ----------------------------
 -- Upvalues
@@ -46,7 +49,7 @@ function Timer:ChatHandler(msg)
 						break
 					end
 				end
-				self:SendMessage("Quartz3Mirror_UpdateCustom")
+				AceEvent.SendMessage(Timer, "Quartz3Mirror_UpdateCustom")
 			else
 				return Quartz3:Print(L["Usage: /quartztimer timername 60 or /quartztimer kill timername"])
 			end
@@ -76,7 +79,7 @@ function Timer:ChatHandler(msg)
 				end
 			end
 			thistimers[#thistimers+1] = name
-			self:SendMessage("Quartz3Mirror_UpdateCustom")
+			AceEvent.SendMessage(Timer, "Quartz3Mirror_UpdateCustom")
 		end
 	end
 end
@@ -86,7 +89,7 @@ function Timer:OnDisable()
 		external[v] = nil
 		thistimers[k] = nil
 	end
-	self:SendMessage("Quartz3Mirror_UpdateCustom")
+	AceEvent.SendMessage(Timer, "Quartz3Mirror_UpdateCustom")
 end
 
 local function chatHandler(message)
@@ -167,7 +170,7 @@ do
 								end
 							end
 							thistimers[#thistimers+1] = newname
-							Timer:SendMessage("Quartz3Mirror_UpdateCustom")
+							AceEvent.SendMessage(Timer, "Quartz3Mirror_UpdateCustom")
 							newname = nil
 							newlength = nil
 						end,
@@ -197,7 +200,7 @@ do
 										break
 									end
 								end
-								Timer:SendMessage("Quartz3Mirror_UpdateCustom")
+								AceEvent.SendMessage(Timer, "Quartz3Mirror_UpdateCustom")
 							end
 						end,
 						values = thistimers,

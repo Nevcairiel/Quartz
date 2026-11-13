@@ -20,7 +20,7 @@ local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
 local MODNAME = "Swing"
-local Swing = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
+local Swing = Quartz3:NewModule(MODNAME)
 local Player = Quartz3:GetModule("Player")
 
 local media = LibStub("LibSharedMedia-3.0")
@@ -109,14 +109,14 @@ function Swing:OnEnable()
 
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 
-	self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+	self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", nil, "player")
 	-- slam stuff
 	if playerclass == "WARRIOR" then
-		self:RegisterEvent("UNIT_SPELLCAST_START")
-		self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
+		self:RegisterUnitEvent("UNIT_SPELLCAST_START", nil, "player")
+		self:RegisterUnitEvent("UNIT_SPELLCAST_INTERRUPTED", nil, "player")
 	end
 
-	self:RegisterEvent("UNIT_ATTACK")
+	self:RegisterUnitEvent("UNIT_ATTACK", nil, "player")
 	if not swingbar then
 		swingbar = CreateFrame("Frame", "Quartz3SwingBar", UIParent, "BackdropTemplate")
 		swingbar:SetFrameStrata("HIGH")
@@ -136,6 +136,7 @@ function Swing:OnEnable()
 end
 
 function Swing:OnDisable()
+	self:UnregisterAllEvents()
 	swingbar:Hide()
 end
 

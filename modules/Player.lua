@@ -20,7 +20,7 @@ local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
 local MODNAME = "Player"
-local Player = Quartz3:NewModule(MODNAME, "AceEvent-3.0", "AceHook-3.0")
+local Player = Quartz3:NewModule(MODNAME, "AceHook-3.0")
 
 local UnitCastingInfo, UnitChannelInfo = UnitCastingInfo, UnitChannelInfo
 
@@ -126,7 +126,7 @@ end
 
 function Player:OnEnable()
 	if WoWRetail then
-		self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED", "UpdateChannelingTicks")
+		self:RegisterUnitEvent("PLAYER_SPECIALIZATION_CHANGED", "UpdateChannelingTicks", "player")
 		self:RegisterEvent("TRAIT_CONFIG_UPDATED", "UpdateChannelingTicks")
 	end
 
@@ -137,6 +137,7 @@ function Player:OnEnable()
 end
 
 function Player:OnDisable()
+	self:UnregisterAllEvents()
 	self.Bar:UnregisterEvents()
 	self.Bar:Hide()
 end

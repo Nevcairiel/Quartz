@@ -20,7 +20,7 @@ local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
 local MODNAME = "GCD"
-local GCD = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
+local GCD = Quartz3:NewModule(MODNAME)
 local Player = Quartz3:GetModule("Player")
 
 local gcdbar, gcdstatus, gcdbar_width, gcdspark
@@ -77,8 +77,8 @@ end
 
 function GCD:OnEnable()
 	--self:RegisterEvent("UNIT_SPELLCAST_SENT","CheckGCD")
-	self:RegisterEvent("UNIT_SPELLCAST_START","CheckGCD")
-	self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED","CheckGCD")
+	self:RegisterUnitEvent("UNIT_SPELLCAST_START", "CheckGCD", "player")
+	self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "CheckGCD", "player")
 	if not gcdbar then
 		gcdbar = CreateFrame("Frame", "Quartz3GCDBar", UIParent, "BackdropTemplate")
 		gcdbar:SetFrameStrata("HIGH")
@@ -100,6 +100,7 @@ function GCD:OnEnable()
 end
 
 function GCD:OnDisable()
+	self:UnregisterAllEvents()
 	gcdbar:Hide()
 end
 
@@ -113,8 +114,6 @@ local function StartGCD(duration, spell)
 end
 
 function GCD:CheckGCD(event, unit, guid, spell)
-	if unit ~= "player" then return end
-
 	local cooldown = C_Spell.GetSpellCooldown(spell)
 
 	-- The spell tells us if it is on the global cooldown, which is never secret.

@@ -644,8 +644,17 @@ function CastBarTemplate:ApplySettings()
 end
 
 function CastBarTemplate:RegisterEvents()
+	-- the events are only needed for the unit of the bar, the player bar also shows the casts of a vehicle
+	local function RegisterEvent(event)
+		if self.unit == "player" then
+			self:RegisterUnitEvent(event, "player", "vehicle")
+		else
+			self:RegisterUnitEvent(event, self.unit)
+		end
+	end
+
 	if self.unit == "player" then
-		self:RegisterEvent("UNIT_SPELLCAST_SENT")
+		RegisterEvent("UNIT_SPELLCAST_SENT")
 	end
 
 	if LibClassicCasterino then
@@ -661,22 +670,22 @@ function CastBarTemplate:RegisterEvents()
 		LibClassicCasterino.RegisterCallback(self, "UNIT_SPELLCAST_CHANNEL_UPDATE", CastbarEventHandler)
 		LibClassicCasterino.RegisterCallback(self, "UNIT_SPELLCAST_CHANNEL_STOP", CastbarEventHandler)
 	else
-		self:RegisterEvent("UNIT_SPELLCAST_START")
-		self:RegisterEvent("UNIT_SPELLCAST_STOP")
-		self:RegisterEvent("UNIT_SPELLCAST_FAILED")
-		self:RegisterEvent("UNIT_SPELLCAST_DELAYED")
-		self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
-		self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
-		self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
-		self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
+		RegisterEvent("UNIT_SPELLCAST_START")
+		RegisterEvent("UNIT_SPELLCAST_STOP")
+		RegisterEvent("UNIT_SPELLCAST_FAILED")
+		RegisterEvent("UNIT_SPELLCAST_DELAYED")
+		RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
+		RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
+		RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
+		RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
 		if self.unit ~= "player" and WoWRetail then
-			self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTIBLE")
-			self:RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE")
+			RegisterEvent("UNIT_SPELLCAST_INTERRUPTIBLE")
+			RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE")
 		end
 		if WoWRetail then
-			self:RegisterEvent("UNIT_SPELLCAST_EMPOWER_START")
-			self:RegisterEvent("UNIT_SPELLCAST_EMPOWER_STOP")
-			self:RegisterEvent("UNIT_SPELLCAST_EMPOWER_UPDATE")
+			RegisterEvent("UNIT_SPELLCAST_EMPOWER_START")
+			RegisterEvent("UNIT_SPELLCAST_EMPOWER_STOP")
+			RegisterEvent("UNIT_SPELLCAST_EMPOWER_UPDATE")
 		end
 	end
 

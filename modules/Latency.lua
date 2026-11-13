@@ -20,7 +20,7 @@ local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
 local MODNAME = "Latency"
-local Latency = Quartz3:NewModule(MODNAME, "AceEvent-3.0", "AceHook-3.0")
+local Latency = Quartz3:NewModule(MODNAME, "AceHook-3.0")
 local Player = Quartz3:GetModule("Player")
 
 local media = LibStub("LibSharedMedia-3.0")
@@ -68,9 +68,9 @@ function Latency:OnEnable()
 	self:RawHook(Player, "UNIT_SPELLCAST_DELAYED")
 
 	self:RegisterEvent("CURRENT_SPELL_CAST_CHANGED")
-	self:RegisterEvent("UNIT_SPELLCAST_SENT")
-	self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
-	self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+	self:RegisterUnitEvent("UNIT_SPELLCAST_SENT", nil, "player", "vehicle")
+	self:RegisterUnitEvent("UNIT_SPELLCAST_INTERRUPTED", nil, "player", "vehicle")
+	self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", nil, "player", "vehicle")
 	media.RegisterCallback(self, "LibSharedMedia_SetGlobal", function(mtype, override)
 		if mtype == "statusbar" then
 			lagbox:SetTexture(media:Fetch("statusbar", override))
@@ -86,6 +86,7 @@ function Latency:OnEnable()
 end
 
 function Latency:OnDisable()
+	self:UnregisterAllEvents()
 	media.UnregisterCallback(self, "LibSharedMedia_SetGlobal")
 	lagbox:Hide()
 	lagtext:Hide()
@@ -96,17 +97,11 @@ function Latency:CURRENT_SPELL_CAST_CHANGED(event)
 end
 
 function Latency:UNIT_SPELLCAST_SENT(event, unit)
-	if unit ~= "player" and unit ~= "vehicle" then
-		return
-	end
 	sendTime = lastCastChangeTime
 	lastCastChangeTime = nil
 end
 
 function Latency:UNIT_SPELLCAST_SUCCEEDED(event, unit)
-	if unit ~= "player" and unit ~= "vehicle" then
-		return
-	end
 	sendTime = nil
 end
 
@@ -199,9 +194,6 @@ function Latency:UNIT_SPELLCAST_DELAYED(object, bar, unit)
 end
 
 function Latency:UNIT_SPELLCAST_INTERRUPTED(event, unit)
-	if unit ~= "player" and unit ~= "vehicle" then
-		return
-	end
 	lagbox:Hide()
 	lagtext:Hide()
 end

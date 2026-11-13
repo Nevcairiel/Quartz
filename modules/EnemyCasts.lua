@@ -20,7 +20,7 @@ local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
 local MODNAME = "EnemyCasts"
-local Enemy = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
+local Enemy = Quartz3:NewModule(MODNAME)
 
 local Player = Quartz3:GetModule("Player")
 local Focus = Quartz3:GetModule("Focus", true)
@@ -145,6 +145,7 @@ function Enemy:OnEnable()
 end
 
 function Enemy:OnDisable()
+	self:UnregisterAllEvents()
 	castbars[1].Hide = nil
 	castbars[1]:EnableMouse(false)
 	castbars[1]:SetScript("OnDragStart", nil)

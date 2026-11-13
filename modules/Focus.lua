@@ -23,7 +23,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 if not FocusFrameSpellBar then return end
 
 local MODNAME = "Focus"
-local Focus = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
+local Focus = Quartz3:NewModule(MODNAME)
 
 ----------------------------
 -- Upvalues

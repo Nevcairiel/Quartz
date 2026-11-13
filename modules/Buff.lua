@@ -20,7 +20,7 @@ local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
 local MODNAME = "Buff"
-local Buff = Quartz3:NewModule(MODNAME, "AceEvent-3.0", "AceBucket-3.0", "AceTimer-3.0")
+local Buff = Quartz3:NewModule(MODNAME, "AceTimer-3.0")
 local Player = Quartz3:GetModule("Player")
 local Focus = Quartz3:GetModule("Focus", true)
 local Target = Quartz3:GetModule("Target", true)
@@ -34,7 +34,6 @@ local lsmlist = AceGUIWidgetLSMlists
 -- Upvalues
 -- GLOBALS:
 local CreateFrame, GetTime, UIParent = CreateFrame, GetTime, UIParent
-local UnitIsUnit = UnitIsUnit
 local unpack, pairs, next, sort = unpack, pairs, next, sort
 
 local targetlocked = true
@@ -775,7 +774,7 @@ function Buff:OnInitialize()
 end
 
 function Buff:OnEnable()
-	self:RegisterBucketEvent("UNIT_AURA", 0.5)
+	self:RegisterUnitEvent("UNIT_AURA", nil, "target", "focus")
 	self:RegisterEvent("PLAYER_TARGET_CHANGED", "UpdateBars")
 	self:RegisterEvent("PLAYER_FOCUS_CHANGED", "UpdateBars")
 	media.RegisterCallback(self, "LibSharedMedia_SetGlobal", function(mtype, override)
@@ -803,7 +802,16 @@ function Buff:OnEnable()
 	self:ApplySettings()
 end
 
+-- Auras can change many times in a short time. The bars are updated once, half a second after the first
+-- change, for all the units which had a change until then.
+local changedUnits = {}
+
 function Buff:OnDisable()
+	self:UnregisterAllEvents()
+	-- the timers of the module are canceled when it is disabled
+	self.auraUpdateTimer = nil
+	wipe(changedUnits)
+
 	targetbars[1].Hide = nil
 	targetbars[1]:EnableMouse(false)
 	targetbars[1]:SetScript("OnDragStart", nil)
@@ -824,14 +832,23 @@ function Buff:OnDisable()
 	media.UnregisterCallback(self, "LibSharedMedia_Registered")
 end
 
-function Buff:UNIT_AURA(units)
-	for unit in pairs(units) do
-		if unit == "target" then
-			self:UpdateTargetBars()
-		end
-		if unit == "focus" or UnitIsUnit("focus", unit) then
-			self:UpdateFocusBars()
-		end
+function Buff:UNIT_AURA(event, unit)
+	changedUnits[unit] = true
+	if not self.auraUpdateTimer then
+		self.auraUpdateTimer = self:ScheduleTimer("UpdateChangedUnits", 0.5)
+	end
+end
+
+function Buff:UpdateChangedUnits()
+	self.auraUpdateTimer = nil
+	local target, focus = changedUnits.target, changedUnits.focus
+	wipe(changedUnits)
+
+	if target then
+		self:UpdateTargetBars()
+	end
+	if focus then
+		self:UpdateFocusBars()
 	end
 end
 

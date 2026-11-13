@@ -26,7 +26,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 -- ourselves. That also means the buttons can only be touched while auras are not secret, any change of the
 -- look of the bars during combat is applied once combat is over.
 local MODNAME = "Buff"
-local Buff = Quartz3:NewModule(MODNAME, "AceEvent-3.0", "AceTimer-3.0")
+local Buff = Quartz3:NewModule(MODNAME, "AceTimer-3.0")
 local Player = Quartz3:GetModule("Player")
 local Focus = Quartz3:GetModule("Focus", true)
 local Target = Quartz3:GetModule("Target", true)
@@ -1009,20 +1009,16 @@ end
 ----------------------------
 -- Module
 
-local eventFrame = CreateFrame("Frame")
-eventFrame:SetScript("OnEvent", function(self, event, unit)
-	if event == "UNIT_AURA" then
-		local container = containers[unit]
-		if container then
-			container:UpdateAllAuras()
-		end
-	else
-		-- Auras of our casts and channels are not always removed from the container when they end.
-		-- Their removal can also arrive after the cast stopped, so look again a moment later.
-		Buff:UpdateBars()
-		Buff:ScheduleTimer("UpdateBars", 0.2)
-	end
-end)
+function Buff:UNIT_AURA(event, unit)
+	containers[unit]:UpdateAllAuras()
+end
+
+-- Auras of our casts and channels are not always removed from the container when they end.
+-- Their removal can also arrive after the cast stopped, so look again a moment later.
+function Buff:CastStopped()
+	self:UpdateBars()
+	self:ScheduleTimer("UpdateBars", 0.2)
+end
 
 function Buff:OnInitialize()
 	self.db = Quartz3.db:RegisterNamespace(MODNAME, defaults)
@@ -1050,10 +1046,10 @@ function Buff:OnEnable()
 	self:RegisterEvent("PLAYER_TARGET_CHANGED", "UpdateBars")
 	self:RegisterEvent("PLAYER_FOCUS_CHANGED", "UpdateBars")
 	self:RegisterEvent("PLAYER_REGEN_ENABLED", "UpdateBars")
-	eventFrame:RegisterUnitEvent("UNIT_AURA", "target", "focus")
-	eventFrame:RegisterUnitEvent("UNIT_SPELLCAST_STOP", "player")
-	eventFrame:RegisterUnitEvent("UNIT_SPELLCAST_CHANNEL_STOP", "player")
-	eventFrame:RegisterUnitEvent("UNIT_SPELLCAST_EMPOWER_STOP", "player")
+	self:RegisterUnitEvent("UNIT_AURA", nil, "target", "focus")
+	self:RegisterUnitEvent("UNIT_SPELLCAST_STOP", "CastStopped", "player")
+	self:RegisterUnitEvent("UNIT_SPELLCAST_CHANNEL_STOP", "CastStopped", "player")
+	self:RegisterUnitEvent("UNIT_SPELLCAST_EMPOWER_STOP", "CastStopped", "player")
 	self.updateTimer = self:ScheduleRepeatingTimer("UpdateBars", 3)
 
 	local function mediaChanged(event, mtype)
@@ -1068,7 +1064,7 @@ function Buff:OnEnable()
 end
 
 function Buff:OnDisable()
-	eventFrame:UnregisterAllEvents()
+	self:UnregisterAllEvents()
 	self:CancelAllTimers()
 	self.updateTimer = nil
 

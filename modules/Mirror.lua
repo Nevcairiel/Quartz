@@ -20,7 +20,7 @@ local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
 local MODNAME = "Mirror"
-local Mirror = Quartz3:NewModule(MODNAME, "AceHook-3.0", "AceEvent-3.0", "AceTimer-3.0")
+local Mirror = Quartz3:NewModule(MODNAME, "AceHook-3.0", "AceTimer-3.0")
 local Player = Quartz3:GetModule("Player")
 local Focus = Quartz3:GetModule("Focus", true)
 local Target = Quartz3:GetModule("Target", true)
@@ -28,6 +28,7 @@ local Target = Quartz3:GetModule("Target", true)
 local TimeFmt = Quartz3.Util.TimeFormat
 
 local media = LibStub("LibSharedMedia-3.0")
+local AceEvent = LibStub("AceEvent-3.0")
 local lsmlist = AceGUIWidgetLSMlists
 
 local MIRRORTIMER_NUMTIMERS = MIRRORTIMER_NUMTIMERS or 3
@@ -231,7 +232,8 @@ function Mirror:OnEnable()
 	self:RegisterEvent("MIRROR_TIMER_STOP", "UpdateBars")
 	self:RegisterEvent("PLAYER_UNGHOST", "UpdateBars")
 	self:RegisterEvent("PLAYER_ALIVE", "UpdateBars")
-	self:RegisterMessage("Quartz3Mirror_UpdateCustom", "UpdateBars")
+	-- other addons can send this message after changing Mirror.ExternalTimers
+	AceEvent.RegisterMessage(self, "Quartz3Mirror_UpdateCustom", "UpdateBars")
 	self:RegisterEvent("CHAT_MSG_BG_SYSTEM_NEUTRAL")
 	self:RegisterEvent("LFG_PROPOSAL_SHOW")
 	self:RegisterEvent("LFG_PROPOSAL_FAILED", "LFG_PROPOSAL_End")
@@ -259,6 +261,9 @@ function Mirror:OnEnable()
 end
 
 function Mirror:OnDisable()
+	self:UnregisterAllEvents()
+	AceEvent.UnregisterMessage(self, "Quartz3Mirror_UpdateCustom")
+
 	mirrorbars[1].Hide = nil
 	mirrorbars[1]:EnableMouse(false)
 	mirrorbars[1]:SetScript("OnDragStart", nil)

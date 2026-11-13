@@ -20,7 +20,7 @@ local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
 local MODNAME = "Range"
-local Range = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
+local Range = Quartz3:NewModule(MODNAME)
 local Player = Quartz3:GetModule("Player")
 
 ----------------------------
@@ -73,9 +73,13 @@ function Range:OnInitialize()
 end
 
 function Range:OnEnable()
-	self:RegisterEvent("UNIT_SPELLCAST_SENT")
-	self:RegisterEvent("UNIT_SPELLCAST_START")
-	self:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
+	self:RegisterUnitEvent("UNIT_SPELLCAST_SENT", nil, "player")
+	self:RegisterUnitEvent("UNIT_SPELLCAST_START", nil, "player")
+	self:RegisterUnitEvent("UNIT_SPELLCAST_CHANNEL_START", nil, "player")
+end
+
+function Range:OnDisable()
+	self:UnregisterAllEvents()
 end
 
 function Range:ApplySettings()
@@ -83,9 +87,6 @@ function Range:ApplySettings()
 end
 
 function Range:UNIT_SPELLCAST_START(event, unit, guid, spellID)
-	if unit ~= "player" then
-		return
-	end
 	if not castBar then
 		castBar = Player.Bar.Bar
 	end
@@ -98,9 +99,6 @@ end
 Range.UNIT_SPELLCAST_CHANNEL_START = Range.UNIT_SPELLCAST_START
 
 function Range:UNIT_SPELLCAST_SENT(event, unit, name)
-	if unit ~= "player" then
-		return
-	end
 	if name then
 		if name == UnitName("player") then
 			target = "player"

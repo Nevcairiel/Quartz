@@ -11,7 +11,6 @@ externals:
   libs/AceDBOptions-3.0: https://repos.wowace.com/wow/ace3/trunk/AceDBOptions-3.0
   libs/AceEvent-3.0: https://repos.wowace.com/wow/ace3/trunk/AceEvent-3.0
   libs/AceTimer-3.0: https://repos.wowace.com/wow/ace3/trunk/AceTimer-3.0
-  libs/AceBucket-3.0: https://repos.wowace.com/wow/ace3/trunk/AceBucket-3.0
   libs/AceLocale-3.0: https://repos.wowace.com/wow/ace3/trunk/AceLocale-3.0
   libs/AceHook-3.0: https://repos.wowace.com/wow/ace3/trunk/AceHook-3.0
   libs/AceGUI-3.0-SharedMediaWidgets: https://repos.wowace.com/wow/ace-gui-3-0-shared-media-widgets/trunk/AceGUI-3.0-SharedMediaWidgets

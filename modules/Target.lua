@@ -20,7 +20,7 @@ local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
 local MODNAME = "Target"
-local Target = Quartz3:NewModule(MODNAME, "AceEvent-3.0", "AceHook-3.0")
+local Target = Quartz3:NewModule(MODNAME, "AceHook-3.0")
 
 ----------------------------
 -- Upvalues

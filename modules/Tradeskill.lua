@@ -20,7 +20,7 @@ local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
 local MODNAME = "Tradeskill"
-local Tradeskill = Quartz3:NewModule(MODNAME, "AceEvent-3.0", "AceHook-3.0")
+local Tradeskill = Quartz3:NewModule(MODNAME, "AceHook-3.0")
 local Player = Quartz3:GetModule("Player")
 
 local WoWRetail = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
@@ -88,9 +88,9 @@ end
 
 function Tradeskill:OnEnable()
 	self:RawHook(Player, "UNIT_SPELLCAST_START")
-	self:RegisterEvent("UNIT_SPELLCAST_STOP")
-	self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-	self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
+	self:RegisterUnitEvent("UNIT_SPELLCAST_STOP", nil, "player")
+	self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", nil, "player")
+	self:RegisterUnitEvent("UNIT_SPELLCAST_INTERRUPTED", nil, "player")
 	if WoWRetail then
 		if ProfessionsFrame then
 			self:SecureHook(ProfessionsFrame.CraftingPage, "CreateInternal", "DoTradeSkill")
@@ -102,6 +102,10 @@ function Tradeskill:OnEnable()
 	else
 		self:SecureHook("DoTradeSkill", "DoTradeSkillClassic")
 	end
+end
+
+function Tradeskill:OnDisable()
+	self:UnregisterAllEvents()
 end
 
 function Tradeskill:ADDON_LOADED(event, addon)
@@ -153,25 +157,16 @@ function Tradeskill:UNIT_SPELLCAST_START(object, bar, unit, guid, spellID)
 end
 
 function Tradeskill:UNIT_SPELLCAST_STOP(event, unit)
-	if unit ~= "player" then
-		return
-	end
 	casting = false
 end
 
 function Tradeskill:UNIT_SPELLCAST_SUCCEEDED(event, unit, guid, spell)
-	if unit ~= "player" then
-		return
-	end
 	if castSpellID == spell then
 		completedcasts = completedcasts + 1
 	end
 end
 
 function Tradeskill:UNIT_SPELLCAST_INTERRUPTED(event, unit)
-	if unit ~= "player" then
-		return
-	end
 	bail = true
 end
 

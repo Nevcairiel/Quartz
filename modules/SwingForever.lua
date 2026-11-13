@@ -24,7 +24,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 -- The client announces every swing of the player there, and how long it takes until the next one,
 -- which replaces putting the swings together from the combat log and the attack speed of the player.
 local MODNAME = "Swing"
-local Swing = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
+local Swing = Quartz3:NewModule(MODNAME)
 local Player = Quartz3:GetModule("Player")
 
 local media = LibStub("LibSharedMedia-3.0")
@@ -104,6 +104,7 @@ function Swing:OnEnable()
 end
 
 function Swing:OnDisable()
+	self:UnregisterAllEvents()
 	swingbar:Hide()
 end
 

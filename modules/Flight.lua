@@ -20,7 +20,7 @@ local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
 local MODNAME = "Flight"
-local Flight = Quartz3:NewModule(MODNAME, "AceHook-3.0", "AceEvent-3.0")
+local Flight = Quartz3:NewModule(MODNAME, "AceHook-3.0")
 local Player = Quartz3:GetModule("Player")
 
 local WoWClassic = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
@@ -91,6 +91,10 @@ end
 
 function Flight:OnEnable()
 	self:RegisterEvent("TAXIMAP_OPENED")
+end
+
+function Flight:OnDisable()
+	self:UnregisterAllEvents()
 end
 
 function Flight:ApplySettings()

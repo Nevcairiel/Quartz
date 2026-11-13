@@ -20,7 +20,7 @@ local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 
 local MODNAME = "Interrupt"
-local Interrupt = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
+local Interrupt = Quartz3:NewModule(MODNAME)
 local Player = Quartz3:GetModule("Player")
 
 local db, getOptions
@@ -47,6 +47,10 @@ end
 
 function Interrupt:OnEnable()
 	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+end
+
+function Interrupt:OnDisable()
+	self:UnregisterAllEvents()
 end
 
 function Interrupt:ApplySettings()
