@@ -26,6 +26,7 @@ local MODNAME = "Focus"
 local Focus = Quartz3:NewModule(MODNAME)
 
 local WoWRetail = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
+local WoWForever = (WOW_PROJECT_ID == WOW_PROJECT_CAMELOT)
 
 local db, getOptions
 
@@ -142,6 +143,8 @@ function Focus:ApplySettings()
 			FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_EMPOWER_START", "focus")
 			FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_EMPOWER_UPDATE", "focus")
 			FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_EMPOWER_STOP", "focus")
+		end
+		if WoWRetail or WoWForever then
 			FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_INTERRUPTIBLE", "focus")
 			FocusFrameSpellBar:RegisterUnitEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE", "focus")
 		end

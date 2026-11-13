@@ -24,6 +24,7 @@ local media = LibStub("LibSharedMedia-3.0")
 local lsmlist = AceGUIWidgetLSMlists
 
 local WoWRetail = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
+local WoWForever = (WOW_PROJECT_ID == WOW_PROJECT_CAMELOT)
 local WoWClassic = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
 
 local LibClassicCasterino = WoWClassic and LibStub("LibClassicCasterino", true)
@@ -671,7 +672,7 @@ function CastBarTemplate:RegisterEvents()
 		RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
 		RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
 		RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
-		if self.unit ~= "player" and WoWRetail then
+		if self.unit ~= "player" and (WoWRetail or WoWForever) then
 			RegisterEvent("UNIT_SPELLCAST_INTERRUPTIBLE")
 			RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE")
 		end

@@ -23,6 +23,7 @@ local MODNAME = "Pet"
 local Pet = Quartz3:NewModule(MODNAME)
 
 local WoWRetail = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
+local WoWForever = (WOW_PROJECT_ID == WOW_PROJECT_CAMELOT)
 
 local db, getOptions
 
@@ -106,6 +107,8 @@ function Pet:ApplySettings()
 			PetCastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_EMPOWER_START", "pet")
 			PetCastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_EMPOWER_UPDATE", "pet")
 			PetCastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_EMPOWER_STOP", "pet")
+		end
+		if WoWRetail or WoWForever then
 			PetCastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_INTERRUPTIBLE", "pet")
 			PetCastingBarFrame:RegisterUnitEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE", "pet")
 		end

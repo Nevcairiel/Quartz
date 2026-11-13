@@ -24,6 +24,7 @@ local Tradeskill = Quartz3:NewModule(MODNAME, "AceHook-3.0")
 local Player = Quartz3:GetModule("Player")
 
 local WoWRetail = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
+local WoWForever = (WOW_PROJECT_ID == WOW_PROJECT_CAMELOT)
 
 local TimeFmt = Quartz3.Util.TimeFormat
 
@@ -86,7 +87,7 @@ function Tradeskill:OnEnable()
 	self:RegisterUnitEvent("UNIT_SPELLCAST_STOP", nil, "player")
 	self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", nil, "player")
 	self:RegisterUnitEvent("UNIT_SPELLCAST_INTERRUPTED", nil, "player")
-	if WoWRetail then
+	if WoWRetail or WoWForever then
 		if ProfessionsFrame then
 			self:SecureHook(ProfessionsFrame.CraftingPage, "CreateInternal", "DoTradeSkill")
 		else

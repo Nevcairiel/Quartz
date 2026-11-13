@@ -175,10 +175,6 @@ function Player:ApplySettings()
 			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_START")
 			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
 			CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_CHANNEL_UPDATE")
-			if WoWRetail then
-				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_INTERRUPTIBLE")
-				CastingBarFrame:RegisterEvent("UNIT_SPELLCAST_NOT_INTERRUPTIBLE")
-			end
 			CastingBarFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 		end
 	end
