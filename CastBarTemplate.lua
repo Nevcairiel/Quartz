@@ -77,15 +77,18 @@ local function OnUpdate(self)
 	local db = self.config
 	if self.channeling or self.casting then
 		local perc, remainingTime, delayFormat, delayFormatTime
+		local duration = endTime - startTime
 		if self.casting then
 			local showTime = min(currentTime, endTime)
 			remainingTime = endTime - showTime
-			perc = (showTime - startTime) / (endTime - startTime)
+			-- a zero-length cast is complete
+			perc = duration > 0 and ((showTime - startTime) / duration) or 1
 
 			delayFormat, delayFormatTime = "|cffff0000+%.1f|cffffffff %s", "|cffff0000+%.1f|cffffffff %s / %s"
 		elseif self.channeling then
 			remainingTime = endTime - currentTime
-			perc = remainingTime / (endTime - startTime)
+			-- a zero-length channel is empty
+			perc = duration > 0 and (remainingTime / duration) or 0
 
 			delayFormat, delayFormatTime = "|cffff0000-%.1f|cffffffff %s", "|cffff0000-%.1f|cffffffff %s / %s"
 		end
@@ -1153,7 +1156,7 @@ function Quartz3.CastBarTemplate:new(parent, unit, name, localizedName, config)
 	bar:RegisterForDrag("LeftButton")
 	bar:SetClampedToScreen(true)
 
-	bar.Bar      = Quartz3:CreateStatusBar(nil, bar) --CreateFrame("StatusBar", nil, bar)
+	bar.Bar      = Quartz3:CreateStatusBar(nil, bar)
 	bar.Text     = bar.Bar:CreateFontString(nil, "OVERLAY")
 	bar.TimeText = bar.Bar:CreateFontString(nil, "OVERLAY")
 	bar.Icon     = bar.Bar:CreateTexture(nil, "ARTWORK")
