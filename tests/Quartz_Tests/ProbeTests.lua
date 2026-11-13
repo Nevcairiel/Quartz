@@ -517,6 +517,171 @@ local function toggleRecording()
 end
 ns.commands.record = toggleRecording
 
+----------------------------
+-- Recording the global cooldown
+
+local GCD_SPELL = 61304 -- the spell the client tracks the global cooldown on
+local gcdFrame
+local gcdRecording = false
+local MAX_GCD_RECORDS = 60
+
+local function describeCooldown(log, label, spell)
+	local ok, info = pcall(C_Spell.GetSpellCooldown, spell)
+	if not ok then
+		log(label .. " GetSpellCooldown", "ERROR: " .. tostring(info))
+	elseif not info then
+		log(label .. " GetSpellCooldown", "<nothing>")
+	else
+		local parts = {}
+		for _, field in ipairs({ "startTime", "duration", "isEnabled", "isActive", "modRate", "activeCategory", "timeUntilEndOfStartRecovery", "isOnGCD" }) do
+			parts[#parts + 1] = field .. "=" .. describeResults(pcall(function() return info[field] end))
+		end
+		log(label .. " GetSpellCooldown", table.concat(parts, ", "))
+	end
+	log(label .. " ShouldSpellCooldownBeSecret", try(C_Secrets.ShouldSpellCooldownBeSecret, spell))
+	log(label .. " GetSpellCooldownSecrecy", try(C_Secrets.GetSpellCooldownSecrecy, spell))
+
+	local okDuration, duration = pcall(C_Spell.GetSpellCooldownDuration, spell)
+	if not okDuration then
+		log(label .. " GetSpellCooldownDuration", "ERROR: " .. tostring(duration))
+	elseif not duration then
+		log(label .. " GetSpellCooldownDuration", "<nothing>")
+	else
+		local parts = {}
+		for _, name in ipairs({ "HasSecretValues", "IsZero", "GetTotalDuration", "GetRemainingDuration", "HasExpired" }) do
+			parts[#parts + 1] = name .. "=" .. method(duration, name)
+		end
+		log(label .. " GetSpellCooldownDuration", table.concat(parts, ", "))
+	end
+	return okDuration and duration or nil
+end
+
+local function recordGCD(self, event, ...)
+	QuartzTestDB = QuartzTestDB or {}
+	QuartzTestDB.gcd = QuartzTestDB.gcd or {}
+	local records = QuartzTestDB.gcd
+	if #records >= MAX_GCD_RECORDS then return end
+
+	local lines = {}
+	local function log(key, value)
+		lines[#lines + 1] = key .. " = " .. tostring(value)
+	end
+	records[#records + 1] = { event = event, time = ("%.3f"):format(GetTime()), lines = lines }
+
+	log("arguments", describeResults(true, ...))
+	log("InCombatLockdown", tostring(InCombatLockdown()))
+	log("ShouldCooldownsBeSecret", try(C_Secrets.ShouldCooldownsBeSecret))
+	local duration = describeCooldown(log, "gcd spell", GCD_SPELL)
+
+	if event ~= "SPELL_UPDATE_COOLDOWN" then
+		local _, _, spell = ...
+		describeCooldown(log, "cast spell", spell)
+
+		-- drive a bar with the global cooldown, to see that it can be shown
+		if duration then
+			log("bar:SetTimerDuration", method(self.bar, "SetTimerDuration", duration, Enum.StatusBarInterpolation.Immediate, Enum.StatusBarTimerDirection.ElapsedTime))
+		end
+
+		-- Can the global cooldown be shown from the cast spell alone, without the global cooldown spell?
+		-- The spell's own fields and duration are followed for a while, and compared against the
+		-- global cooldown spell, which is readable on retail and gives the true end time.
+		local okInfo, spellInfo = pcall(C_Spell.GetSpellCooldown, spell)
+		local okGCD, gcdInfo = pcall(C_Spell.GetSpellCooldown, GCD_SPELL)
+		if okInfo and spellInfo and spellInfo.isOnGCD == true and okGCD and gcdInfo and not issecretvalue(gcdInfo.duration) and gcdInfo.duration > 0 then
+			if self.finishSampling then self.finishSampling() end
+
+			local gcdEnd = gcdInfo.startTime + gcdInfo.duration
+			local okSpellDuration, spellDuration = pcall(C_Spell.GetSpellCooldownDuration, spell)
+			log("cast spell duration while on gcd", okSpellDuration and desc(spellDuration) or ("ERROR: " .. tostring(spellDuration)))
+			if okSpellDuration and spellDuration then
+				-- the secret path: the bar runs on the duration of the cast spell
+				log("bar:SetTimerDuration(cast spell duration)", method(self.bar, "SetTimerDuration", spellDuration, Enum.StatusBarInterpolation.Immediate, Enum.StatusBarTimerDirection.ElapsedTime))
+			end
+
+			if not self.alphaCurve then
+				-- alpha 1 for the whole cooldown, fading to 0 over its last 3%
+				self.alphaCurve = C_CurveUtil.CreateCurve()
+				self.alphaCurve:SetType(Enum.LuaCurveType.Linear)
+				self.alphaCurve:AddPoint(0, 0)
+				self.alphaCurve:AddPoint(0.03, 1)
+				self.alphaCurve:AddPoint(1, 1)
+			end
+			local curve = self.alphaCurve
+
+			local onGCDEnd, activeEnd, alphaZero, alphaMid, frames, alphaErrors, firstAlphaError = nil, nil, nil, nil, 0, 0, nil
+			self.finishSampling = function()
+				self:SetScript("OnUpdate", nil)
+				self.finishSampling = nil
+				self.spark:SetAlpha(1)
+				log("sampled frames", frames)
+				log("cast spell isOnGCD stopped being true, seconds after the true end", onGCDEnd and ("%.3f"):format(onGCDEnd) or "never within the sample")
+				log("cast spell isActive stopped being true, seconds after the true end", activeEnd and ("%.3f"):format(activeEnd) or "never within the sample")
+				log("alpha curve on the readable gcd duration, value mid cooldown", alphaMid and ("%.3f"):format(alphaMid) or "not sampled")
+				log("alpha curve on the readable gcd duration reached 0, seconds after the true end", alphaZero and ("%.3f"):format(alphaZero) or "never within the sample")
+				log("spark:SetAlpha(curve on the cast spell duration)", ("%d errors%s"):format(alphaErrors, firstAlphaError and (", first: " .. firstAlphaError) or ""))
+			end
+
+			self:SetScript("OnUpdate", function()
+				local now = GetTime()
+				frames = frames + 1
+
+				local info = C_Spell.GetSpellCooldown(spell)
+				if not onGCDEnd and not (info and info.isOnGCD == true) then onGCDEnd = now - gcdEnd end
+				if not activeEnd and not (info and info.isActive == true) then activeEnd = now - gcdEnd end
+
+				if duration then
+					local okAlpha, alpha = pcall(duration.EvaluateRemainingPercent, duration, curve)
+					if okAlpha and not issecretvalue(alpha) then
+						if not alphaMid and now > gcdEnd - gcdInfo.duration / 2 then alphaMid = alpha end
+						if not alphaZero and alpha == 0 then alphaZero = now - gcdEnd end
+					end
+				end
+
+				if okSpellDuration and spellDuration then
+					local okSet, err = pcall(function()
+						self.spark:SetAlpha(spellDuration:EvaluateRemainingPercent(curve))
+					end)
+					if not okSet then
+						alphaErrors = alphaErrors + 1
+						firstAlphaError = firstAlphaError or tostring(err)
+					end
+				end
+
+				if now > gcdEnd + 1 then self.finishSampling() end
+			end)
+		end
+		print(("|cff40c0ffQuartz gcd:|r %s (%d/%d)"):format(event, #records, MAX_GCD_RECORDS))
+	end
+end
+
+local function toggleGCDRecording()
+	gcdRecording = not gcdRecording
+	if not gcdFrame then
+		gcdFrame = getRecorder("gcd", 4)
+		gcdFrame:SetScript("OnEvent", function(self, event, ...)
+			local ok, err = pcall(recordGCD, self, event, ...)
+			if not ok then
+				print("|cffff4040Quartz gcd error:|r " .. tostring(err))
+			end
+		end)
+	end
+	if gcdRecording then
+		QuartzTestDB = QuartzTestDB or {}
+		QuartzTestDB.gcd = {}
+		gcdFrame:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")
+		gcdFrame:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
+		gcdFrame:RegisterEvent("SPELL_UPDATE_COOLDOWN")
+		gcdFrame:Show()
+		print("|cff40c0ffQuartz gcd:|r on. Use an instant spell out of combat, then one in combat, then /qtest gcd again and /reload.")
+	else
+		gcdFrame:UnregisterAllEvents()
+		if gcdFrame.finishSampling then gcdFrame.finishSampling() end
+		gcdFrame:Hide()
+		print("|cff40c0ffQuartz gcd:|r off. /reload to write the records to disk.")
+	end
+end
+ns.commands.gcd = toggleGCDRecording
+
 function ns.HideProbe()
 	if probeHolder then probeHolder:Hide() end
 end
