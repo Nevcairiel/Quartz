@@ -233,6 +233,98 @@ function ns.AddCastBarCases(cases, add, near)
 		end,
 	}
 
+	-- the look of casts that can not be interrupted, on the target bar.
+	-- Plain booleans are used here; real casts of other units pass a secret boolean through the same code.
+	local Target = Quartz3:GetModule("Target", true)
+	if Target and Target:IsEnabled() and not (Target.Bar.casting or Target.Bar.channeling) then
+		local targetBar = Target.Bar
+		local config = targetBar.config
+		local saved
+
+		-- values read back from a bar are secret once it has shown a real cast with secret values
+		local function readable(name, ...)
+			for i = 1, select("#", ...) do
+				if issecretvalue and issecretvalue((select(i, ...))) then
+					add(name, nil, "skipped, the target bar has shown a secret cast this session; run /qtest right after a /reload")
+					return false
+				end
+			end
+			return true
+		end
+
+		local function checkLook(name, notInterruptible)
+			local borderAlpha = targetBar.NoInterruptBorder:GetAlpha()
+			local shieldAlpha = targetBar.Shield:GetAlpha()
+			local r, g, b = targetBar.Bar:GetStatusBarColor()
+			local _, _, _, regularAlpha = targetBar:GetBackdropBorderColor()
+			if not readable(name, borderAlpha, shieldAlpha, r, g, b, regularAlpha) then return end
+
+			local on = notInterruptible and 1 or 0
+			add(name .. ": no interrupt border", targetBar.NoInterruptBorder:IsShown() and near(borderAlpha, on, 0.01), ("alpha %.2f"):format(borderAlpha))
+			add(name .. ": regular border", near(regularAlpha, notInterruptible and 0 or Quartz3.db.profile.borderalpha, 0.01), ("alpha %.2f"):format(regularAlpha))
+			if not config.hideicon then
+				add(name .. ": shield", targetBar.Shield:IsShown() and near(shieldAlpha, on, 0.01), ("alpha %.2f"):format(shieldAlpha))
+			end
+			local color = notInterruptible and config.noInterruptColor or Quartz3.db.profile.castingcolor
+			add(name .. ": bar color", near(r, color[1], 0.01) and near(g, color[2], 0.01) and near(b, color[3], 0.01), ("%.2f %.2f %.2f"):format(r, g, b))
+		end
+
+		cases[#cases + 1] = {
+			name = "target bar: cast that can not be interrupted",
+			setup = function()
+				saved = { config.noInterruptChangeBorder, config.noInterruptChangeColor, config.noInterruptShield, config.noInterruptColor }
+				config.noInterruptChangeBorder, config.noInterruptChangeColor, config.noInterruptShield = true, true, true
+				-- the default no interrupt color is the same as the default casting color, use one that can be told apart
+				config.noInterruptColor = { 0.1, 0.9, 0.2 }
+				ns.StartSyntheticCast(targetBar, "cast", 100, 25)
+				targetBar:ToggleCastNotInterruptible(true)
+			end,
+			check = function()
+				checkLook("uninterruptible cast", true)
+				add("uninterruptible cast: the bar still runs on its duration", targetBar.Bar:GetTimerDuration() == targetBar.duration)
+			end,
+		}
+
+		cases[#cases + 1] = {
+			name = "target bar: cast becomes interruptible",
+			setup = function() targetBar:UNIT_SPELLCAST_INTERRUPTIBLE("UNIT_SPELLCAST_INTERRUPTIBLE", "target") end,
+			check = function() checkLook("cast that became interruptible", false) end,
+		}
+
+		cases[#cases + 1] = {
+			name = "target bar: cast becomes uninterruptible",
+			setup = function() targetBar:UNIT_SPELLCAST_NOT_INTERRUPTIBLE("UNIT_SPELLCAST_NOT_INTERRUPTIBLE", "target") end,
+			check = function() checkLook("cast that became uninterruptible", true) end,
+		}
+
+		cases[#cases + 1] = {
+			name = "target bar: no interrupt options off",
+			setup = function()
+				config.noInterruptChangeBorder, config.noInterruptChangeColor, config.noInterruptShield = false, false, false
+				ns.StartSyntheticCast(targetBar, "cast", 100, 25)
+				targetBar:ToggleCastNotInterruptible(true)
+			end,
+			check = function()
+				add("options off: no interrupt border is hidden", not targetBar.NoInterruptBorder:IsShown())
+				add("options off: shield is hidden", not targetBar.Shield:IsShown())
+				local _, _, _, regularAlpha = targetBar:GetBackdropBorderColor()
+				if readable("options off: regular border", regularAlpha) then
+					add("options off: regular border", near(regularAlpha, Quartz3.db.profile.borderalpha, 0.01), ("alpha %.2f"):format(regularAlpha))
+				end
+			end,
+		}
+
+		cases[#cases + 1] = {
+			name = "target bar: cleanup",
+			setup = function()
+				config.noInterruptChangeBorder, config.noInterruptChangeColor, config.noInterruptShield, config.noInterruptColor = saved[1], saved[2], saved[3], saved[4]
+				ns.StopSyntheticCast(targetBar)
+				targetBar:ToggleCastNotInterruptible(false)
+			end,
+			check = function() end,
+		}
+	end
+
 	-- the flight module runs its timer on the player bar
 	local Flight = Quartz3:GetModule("Flight", true)
 	if Flight then
