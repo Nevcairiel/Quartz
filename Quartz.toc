@@ -59,9 +59,13 @@ modules\Mirror.lua
 modules\Timer.lua
 modules\Flight.lua
 
+# special flavor modules
 modules\Buff.lua [ExcludeLoadGameType mainline]
 modules\BuffContainer.lua [AllowLoadGameType mainline]
 modules\Swing.lua [ExcludeLoadGameType mainline]
+modules\SwingForever.lua [AllowLoadGameType camelot][ExcludeLoadGameType standard, classic]
+
+# classic-only modules
 modules\Range.lua [ExcludeLoadGameType mainline]
 modules\Interrupt.lua [ExcludeLoadGameType mainline]
 modules\EnemyCasts.lua [ExcludeLoadGameType mainline]
