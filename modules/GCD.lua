@@ -23,13 +23,9 @@ local MODNAME = "GCD"
 local GCD = Quartz3:NewModule(MODNAME, "AceEvent-3.0")
 local Player = Quartz3:GetModule("Player")
 
-----------------------------
--- Upvalues
-local CreateFrame, GetTime, UIParent = CreateFrame, GetTime, UIParent
-local unpack = unpack
-
-local gcdbar, gcdbar_width, gcdspark
-local starttime, duration, warned
+local gcdbar, gcdstatus, gcdbar_width, gcdspark
+-- the duration of the global cooldown, and the spell it is tracked on if the duration is secret
+local gcdDuration, gcdSpell
 
 local db, getOptions
 
@@ -48,18 +44,18 @@ local defaults = {
 	}
 }
 
+-- The bar is a status bar without a visible fill, which runs on the duration of the global cooldown.
+-- The spark is anchored to the edge of the fill, so all that is left to do here is to notice the end.
 local function OnUpdate()
-	if not starttime then return gcdbar:Hide() end
-	gcdspark:ClearAllPoints()
-	local perc = (GetTime() - starttime) / duration
-	if perc > 1 then
-		return gcdbar:Hide()
-	else
-		if db.deplete then
-			gcdspark:SetPoint("CENTER", gcdbar, "LEFT", gcdbar_width * (1-perc), 0)
-		else
-			gcdspark:SetPoint("CENTER", gcdbar, "LEFT", gcdbar_width * perc, 0)
+	if not gcdDuration then return gcdbar:Hide() end
+	if gcdSpell then
+		-- a secret duration can not tell if it expired, but the spell knows if it is still on the global cooldown
+		local cooldown = C_Spell.GetSpellCooldown(gcdSpell)
+		if not cooldown or not cooldown.isOnGCD then
+			return gcdbar:Hide()
 		end
+	elseif gcdDuration:HasExpired() then
+		return gcdbar:Hide()
 	end
 end
 
@@ -92,7 +88,12 @@ function GCD:OnEnable()
 		gcdbar:RegisterForDrag("LeftButton")
 		gcdbar:SetClampedToScreen(true)
 
-		gcdspark = gcdbar:CreateTexture(nil, "ARTWORK")
+		gcdstatus = Quartz3:CreateStatusBar(nil, gcdbar)
+		gcdstatus:SetAllPoints(gcdbar)
+		gcdstatus:SetStatusBarColor(1, 1, 1, 0)
+
+		gcdspark = gcdstatus:CreateTexture(nil, "OVERLAY")
+		gcdspark:SetPoint("CENTER", gcdstatus:GetStatusBarTexture(), "RIGHT", 0, 0)
 		gcdbar:Hide()
 	end
 	self:ApplySettings()
@@ -102,22 +103,38 @@ function GCD:OnDisable()
 	gcdbar:Hide()
 end
 
+local function StartGCD(duration, spell)
+	gcdDuration = duration
+	gcdSpell = duration:HasSecretValues() and spell or nil
+
+	local direction = db.deplete and Enum.StatusBarTimerDirection.RemainingTime or Enum.StatusBarTimerDirection.ElapsedTime
+	gcdstatus:SetTimerDuration(duration, Enum.StatusBarInterpolation.Immediate, direction)
+	gcdbar:Show()
+end
+
 function GCD:CheckGCD(event, unit, guid, spell)
-	if unit == "player" then
-		local start, dur
-		if C_Spell and C_Spell.GetSpellCooldown then
-			local cooldown = C_Spell.GetSpellCooldown(spell)
-			if cooldown then
-				start, dur = cooldown.startTime, cooldown.duration
-			end
-		else
-			start, dur = GetSpellCooldown(spell)
+	if unit ~= "player" then return end
+
+	local cooldown = C_Spell.GetSpellCooldown(spell)
+
+	-- The spell tells us if it is on the global cooldown, which is never secret.
+	-- Its cooldown is the global cooldown then, and the duration of that can run the bar even if it is secret.
+	if cooldown and cooldown.isOnGCD then
+		local duration = C_Spell.GetSpellCooldownDuration(spell)
+		if duration then
+			return StartGCD(duration, spell)
 		end
-		if dur and dur > 0 and dur <= 1.5 then
-			starttime = start
-			duration = dur
-			gcdbar:Show()
-		end
+	end
+
+	-- without that information, a short cooldown on the spell is taken to be the global cooldown
+	local start, dur
+	if cooldown then
+		start, dur = cooldown.startTime, cooldown.duration
+	end
+	if dur and not issecretvalue(dur) and dur > 0 and dur <= 1.5 then
+		local duration = C_DurationUtil.CreateDuration()
+		duration:SetTimeFromStart(start, dur)
+		StartGCD(duration)
 	end
 end
 
