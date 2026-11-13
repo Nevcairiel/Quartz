@@ -740,6 +740,77 @@ local function toggleSentRecording()
 end
 ns.commands.sent = toggleSentRecording
 
+----------------------------
+-- Recording swings, for the swing module on Forever
+
+local swingFrame
+local swingRecording = false
+local MAX_SWING_RECORDS = 120
+local lastSwing = {}
+
+local function recordSwing(event, ...)
+	QuartzTestDB = QuartzTestDB or {}
+	QuartzTestDB.swing = QuartzTestDB.swing or {}
+	local records = QuartzTestDB.swing
+	if #records >= MAX_SWING_RECORDS then return end
+
+	local now = GetTime()
+	local line = ("%.3f %s [%s] combat=%s"):format(now, event, describeResults(true, ...), tostring(InCombatLockdown()))
+
+	if event == "PLAYER_SWING" then
+		local swingDuration, swingType = ...
+		line = line .. " attackSpeed=[" .. try(UnitAttackSpeed, "player") .. "]"
+		line = line .. " inRange=[" .. try(C_SwingTimer.IsTargetWithinSwingRange, swingType) .. "]"
+
+		-- how long after the previous swing of this type did this one arrive, compared to the duration that one announced?
+		if not issecretvalue(swingDuration) and not issecretvalue(swingType) then
+			local previous = lastSwing[swingType]
+			if previous then
+				line = line .. (" sincePrevious=%.3f previousDuration=%.3f difference=%+.3f"):format(now - previous.time, previous.duration, (now - previous.time) - previous.duration)
+			end
+			lastSwing[swingType] = { time = now, duration = swingDuration }
+		end
+	end
+
+	records[#records + 1] = line
+end
+
+local function toggleSwingRecording()
+	if not C_SwingTimer then
+		print("|cff40c0ffQuartz swing:|r this client has no C_SwingTimer.")
+		return
+	end
+	swingRecording = not swingRecording
+	if not swingFrame then
+		swingFrame = CreateFrame("Frame")
+		swingFrame:SetScript("OnEvent", function(_, event, ...)
+			local ok, err = pcall(recordSwing, event, ...)
+			if not ok then
+				print("|cffff4040Quartz swing error:|r " .. tostring(err))
+			end
+		end)
+	end
+	if swingRecording then
+		QuartzTestDB = QuartzTestDB or {}
+		QuartzTestDB.swing = {}
+		wipe(lastSwing)
+		swingFrame:RegisterEvent("PLAYER_SWING")
+		swingFrame:RegisterEvent("PLAYER_SWING_RANGE_UPDATE")
+		swingFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
+		swingFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+		swingFrame:RegisterEvent("PLAYER_TARGET_CHANGED")
+		swingFrame:RegisterUnitEvent("UNIT_ATTACK_SPEED", "player")
+		swingFrame:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")
+		swingFrame:RegisterUnitEvent("UNIT_SPELLCAST_STOP", "player")
+		swingFrame:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
+		print("|cff40c0ffQuartz swing:|r on. Auto attack something for a while, then /qtest swing again and /reload.")
+	else
+		swingFrame:UnregisterAllEvents()
+		print(("|cff40c0ffQuartz swing:|r off, %d events recorded. /reload to write them to disk."):format(QuartzTestDB.swing and #QuartzTestDB.swing or 0))
+	end
+end
+ns.commands.swing = toggleSwingRecording
+
 function ns.HideProbe()
 	if probeHolder then probeHolder:Hide() end
 end
