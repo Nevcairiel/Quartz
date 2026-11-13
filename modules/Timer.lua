@@ -26,12 +26,6 @@ local Mirror = Quartz3:GetModule("Mirror")
 -- the message to update the timers is sent through AceEvent, other addons can send it as well
 local AceEvent = LibStub("AceEvent-3.0")
 
-----------------------------
--- Upvalues
-local GetTime = GetTime
-local unpack, pairs, ipairs, tonumber = unpack, pairs, ipairs, tonumber
-local table_remove = table.remove
-
 local external = Mirror.ExternalTimers
 local thistimers = {}
 
@@ -45,7 +39,7 @@ function Timer:ChatHandler(msg)
 				external[name] = nil
 				for k, v in ipairs(thistimers) do
 					if v == name then
-						table_remove(thistimers, k)
+						table.remove(thistimers, k)
 						break
 					end
 				end
@@ -74,7 +68,7 @@ function Timer:ChatHandler(msg)
 		external[name].endTime = currentTime + duration
 		for k, v in ipairs(thistimers) do
 			if v == name then
-				table_remove(thistimers, k)
+				table.remove(thistimers, k)
 				break
 				end
 			end
@@ -165,7 +159,7 @@ do
 							external[newname].endTime = currentTime + newlength
 							for k, v in ipairs(thistimers) do
 								if v == newname then
-									table_remove(thistimers, k)
+									table.remove(thistimers, k)
 									break
 								end
 							end
@@ -196,7 +190,7 @@ do
 								external[name] = nil
 								for k, v in ipairs(thistimers) do
 									if v == name then
-										table_remove(thistimers, k)
+										table.remove(thistimers, k)
 										break
 									end
 								end

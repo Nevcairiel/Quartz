@@ -26,11 +26,6 @@ local Player = Quartz3:GetModule("Player")
 local media = LibStub("LibSharedMedia-3.0")
 local lsmlist = AceGUIWidgetLSMlists
 
-----------------------------
--- Upvalues
-local GetTime = GetTime
-local unpack = unpack
-
 local lagbox, lagtext, db, timeDiff, lastCastChangeTime, sendTime, alignoutside
 
 local getOptions

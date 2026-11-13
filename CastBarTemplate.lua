@@ -28,12 +28,7 @@ local WoWClassic = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
 
 local LibClassicCasterino = WoWClassic and LibStub("LibClassicCasterino", true)
 
-----------------------------
--- Upvalues
-local min, type, format, unpack, setmetatable = math.min, type, string.format, unpack, setmetatable
-local CreateFrame, GetTime, UIParent = CreateFrame, GetTime, UIParent
-local UnitName, UnitCastingInfo, UnitChannelInfo = UnitName, UnitCastingInfo, UnitChannelInfo
-
+local UnitCastingInfo, UnitChannelInfo = UnitCastingInfo, UnitChannelInfo
 if LibClassicCasterino then
 	UnitCastingInfo = function(unit)
 		return LibClassicCasterino:UnitCastingInfo(unit)
@@ -49,8 +44,6 @@ local CastBarTemplate_MT = {__index = CastBarTemplate}
 
 local TimeFmt = Quartz3.Util.TimeFormat
 local GetTimeFormatter = Quartz3.Util.GetTimeFormatter
-
-local issecretvalue = issecretvalue or function() return false end
 
 local TIMER_ELAPSED = Enum.StatusBarTimerDirection.ElapsedTime
 local TIMER_REMAINING = Enum.StatusBarTimerDirection.RemainingTime

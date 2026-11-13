@@ -27,11 +27,6 @@ local WoWRetail = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
 
 local TimeFmt = Quartz3.Util.TimeFormat
 
-----------------------------
--- Upvalues
-local GetTime, UnitCastingInfo = GetTime, UnitCastingInfo
-local unpack, tonumber, format = unpack, tonumber, format
-
 local getOptions
 
 local castBar, castBarText, castBarTimeText, castBarIcon, castBarSpark, castBarParent

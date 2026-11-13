@@ -30,9 +30,6 @@ local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
 
 local Events = {}
 
-local CreateFrame = CreateFrame
-local type, error, wipe = type, error, wipe
-
 -- the event frame of every object
 local frames = {}
 

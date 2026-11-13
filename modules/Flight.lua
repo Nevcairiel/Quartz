@@ -25,11 +25,6 @@ local Player = Quartz3:GetModule("Player")
 
 local WoWClassic = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
 
-----------------------------
--- Upvalues
-local GetTime = GetTime
-local unpack = unpack
-
 local db, getOptions
 
 local defaults = {

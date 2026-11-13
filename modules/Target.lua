@@ -22,10 +22,6 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 local MODNAME = "Target"
 local Target = Quartz3:NewModule(MODNAME, "AceHook-3.0")
 
-----------------------------
--- Upvalues
-local UnitIsEnemy, UnitIsFriend = UnitIsEnemy, UnitIsFriend
-
 local db, getOptions
 
 local defaults = {

@@ -25,10 +25,6 @@ if not FocusFrameSpellBar then return end
 local MODNAME = "Focus"
 local Focus = Quartz3:NewModule(MODNAME)
 
-----------------------------
--- Upvalues
-local UnitIsEnemy, UnitIsFriend, UnitIsUnit = UnitIsEnemy, UnitIsFriend, UnitIsUnit
-
 local WoWRetail = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
 
 local db, getOptions

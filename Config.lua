@@ -18,13 +18,7 @@
 ]]
 local Quartz3 = LibStub("AceAddon-3.0"):GetAddon("Quartz3")
 local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
-local media = LibStub("LibSharedMedia-3.0")
 local LibDualSpec = LibStub("LibDualSpec-1.0", true)
-
-----------------------------
--- Upvalues
--- GLOBALS: LibStub, InterfaceOptionsFrame_OpenToCategory
-local pairs, unpack, type = pairs, unpack, type
 
 local getOpt, setOpt, getColor, setColor
 do

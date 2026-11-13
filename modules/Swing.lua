@@ -24,16 +24,9 @@ local Swing = Quartz3:NewModule(MODNAME)
 local Player = Quartz3:GetModule("Player")
 
 local media = LibStub("LibSharedMedia-3.0")
-local lsmlist = AceGUIWidgetLSMlists
 
-----------------------------
--- Upvalues
-local CreateFrame, GetTime, UIParent = CreateFrame, GetTime, UIParent
-local UnitClass, UnitDamage, UnitAttackSpeed, UnitRangedDamage = UnitClass, UnitDamage, UnitAttackSpeed, UnitRangedDamage
-local math_abs, bit_band, unpack = math.abs, bit.band, unpack
-local COMBATLOG_FILTER_ME = COMBATLOG_FILTER_ME
-
-local GetSpellName = C_Spell and C_Spell.GetSpellName or GetSpellInfo
+local math_abs, bit_band = math.abs, bit.band
+local GetSpellName = C_Spell.GetSpellName
 
 local playerclass
 local autoshotname = GetSpellName(75)

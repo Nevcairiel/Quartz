@@ -24,10 +24,6 @@ local Pet = Quartz3:NewModule(MODNAME)
 
 local WoWRetail = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
 
-----------------------------
--- Upvalues
--- GLOBALS: PetCastingBarFrame
-
 local db, getOptions
 
 local defaults = {

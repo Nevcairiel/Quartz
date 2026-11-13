@@ -28,13 +28,6 @@ local Swing = Quartz3:NewModule(MODNAME)
 local Player = Quartz3:GetModule("Player")
 
 local media = LibStub("LibSharedMedia-3.0")
-local lsmlist = AceGUIWidgetLSMlists
-
-----------------------------
--- Upvalues
-local CreateFrame, GetTime, UIParent = CreateFrame, GetTime, UIParent
-local unpack = unpack
-local issecretvalue = issecretvalue
 
 local swingbar, swingbar_width, swingstatusbar, remainingtext, durationtext
 -- the duration of the current swing

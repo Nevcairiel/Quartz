@@ -23,12 +23,6 @@ local MODNAME = "Range"
 local Range = Quartz3:NewModule(MODNAME)
 local Player = Quartz3:GetModule("Player")
 
-----------------------------
--- Upvalues
-local CreateFrame, UIParent = CreateFrame, UIParent
-local UnitName = UnitName
-local unpack = unpack
-
 local IsSpellInRange = C_Spell.IsSpellInRange
 
 local f, OnUpdate, db, getOptions, spell, target, modified, r, g, b, castBar

@@ -22,8 +22,6 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Quartz3")
 local MODNAME = "Player"
 local Player = Quartz3:NewModule(MODNAME, "AceHook-3.0")
 
-local UnitCastingInfo, UnitChannelInfo = UnitCastingInfo, UnitChannelInfo
-
 local WoWRetail = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
 local WoWClassicEra = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
 local WoWBC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC)
@@ -32,13 +30,7 @@ local WoWCata = (WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC)
 local WoWMists = (WOW_PROJECT_ID == WOW_PROJECT_MISTS_CLASSIC)
 local WoWForever = (WOW_PROJECT_ID == WOW_PROJECT_CAMELOT)
 
-local GetSpellName = C_Spell and C_Spell.GetSpellName or GetSpellInfo
-
-----------------------------
--- Upvalues
--- GLOBALS: CastingBarFrame
-local unpack = unpack
-
+local GetSpellName = C_Spell.GetSpellName
 
 local db, getOptions, castBar
 

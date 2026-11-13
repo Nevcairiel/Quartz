@@ -33,16 +33,6 @@ local lsmlist = AceGUIWidgetLSMlists
 
 local MIRRORTIMER_NUMTIMERS = MIRRORTIMER_NUMTIMERS or 3
 
-----------------------------
--- Upvalues
--- GLOBALS: MIRRORTIMER_NUMTIMERS
-local _G = _G
-local CreateFrame, GetTime, UIParent, StaticPopupDialogs = CreateFrame, GetTime, UIParent, StaticPopupDialogs
-local GetMirrorTimerProgress, GetMirrorTimerInfo, GetCorpseRecoveryDelay = GetMirrorTimerProgress, GetMirrorTimerInfo, GetCorpseRecoveryDelay
-local UnitHealth = UnitHealth
-local pairs, unpack, next, wipe, error = pairs, unpack, next, wipe, error
-local table_sort = table.sort
-
 local WoWClassic = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
 
 local gametimebase, gametimetostart
@@ -454,7 +444,7 @@ do
 			end
 		end
 
-		table_sort(tmp, sort)
+		table.sort(tmp, sort)
 		local maxindex = 0
 		for k=1,#tmp do
 			local v = tmp[k]

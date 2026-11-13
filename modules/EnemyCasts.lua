@@ -31,14 +31,11 @@ local TimeFmt = Quartz3.Util.TimeFormat
 local media = LibStub("LibSharedMedia-3.0")
 local lsmlist = AceGUIWidgetLSMlists
 
-----------------------------
--- Upvalues
--- GLOBALS: CastingBarFrame
 local tsort, tinsert = table.sort, table.insert
-local bit_band, bit_bor = bit.band, bit.bor
+local bit_band = bit.band
 
 local locked = true
-local db, getOptions, castBar
+local db, getOptions
 
 local defaults = {
 	profile = {

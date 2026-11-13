@@ -30,12 +30,6 @@ local TimeFmt = Quartz3.Util.TimeFormat
 local media = LibStub("LibSharedMedia-3.0")
 local lsmlist = AceGUIWidgetLSMlists
 
-----------------------------
--- Upvalues
--- GLOBALS:
-local CreateFrame, GetTime, UIParent = CreateFrame, GetTime, UIParent
-local unpack, pairs, next, sort = unpack, pairs, next, sort
-
 local targetlocked = true
 local focuslocked = true
 

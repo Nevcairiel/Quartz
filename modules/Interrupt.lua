@@ -25,12 +25,6 @@ local Player = Quartz3:GetModule("Player")
 
 local db, getOptions
 
-----------------------------
--- Upvalues
-local GetTime = GetTime
-local unpack = unpack
-local SPELLINTERRUPTOTHERSELF, UNKNOWN = SPELLINTERRUPTOTHERSELF, UNKNOWN
-
 local defaults = {
 	profile = {
 		interruptcolor = {0,0,0},

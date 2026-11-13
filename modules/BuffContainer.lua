@@ -34,11 +34,6 @@ local Target = Quartz3:GetModule("Target", true)
 local media = LibStub("LibSharedMedia-3.0")
 local lsmlist = AceGUIWidgetLSMlists
 
-----------------------------
--- Upvalues
-local CreateFrame, UIParent = CreateFrame, UIParent
-local unpack, pairs, ipairs = unpack, pairs, ipairs
-
 local UNITS = { "target", "focus" }
 local GROUPS = { "buffs", "debuffs" }
 local FILTERS = { buffs = "HELPFUL|PLAYER", debuffs = "HARMFUL|PLAYER" }
