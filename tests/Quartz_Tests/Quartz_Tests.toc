@@ -1,0 +1,8 @@
+## Interface: 120105
+## Title: Quartz Tests
+## Notes: Development-only in-game tests for Quartz. Run with /qtest, then /reload to write results to disk.
+## Dependencies: Quartz
+## SavedVariables: QuartzTestDB
+
+CastBarTests.lua
+StatusBarTests.lua

@@ -2,6 +2,7 @@ std = "lua51"
 max_line_length = false
 exclude_files = {
 	"libs/",
+	"tests/",
 	"locale/find-locale-strings.lua",
 	".luacheckrc"
 }

@@ -27,3 +27,4 @@ ignore:
   - .luacheckrc
   - locale/find-locale-strings.lua
   - locale/wowace-locale-import.sh
+  - tests
