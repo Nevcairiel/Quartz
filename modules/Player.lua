@@ -147,7 +147,6 @@ function Player:ApplySettings()
 	-- obey the hideblizz setting no matter if disabled or not
 	if PlayerCastingBarFrame then
 		if db.hideblizz then
-			PlayerCastingBarFrame.RegisterEvent = function() end
 			PlayerCastingBarFrame:UnregisterAllEvents()
 			PlayerCastingBarFrame:Hide()
 		else
