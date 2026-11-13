@@ -56,6 +56,8 @@ local TIMER_ELAPSED = Enum.StatusBarTimerDirection.ElapsedTime
 local TIMER_REMAINING = Enum.StatusBarTimerDirection.RemainingTime
 local TIMER_IMMEDIATE = Enum.StatusBarInterpolation.Immediate
 
+local EvaluateColorValueFromBoolean = C_CurveUtil.EvaluateColorValueFromBoolean
+
 -- Returns a DurationObject for the units current cast ("cast"), channel ("channel") or empowered cast ("empower")
 -- The duration of units other than the player can hold secret values.
 local function GetUnitDuration(unit, kind)
@@ -221,37 +223,64 @@ function CastBarTemplate:SetNameText(name)
 	end
 end
 
+-- Applies the look of a cast that can not be interrupted.
+-- notInterruptible is a secret boolean for most units. It is never tested here, it is only
+-- handed to functions which pick one of two values from it, so both looks are always set up.
 local function ToggleCastNotInterruptible(self, notInterruptible, init)
 	if self.unit == "player" and not init then return end
 	local db = self.config
 
-	if notInterruptible and db.noInterruptChangeColor then
-		self.Bar:SetStatusBarColor(unpack(db.noInterruptColor))
+	if not issecretvalue(notInterruptible) then
+		notInterruptible = notInterruptible and true or false
 	end
 
-	local r, g, b, a
-	if notInterruptible and db.noInterruptChangeBorder then
-		self.backdrop.edgeFile = media:Fetch("border", db.noInterruptBorder)
-		r,g,b = unpack(db.noInterruptBorderColor)
-		a = db.noInterruptBorderAlpha
-	else
-		self.backdrop.edgeFile = media:Fetch("border", db.border)
-		r,g,b = unpack(Quartz3.db.profile.bordercolor)
-		a = Quartz3.db.profile.borderalpha
+	-- color of the bar, while it shows a cast
+	if db.noInterruptChangeColor and (self.casting or self.channeling) then
+		local color = self.casting and Quartz3.db.profile.castingcolor or Quartz3.db.profile.channelingcolor
+		local noInterruptColor = db.noInterruptColor
+		self.Bar:SetStatusBarColor(
+			EvaluateColorValueFromBoolean(notInterruptible, noInterruptColor[1], color[1]),
+			EvaluateColorValueFromBoolean(notInterruptible, noInterruptColor[2], color[2]),
+			EvaluateColorValueFromBoolean(notInterruptible, noInterruptColor[3], color[3]),
+			EvaluateColorValueFromBoolean(notInterruptible, noInterruptColor[4] or 1, color[4] or 1)
+		)
 	end
 
-	-- apply new backdrop
+	-- the regular border, which makes room for the no interrupt border
+	self.backdrop.edgeFile = media:Fetch("border", db.border)
 	self.backdropInfo = self.backdrop
 	self:ApplyBackdrop()
 
-	-- setbackdrop colors
+	local r, g, b = unpack(Quartz3.db.profile.bordercolor)
+	local a = Quartz3.db.profile.borderalpha
+	if db.noInterruptChangeBorder and self.NoInterruptBorder then
+		a = EvaluateColorValueFromBoolean(notInterruptible, 0, a)
+	end
 	self:SetBackdropBorderColor(r, g, b, a)
 
 	r, g, b = unpack(Quartz3.db.profile.backgroundcolor)
 	self:SetBackdropColor(r, g, b, Quartz3.db.profile.backgroundalpha)
 
+	-- the no interrupt border is a separate frame on top of the regular border
+	local border = self.NoInterruptBorder
+	if border then
+		if db.noInterruptChangeBorder then
+			border.backdrop.edgeFile = media:Fetch("border", db.noInterruptBorder)
+			border.backdropInfo = border.backdrop
+			border:ApplyBackdrop()
+
+			r, g, b = unpack(db.noInterruptBorderColor)
+			border:SetBackdropBorderColor(r, g, b, db.noInterruptBorderAlpha)
+			border:SetAlphaFromBoolean(notInterruptible, 1, 0)
+			border:Show()
+		else
+			border:Hide()
+		end
+	end
+
 	if self.Shield then
-		if notInterruptible and db.noInterruptShield and not db.hideicon then
+		if db.noInterruptShield and not db.hideicon then
+			self.Shield:SetAlphaFromBoolean(notInterruptible, 1, 0)
 			self.Shield:Show()
 		else
 			self.Shield:Hide()
@@ -297,8 +326,7 @@ function CastBarTemplate:UNIT_SPELLCAST_START(event, unit, guid, spellID)
 	if not spell then return end
 
 	-- this property doesn't exist in BC, and aliases with the spellID
-	-- a secret value can not be tested, treat those casts as interruptible
-	if WoWClassic or issecretvalue(notInterruptible) then
+	if WoWClassic then
 		notInterruptible = false
 	end
 
@@ -1242,6 +1270,14 @@ function Quartz3.CastBarTemplate:new(parent, unit, name, localizedName, config)
 		bar.Shield:SetHeight(64)
 		bar.Shield:SetPoint("CENTER", bar.Icon, "CENTER", -2, -1)
 		bar.Shield:Hide()
+
+		-- border shown instead of the regular border while a cast can not be interrupted
+		bar.NoInterruptBorder = CreateFrame("Frame", nil, bar, "BackdropTemplate")
+		bar.NoInterruptBorder:SetAllPoints(bar)
+		bar.NoInterruptBorder:SetFrameLevel(bar:GetFrameLevel())
+		bar.NoInterruptBorder.backdrop = { tile = true, tileSize = 16, edgeSize = 16, --edgeFile = "", -- set by ApplySettings
+		                                   insets = {left = 4, right = 4, top = 4, bottom = 4} }
+		bar.NoInterruptBorder:Hide()
 	end
 
 	bar.lastNotInterruptible = false

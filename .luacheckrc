@@ -44,6 +44,7 @@ read_globals = {
 
 	-- API functions
 	"C_AddOns",
+	"C_CurveUtil",
 	"C_DurationUtil",
 	"C_Spell",
 	"C_StringUtil",
