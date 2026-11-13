@@ -7,4 +7,5 @@
 CastBarTests.lua
 BaselineTests.lua
 ProbeTests.lua
+AuraProbe.lua
 StatusBarTests.lua
