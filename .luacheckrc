@@ -80,7 +80,7 @@ read_globals = {
 	"UnitEmpoweredChannelDuration",
 	"UnitClass",
 	"UnitDamage",
-	"UnitHealth",
+	"UnitIsDeadOrGhost",
 	"UnitIsEnemy",
 	"UnitIsFriend",
 	"UnitIsUnit",

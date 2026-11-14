@@ -372,7 +372,7 @@ do
 
 		if db.showstatic then
 			local recoverydelay = GetCorpseRecoveryDelay()
-			if recoverydelay > 0 and UnitHealth("player") < 2 then
+			if recoverydelay > 0 and UnitIsDeadOrGhost("player") then
 				if reztimermax == 0 then
 					reztimermax = recoverydelay
 				end
