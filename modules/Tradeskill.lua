@@ -32,13 +32,19 @@ local getOptions
 
 local castBar, castBarText, castBarTimeText, castBarIcon, castBarSpark, castBarParent
 
-local repeattimes, castSpellID, duration, totaltime, starttime, casting, bail
+local repeattimes, castSpellID, duration, totaltime, starttime, casting, bail, delayed
 local completedcasts = 0
 local restartdelay = 1
 
 local function tradeskillOnUpdate()
 	local currentTime = GetTime()
 	if casting then
+		if delayed then
+			-- the player bar handled the pushback of the current cast and put the bar on a timer for that
+			-- cast alone, so take the bar back
+			delayed = nil
+			castBar:SetMinMaxValues(0, totaltime)
+		end
 		local elapsed = duration * completedcasts + currentTime - starttime
 		castBar:SetValue(elapsed)
 
@@ -87,6 +93,7 @@ function Tradeskill:OnEnable()
 	self:RegisterUnitEvent("UNIT_SPELLCAST_STOP", nil, "player")
 	self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", nil, "player")
 	self:RegisterUnitEvent("UNIT_SPELLCAST_INTERRUPTED", nil, "player")
+	self:RegisterUnitEvent("UNIT_SPELLCAST_DELAYED", nil, "player")
 	if WoWRetail or WoWForever then
 		if ProfessionsFrame then
 			self:SecureHook(ProfessionsFrame.CraftingPage, "CreateInternal", "DoTradeSkill")
@@ -124,6 +131,7 @@ function Tradeskill:UNIT_SPELLCAST_START(object, bar, unit, guid, spellID)
 		Player.Bar.fadeOut = nil
 		castSpellID = spellID
 		bail = nil
+		delayed = nil
 
 		castBar:SetStatusBarColor(unpack(Quartz3.db.profile.castingcolor))
 		castBar:SetMinMaxValues(0, totaltime)
@@ -164,6 +172,18 @@ end
 
 function Tradeskill:UNIT_SPELLCAST_INTERRUPTED(event, unit)
 	bail = true
+end
+
+function Tradeskill:UNIT_SPELLCAST_DELAYED(event, unit)
+	if not casting then return end
+
+	local _, _, _, startTime, _, isTradeskill = UnitCastingInfo(unit)
+	if isTradeskill and startTime then
+		-- pushback moves the start of the cast
+		starttime = startTime / 1000
+		-- the bar is restored on the next update, after the player bar handled the event as well
+		delayed = true
+	end
 end
 
 function Tradeskill:DoTradeSkill(_, id, num)
